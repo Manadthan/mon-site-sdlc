@@ -20,4 +20,13 @@ Next.js · TypeScript · Tailwind CSS · Supabase · Vercel · Vitest · Playwri
 
 ## Démarrer
 
-Les instructions d'installation arriveront avec l'étape 1 (socle).
+Prérequis : Node.js 24 (voir `.nvmrc`).
+
+```
+npm install
+npm run dev        # http://localhost:3000
+npm run build      # build de production
+npm run typecheck  # vérification des types
+```
+
+Le lint et les tests arrivent avec l'issue #2.

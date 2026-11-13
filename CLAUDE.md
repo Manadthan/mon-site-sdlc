@@ -67,12 +67,12 @@ mon-site-sdlc/
 ├── README.md                          ✅
 ├── .gitignore                         ✅
 ├── .env.example                       ✅
-├── .nvmrc                             1
-├── package.json                       1
-├── tsconfig.json                      1
-├── next.config.ts                     1
+├── .nvmrc                             ✅
+├── package.json                       ✅
+├── tsconfig.json                      ✅
+├── next.config.ts                     ✅
 ├── eslint.config.mjs                  1
-├── postcss.config.mjs                 1
+├── postcss.config.mjs                 ✅
 ├── vitest.config.ts                   1
 ├── playwright.config.ts               1
 ├── .github/
@@ -96,8 +96,8 @@ mon-site-sdlc/
 ├── src/
 │   ├── middleware.ts                  2   redirige vers /login si non connecté
 │   ├── app/
-│   │   ├── layout.tsx                 1
-│   │   ├── globals.css                1
+│   │   ├── layout.tsx                 ✅
+│   │   ├── globals.css                ✅
 │   │   ├── page.tsx                   3   accueil (US-02, 04, 05)
 │   │   ├── login/page.tsx             2   US-01
 │   │   ├── collections/
