@@ -1,5 +1,7 @@
 # Suivi de collections
 
+[![CI](https://github.com/Manadthan/mon-site-sdlc/actions/workflows/ci.yml/badge.svg)](https://github.com/Manadthan/mon-site-sdlc/actions/workflows/ci.yml)
+
 Application web personnelle pour suivre mes collections (jeux, cartes, mangas, objets) depuis mon iPhone.
 
 - Créer une collection à partir de l'URL d'une page qui la recense déjà (images et intitulés récupérés automatiquement).
