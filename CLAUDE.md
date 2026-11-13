@@ -22,8 +22,8 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v0.1 à valider |
-| `docs/MAQUETTES.md` | Lien vers les maquettes des 4 écrans | v0.1 à valider |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.0 validée |
+| `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
 
@@ -53,7 +53,9 @@ Décisions clés (détail dans DESIGN.md) :
 - **ADR-01** un seul utilisateur, compte créé à la main.
 - **ADR-02** images copiées dans Supabase Storage, converties en WebP 400 px.
 - **ADR-03** import en deux temps : `scrapePreview` (n'écrit rien) puis import des images **par lots de 10** pilotés par le navigateur.
-- **ADR-04** ordre des items = entier `position` ; monter/descendre = échange avec le voisin dans une transaction.
+- **ADR-04** ordre des items = entier `position` ; monter/descendre = fonction SQL `move_item` (échange avec le voisin en une transaction).
+- **ADR-05** bucket d'images public, chemins `{user_id}/{collection_id}/{item_id}.webp` ; écriture protégée.
+- RLS des `items` via la propriété de leur collection (pas de `user_id` sur `items`).
 
 ## Arborescence cible
 
@@ -167,19 +169,14 @@ npm run e2e        # Playwright
 ## Avancement
 
 - [x] Phase 1 — Besoins : `docs/SPEC.md` v1.0 validée
-- [x] Phase 2 — Conception : `docs/DESIGN.md` + maquettes (à valider)
-- [ ] Phase 3 — Issues GitHub pour l'étape 1 du plan
+- [x] Phase 2 — Conception : `docs/DESIGN.md` v1.0 + maquettes v1.0 validées
+- [x] Phase 3 — Issues GitHub pour l'étape 1 du plan (#1 à #5)
 - [ ] Phase 4+ — Développement par étapes, revue, tests, déploiement
 
 ## Prochaines étapes
 
-1. Valider DESIGN.md et les maquettes ; passer DESIGN.md en v1.0.
-2. Créer les **labels** GitHub (`us`, `chore`, `bug`, `docs`) et protéger la branche `main`.
-3. Créer les issues de l'**étape 1 — Socle** :
-   - `chore: initialiser Next.js + TypeScript + Tailwind`
-   - `chore: configurer ESLint, Vitest et Playwright`
-   - `chore: CI GitHub Actions (lint, types, tests, build)`
-   - `chore: déployer sur Vercel une page d'accueil vide`
-   - `chore: manifest PWA et icônes`
+1. ~~Valider DESIGN.md et les maquettes~~ (fait, #6).
+2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
+3. Développer l'**étape 1 — Socle** : issues #1 à #5, dans l'ordre (#1 d'abord).
 4. Créer le projet Supabase (région UE) et renseigner les variables sur Vercel.
 5. Enchaîner les étapes 2 à 7 de DESIGN.md §10, une issue à la fois.

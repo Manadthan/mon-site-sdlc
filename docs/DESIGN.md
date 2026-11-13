@@ -2,7 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 0.1 — 13/11/2026 — statut : brouillon à valider
+> Version 1.0 — 13/11/2026 — statut : **validé**
+>
+> | Version | Date | Changements |
+> |---|---|---|
+> | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.0 | 13/11/2026 | Revue (issue #6) : `move_item` en fonction SQL, RLS des items via la collection, images publiques (ADR-05) et chemins de stockage, réduction des photos dans le navigateur, liste SSRF complétée, maquettes complétées |
 
 ## 1. Stack retenue
 
@@ -25,6 +30,8 @@
 - **ADR-02 — Images copiées et redimensionnées.** Chaque image est téléchargée, convertie en WebP 400 px de large, puis stockée. L'URL d'origine est gardée pour information.
 - **ADR-03 — Import en deux temps.** (1) *Aperçu* : on scrape et on montre les candidats, sans rien enregistrer. (2) *Import* : on enregistre les items retenus, puis on copie les images **par lots de 10**, pilotés par le navigateur, pour rester sous la limite de durée des fonctions Vercel gratuites et afficher une progression.
 - **ADR-04 — Ordre par entier `position`.** Monter/descendre un item = échanger sa `position` avec son voisin, dans une seule transaction.
+  Le client Supabase ne sait pas enchaîner plusieurs requêtes dans une transaction : l'échange est donc fait par une **fonction SQL `move_item(item_id, direction)`** appelée en RPC (une fonction Postgres s'exécute d'un seul bloc).
+- **ADR-05 — Bucket d'images public.** Les vignettes sont servies par URL publique, avec des chemins impossibles à deviner (identifiants UUID) : `{user_id}/{collection_id}/{item_id}.webp`. Seule l'écriture est protégée. Pourquoi : chargement rapide de 300+ vignettes sans générer de liens signés, et ces images sont déjà publiques sur les sites sources. Supprimer une collection = supprimer le dossier `{user_id}/{collection_id}/`.
 
 ## 2. Architecture
 
@@ -64,7 +71,10 @@ created_at   timestamptz            position      integer NOT NULL
 
 - Le compteur « possédés / total » et le % sont **calculés** par une vue SQL `collection_stats` (pas stockés → jamais désynchronisés).
 - Index : `items (collection_id, position)`.
-- **Row Level Security** activée : chaque requête ne voit que les lignes où `user_id = auth.uid()`.
+- **Row Level Security** activée :
+  - `collections` : une ligne n'est visible et modifiable que si `user_id = auth.uid()` ;
+  - `items` (pas de colonne `user_id`) : une ligne n'est visible et modifiable que si sa collection appartient à `auth.uid()` (`exists (select 1 from collections c where c.id = collection_id and c.user_id = auth.uid())`) ;
+  - Storage : lecture publique (ADR-05) ; écriture et suppression réservées à l'utilisateur connecté, dans son dossier `{user_id}/`.
 - Le tri préféré de l'accueil (US-05) est mémorisé dans un cookie : inutile de créer une table pour ça.
 
 ## 4. Écrans et routes
@@ -76,7 +86,7 @@ created_at   timestamptz            position      integer NOT NULL
 | `/collections/new` | Création : URL → aperçu → import avec progression | US-03 |
 | `/collections/[id]` | Collection : grille de vignettes, mode cocher / mode édition | US-06 à US-10 |
 
-Les maquettes de ces écrans sont à valider avant le développement.
+Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les états vides, confirmations, progression et erreurs.
 
 ## 5. Actions serveur
 
@@ -86,8 +96,8 @@ Les maquettes de ces écrans sont à valider avant le développement.
 | `createCollection(name, url, candidates)` | Crée la collection et ses items (sans images encore) |
 | `importImages(collectionId, itemIds[≤10])` | Télécharge, redimensionne, stocke un lot d'images |
 | `toggleOwned(itemId)` | Bascule `owned` |
-| `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin |
-| `addItem(collectionId, title, image?)` | Ajoute en fin de liste |
+| `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin via la fonction SQL `move_item` (ADR-04) |
+| `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut) |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
@@ -105,7 +115,8 @@ Les adaptateurs spécifiques à un site viendront plus tard, seulement si l'extr
 Le serveur va chercher des URL saisies par l'utilisateur : c'est une porte d'entrée classique pour une attaque **SSRF**
 (faire appeler par notre serveur des adresses internes). Protections :
 - uniquement `http` et `https` ;
-- refus des adresses privées / locales (`localhost`, `127.*`, `10.*`, `192.168.*`, `169.254.*`…) après résolution DNS, y compris après redirection ;
+- refus des adresses privées / locales après résolution DNS : `localhost`, `0.0.0.0`, `127.*`, `10.*`, `172.16.*` à `172.31.*`, `192.168.*`, `169.254.*`, `100.64.*` à `100.127.*`, et en IPv6 `::1`, `fc00::/7`, `fe80::/10`, adresses IPv4 encapsulées (`::ffff:…`) ;
+- la vérification est refaite **à chaque redirection** (on suit les redirections nous-mêmes, pas automatiquement) ;
 - 5 redirections max ; seules les réponses `image/*` sont acceptées lors de la copie des images.
 
 ## 7. Stratégie de test
