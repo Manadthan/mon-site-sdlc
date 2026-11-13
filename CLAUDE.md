@@ -80,7 +80,7 @@ mon-site-sdlc/
 │   ├── ISSUE_TEMPLATE/
 │   │   └── user-story.md              ✅
 │   └── workflows/
-│       └── ci.yml                     1   lint + types + tests + build
+│       └── ci.yml                     ✅   lint + types + tests + build + e2e (Chromium et WebKit)
 ├── docs/
 │   ├── SPEC.md                        ✅
 │   ├── DESIGN.md                      ✅

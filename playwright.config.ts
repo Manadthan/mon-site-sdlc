@@ -2,6 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
 
+// iPhone 12 mini : écran 375 × 812, tactile, agent Safari iOS.
+const iphone12Mini = { ...devices["iPhone 12 Mini"], viewport: { width: 375, height: 812 } };
+
 export default defineConfig({
   testDir: "tests/e2e",
   forbidOnly: !!process.env.CI,
@@ -13,15 +16,14 @@ export default defineConfig({
   },
   projects: [
     {
-      // iPhone 12 mini : écran 375 × 812, tactile, agent Safari iOS.
       name: "iphone-12-mini",
-      use: {
-        ...devices["iPhone 12 Mini"],
-        viewport: { width: 375, height: 812 },
-        // Chromium partout pour l'instant ; WebKit (moteur de Safari) pourra être ajouté en CI (#3).
-        browserName: "chromium",
-      },
+      use: { ...iphone12Mini, browserName: "chromium" },
     },
+    // WebKit = moteur de Safari, le navigateur de l'iPhone. Lancé seulement en CI :
+    // il n'est pas installé dans l'environnement de Claude.
+    ...(process.env.CI
+      ? [{ name: "iphone-12-mini-webkit", use: { ...iphone12Mini, browserName: "webkit" as const } }]
+      : []),
   ],
   // Teste le build de production, comme sur Vercel.
   webServer: {
