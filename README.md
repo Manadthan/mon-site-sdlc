@@ -27,6 +27,9 @@ npm install
 npm run dev        # http://localhost:3000
 npm run build      # build de production
 npm run typecheck  # vérification des types
+npm run lint       # ESLint
+npm test           # tests unitaires (Vitest)
+npm run e2e        # tests bout en bout (Playwright, écran iPhone 12 mini)
 ```
 
-Le lint et les tests arrivent avec l'issue #2.
+Première fois pour les tests e2e : `npx playwright install chromium`.

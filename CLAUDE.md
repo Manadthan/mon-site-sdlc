@@ -71,10 +71,10 @@ mon-site-sdlc/
 ├── package.json                       ✅
 ├── tsconfig.json                      ✅
 ├── next.config.ts                     ✅
-├── eslint.config.mjs                  1
+├── eslint.config.mjs                  ✅
 ├── postcss.config.mjs                 ✅
-├── vitest.config.ts                   1
-├── playwright.config.ts               1
+├── vitest.config.ts                   ✅
+├── playwright.config.ts               ✅
 ├── .github/
 │   ├── pull_request_template.md       ✅
 │   ├── ISSUE_TEMPLATE/
@@ -120,6 +120,7 @@ mon-site-sdlc/
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
+│   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── server.ts              2
 │   │   │   └── client.ts              2
@@ -138,6 +139,7 @@ mon-site-sdlc/
 │       └── database.ts                2   types générés depuis Supabase
 └── tests/
     └── e2e/
+        ├── home.spec.ts               ✅
         ├── login.spec.ts              2
         ├── collections.spec.ts        3
         ├── owned.spec.ts              4
