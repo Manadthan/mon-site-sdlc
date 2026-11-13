@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Couleurs de docs/MAQUETTES.md, utilisables en classes Tailwind (bg-fond, text-action…). */
+@theme {
+  --color-fond: #f6f7f9;
+  --color-texte: #15171a;
+  --color-texte-doux: #4b5059;
+  --color-bordure: #e4e6ea;
+  --color-action: #1d4ed8;
+  --color-possede: #16a34a;
+  --color-danger: #b42318;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-fond);
+  color: var(--color-texte);
+  -webkit-tap-highlight-color: transparent;
+}
