@@ -101,7 +101,7 @@ mon-site-sdlc/
 │   ├── app/
 │   │   ├── layout.tsx                 ✅
 │   │   ├── globals.css                ✅
-│   │   ├── page.tsx                   ✅   accueil : liste (US-02) ; suppression et tri à venir (US-04, 05)
+│   │   ├── page.tsx                   ✅   accueil : liste (US-02), suppression (US-04) ; tri à venir (US-05)
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
@@ -109,7 +109,7 @@ mon-site-sdlc/
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
-│   │       ├── collections.ts         ✅   createCollection ; deleteCollection et tri à venir (étape 3)
+│   │       ├── collections.ts         ✅   createCollection, deleteCollection ; tri à venir (US-05)
 │   │       ├── items.ts               4-5 toggleOwned, moveItem, add, rename, delete
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
@@ -117,7 +117,8 @@ mon-site-sdlc/
 │   │   ├── CollectionCard.tsx         ✅   US-02
 │   │   ├── NewCollectionForm.tsx      ✅   US-03 1/2
 │   │   ├── SortBar.tsx                3
-│   │   ├── ConfirmDialog.tsx          3
+│   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
+│   │   ├── DeleteCollectionButton.tsx ✅   US-04
 │   │   ├── ItemTile.tsx               4   vignette + coche verte
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
@@ -129,6 +130,7 @@ mon-site-sdlc/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
+│   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -152,7 +154,7 @@ mon-site-sdlc/
         ├── home.spec.ts               ✅
         ├── pwa.spec.ts                ✅
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
-        ├── collections.spec.ts        ✅   US-02, US-03 1/2 (données créées par supabase-admin.ts)
+        ├── collections.spec.ts        ✅   US-02, US-03 1/2, US-04 (données créées par supabase-admin.ts)
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              4
         └── edit.spec.ts               5
@@ -200,3 +202,4 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
 5. Étape 3 en cours : #21 → #24 → #22 → #23, puis étapes 4 à 7 de DESIGN.md §10, une issue à la fois.
+6. **À ne pas oublier** : quand le bucket d'images arrivera (étape 5-6), `deleteCollection` doit aussi effacer le dossier `{user_id}/{collection_id}/` (US-04, ADR-05).
