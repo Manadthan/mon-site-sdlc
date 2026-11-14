@@ -76,3 +76,67 @@ test("supprimer un item demande confirmation", async ({ page }, testInfo) => {
   const { count } = await adminSupabase().from("items").select("id", { count: "exact", head: true }).eq("collection_id", id);
   expect(count).toBe(2);
 });
+
+// US-08 — Ajouter un item avec une photo ; l'image part avec l'item ou la collection (US-04).
+
+test("ajouter un item avec une photo, puis le supprimer avec son image", async ({ page, request }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("photo", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes", 1, 0);
+  const stockage = adminSupabase().storage.from("items");
+  const dossier = `${utilisateur.id}/${id}`;
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  await page.getByRole("button", { name: "Modifier" }).click();
+
+  await page.getByRole("button", { name: "Ajouter un item" }).click();
+  const panneau = page.getByRole("dialog", { name: "Ajouter un item" });
+  await panneau.getByLabel("Intitulé").fill("Carte avec photo");
+  await panneau.getByLabel("Photo de l’item").setInputFiles("tests/e2e/fixtures/photo.jpg");
+  await expect(panneau).toContainText("Photo : photo.jpg");
+  await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(panneau).toBeHidden();
+
+  // La vignette affiche l'image stockée dans le dossier de l'utilisateur, en WebP 400 px.
+  await page.getByRole("button", { name: "Terminé" }).click();
+  const image = page.getByRole("button", { name: /Carte avec photo/ }).locator("img");
+  await expect(image).toHaveAttribute("src", new RegExp(`/storage/v1/object/public/items/${dossier}/[0-9a-f-]+\\.webp$`));
+  await expect(image).toHaveJSProperty("complete", true);
+  expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(400);
+  const reponse = await request.get((await image.getAttribute("src"))!);
+  expect(reponse.headers()["content-type"]).toBe("image/webp");
+
+  // Supprimer l'item supprime aussi son image.
+  const { data: avant } = await stockage.list(dossier);
+  expect(avant).toHaveLength(1);
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await page.getByRole("button", { name: "Supprimer « Carte avec photo »" }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Supprimer" }).click();
+  await expect(page.getByRole("list", { name: "Items" }).getByTestId("intitule")).toHaveText(["Item 1"]);
+  const { data: apres } = await stockage.list(dossier);
+  expect(apres).toHaveLength(0);
+});
+
+test("supprimer une collection supprime aussi ses images", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("photos-coll", testInfo);
+  const id = await creerCollection(utilisateur.id, "Avec images", 0, 0);
+  const dossier = `${utilisateur.id}/${id}`;
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  await page.getByRole("button", { name: "Modifier" }).click();
+  for (const titre of ["Première", "Seconde"]) {
+    await page.getByRole("button", { name: "Ajouter un item" }).click();
+    const panneau = page.getByRole("dialog", { name: "Ajouter un item" });
+    await panneau.getByLabel("Intitulé").fill(titre);
+    await panneau.getByLabel("Photo de l’item").setInputFiles("tests/e2e/fixtures/photo.jpg");
+    await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+    await expect(panneau).toBeHidden();
+  }
+  const stockage = adminSupabase().storage.from("items");
+  expect((await stockage.list(dossier)).data).toHaveLength(2);
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Supprimer la collection Avec images" }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Supprimer" }).click();
+  await expect(page.getByRole("heading", { name: "Aucune collection pour l’instant" })).toBeVisible();
+  expect((await stockage.list(dossier)).data).toHaveLength(0);
+});

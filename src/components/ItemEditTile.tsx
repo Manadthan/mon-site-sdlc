@@ -1,3 +1,4 @@
+import { ItemImage } from "@/components/ItemImage";
 import type { Item } from "@/components/ItemTile";
 
 type Props = { item: Item; position: number; onRename: () => void; onDelete: () => void };
@@ -8,11 +9,7 @@ export function ItemEditTile({ item, position, onRename, onDelete }: Props) {
   return (
     <li className="flex flex-col gap-1.5 rounded-[14px] border border-bordure bg-white p-1.5 [contain-intrinsic-size:auto_240px] [content-visibility:auto]">
       <div className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="M21 15l-5-5L5 21" />
-        </svg>
+        <ItemImage chemin={item.image_path} taille={26} />
         <span className="absolute top-1.5 left-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-[rgba(21,23,26,0.75)] px-1.5 text-xs font-semibold text-white" aria-hidden="true">
           {position}
         </span>

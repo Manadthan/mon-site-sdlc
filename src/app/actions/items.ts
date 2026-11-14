@@ -2,22 +2,31 @@
 
 import { revalidatePath } from "next/cache";
 import { isUuid } from "@/lib/ids";
+import { BUCKET_IMAGES, cheminImage } from "@/lib/images/storage";
+import { TAILLE_MAX_ENVOI, versVignette } from "@/lib/images/thumbnail";
 import { positionSuivante, validateItemTitle } from "@/lib/items/title";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type AddItemState = { error?: string; title?: string; ok?: number };
+export type AddItemState = { error?: string; warning?: string; title?: string; ok?: number };
 
 const POSITION_DEJA_PRISE = "23505";
 
 /**
- * Ajoute un item en fin de collection (US-08 partie 1/2, US-10 « un item ajouté se place en fin de liste »).
- * La RLS refuse l'ajout dans la collection d'un autre. L'image facultative arrive avec la partie 2/2.
+ * Ajoute un item en fin de collection (US-08, US-10 « un item ajouté se place en fin de liste »),
+ * avec une photo facultative (déjà réduite dans le navigateur), convertie en vignette WebP (ADR-02).
+ * La RLS refuse l'ajout dans la collection d'un autre.
  */
 export async function addItem(collectionId: string, _previous: AddItemState, formData: FormData): Promise<AddItemState> {
   const saisie = formData.get("title");
   const resultat = validateItemTitle(saisie);
   if (!resultat.ok) return { error: resultat.error, title: typeof saisie === "string" ? saisie : "" };
   if (!isUuid(collectionId)) return { error: "Collection introuvable." };
+
+  const photo = formData.get("image");
+  const avecPhoto = photo instanceof File && photo.size > 0;
+  if (avecPhoto && (!photo.type.startsWith("image/") || photo.size > TAILLE_MAX_ENVOI)) {
+    return { error: "Cette image n’est pas acceptée (photo de 2 Mo au plus).", title: resultat.title };
+  }
 
   const supabase = await createSupabaseServerClient();
   // Deux essais : si deux ajouts simultanés visent la même position, la contrainte d'unicité refuse le second.
@@ -30,19 +39,47 @@ export async function addItem(collectionId: string, _previous: AddItemState, for
       .limit(1)
       .maybeSingle();
 
-    const { error } = await supabase
+    const { data: cree, error } = await supabase
       .from("items")
-      .insert({ collection_id: collectionId, title: resultat.title, position: positionSuivante(dernier?.position) });
+      .insert({ collection_id: collectionId, title: resultat.title, position: positionSuivante(dernier?.position) })
+      .select("id")
+      .single();
 
     if (!error) {
+      const imageOk = avecPhoto ? await enregistrerImage(supabase, collectionId, cree.id, photo) : true;
       revalidatePath(`/collections/${collectionId}`);
       revalidatePath("/");
-      // Valeur changeante : le formulaire sait qu'un ajout vient de réussir et se vide.
-      return { ok: Date.now() };
+      // ok : valeur changeante, le formulaire sait qu'un ajout vient de réussir et se vide.
+      return imageOk
+        ? { ok: Date.now() }
+        : { ok: Date.now(), warning: "Item ajouté, mais l’image n’a pas pu être enregistrée." };
     }
     if (error.code !== POSITION_DEJA_PRISE) break;
   }
   return { error: "L’item n’a pas pu être ajouté. Réessayez dans un instant.", title: resultat.title };
+}
+
+type Supabase = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
+/** Convertit la photo en vignette, la range dans le dossier de l'utilisateur (ADR-05) et la relie à l'item. */
+async function enregistrerImage(supabase: Supabase, collectionId: string, itemId: string, photo: File) {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const chemin = cheminImage(user.id, collectionId, itemId);
+    const vignette = await versVignette(await photo.arrayBuffer());
+    const { error } = await supabase.storage
+      .from(BUCKET_IMAGES)
+      .upload(chemin, vignette, { contentType: "image/webp", upsert: true, cacheControl: "31536000" });
+    if (error) return false;
+    const { error: lien } = await supabase.from("items").update({ image_path: chemin }).eq("id", itemId);
+    return !lien;
+  } catch {
+    // Image illisible (fichier abîmé, format inconnu) : l'item reste, sans image.
+    return false;
+  }
 }
 
 /**
@@ -93,8 +130,10 @@ export async function deleteItem(itemId: string): Promise<{ error?: string }> {
   if (!isUuid(itemId)) return { error: "Item introuvable." };
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("items").delete().eq("id", itemId).select("collection_id");
+  const { data, error } = await supabase.from("items").delete().eq("id", itemId).select("collection_id, image_path");
   if (error || data.length === 0) return { error: "La suppression a échoué. Réessayez dans un instant." };
+  // Son image part avec lui (un échec ici ne laisse qu'un fichier orphelin, sans effet visible).
+  if (data[0]!.image_path) await supabase.storage.from(BUCKET_IMAGES).remove([data[0]!.image_path]);
 
   revalidatePath(`/collections/${data[0]!.collection_id}`);
   revalidatePath("/");

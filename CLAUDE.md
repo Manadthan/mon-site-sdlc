@@ -94,8 +94,10 @@ mon-site-sdlc/
 │   ├── config.toml                    ✅   base locale (inscriptions désactivées)
 │   ├── migrations/
 │   │   ├── 0001_schema.sql            ✅   tables + vue collection_stats
-│   │   └── 0002_rls.sql               ✅   Row Level Security
+│   │   ├── 0002_rls.sql               ✅   Row Level Security
+│   │   └── 0003_images.sql            ✅   bucket public « items », écriture dans son dossier
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
+│   ├── tests/database/storage.test.sql ✅  tests pgTAP du stockage des images
 ├── src/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/
@@ -125,7 +127,8 @@ mon-site-sdlc/
 │   │   ├── SearchField.tsx            7
 │   │   ├── ItemEditTile.tsx           ✅   renommer, supprimer (US-08) ; flèches haut/bas à venir (US-10)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
-│   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition (image à venir, #33)
+│   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo facultative
+│   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
@@ -142,7 +145,10 @@ mon-site-sdlc/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
 │   │   │   ├── server.ts              ✅
 │   │   │   └── client.ts              ✅
-│   │   ├── images.ts                  6   téléchargement + sharp → WebP
+│   │   ├── images/storage.ts          ✅   bucket, chemins (ADR-05), URL publique
+│   │   ├── images/thumbnail.ts        ✅   sharp → WebP 400 px (+ thumbnail.test.ts)
+│   │   ├── images/resize.ts           ✅   réduction de la photo dans le navigateur (+ resize.test.ts)
+│   │   ├── images/download.ts         6   téléchargement d'une image par URL (SSRF)
 │   │   └── scraper/
 │   │       ├── index.ts               6   scrapePreview(url)
 │   │       ├── fetchPage.ts           6   délai, taille max, encodage, HTTP accepté
@@ -215,5 +221,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 5 : #33 en plusieurs PR (1. mode édition + renommer + supprimer ; 2. images), puis #34. Ensuite étapes 6 et 7. Toute nouvelle issue est rattachée au milestone de son étape.
-6. **À ne pas oublier** : quand le bucket d'images arrivera (étape 5-6), `deleteCollection` doit aussi effacer le dossier `{user_id}/{collection_id}/` (US-04, ADR-05).
+5. Étape 5 : #33 en plusieurs PR (1. mode édition ✅ ; 2. photo ✅ ; 3. image par URL, avec la protection SSRF réutilisée à l'étape 6), puis #34. Ensuite étapes 6 et 7. Toute nouvelle issue est rattachée au milestone de son étape.
+6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
