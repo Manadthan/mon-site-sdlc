@@ -105,12 +105,12 @@ mon-site-sdlc/
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
-│   │   │   └── [id]/page.tsx          ✅   grille (US-06), ajout d'item (US-08 1/2) ; cocher, éditer à venir
+│   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard (US-06, 07, 08 1/2)
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
-│   │       ├── items.ts               ✅   addItem ; toggleOwned (4), moveItem, rename, delete (5) à venir
+│   │       ├── items.ts               ✅   addItem, setOwned ; moveItem, rename, delete à venir (5)
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
@@ -119,7 +119,8 @@ mon-site-sdlc/
 │   │   ├── SortBar.tsx                ✅   US-05
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
-│   │   ├── ItemTile.tsx               ✅   vignette (US-06) ; coche verte à venir (US-07)
+│   │   ├── CollectionBoard.tsx        ✅   grille, compteur, coche immédiate (US-06, US-07)
+│   │   ├── ItemTile.tsx               ✅   vignette + coche verte (US-06, US-07)
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
 │   │   ├── ItemEditTile.tsx           5   flèches haut/bas, suppression
@@ -130,6 +131,7 @@ mon-site-sdlc/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
 │   │   ├── items/title.ts             ✅   validation de l'intitulé, position suivante (+ title.test.ts)
+│   │   ├── items/owned.ts             ✅   état possédé affiché, comptage (+ owned.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -160,7 +162,7 @@ mon-site-sdlc/
         ├── collections.spec.ts        ✅   US-02, US-03 1/2, US-04, US-05 (données créées par supabase-admin.ts)
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
-        ├── owned.spec.ts              4
+        ├── owned.spec.ts              ✅   US-07
         └── edit.spec.ts               5
 ```
 

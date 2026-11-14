@@ -28,7 +28,7 @@ test("depuis l'accueil, la carte ouvre la collection : compteur et items dans l'
 
   const vignettes = page.getByRole("list", { name: "Items" }).getByRole("listitem");
   await expect(vignettes).toHaveCount(3);
-  await expect(vignettes.getByRole("heading")).toHaveText([
+  await expect(vignettes.getByTestId("intitule")).toHaveText([
     "Premier",
     /^Un intitulé très long/,
     "Troisième",
@@ -95,7 +95,7 @@ test("ajouter un item : intitulé obligatoire, placé en fin de liste, compteur 
   await expect(panneau).toBeHidden();
 
   const vignettes = page.getByRole("list", { name: "Items" }).getByRole("listitem");
-  await expect(vignettes.getByRole("heading")).toHaveText(["Item 1", "Item 2", "N°49 — Carte secrète"]);
+  await expect(vignettes.getByTestId("intitule")).toHaveText(["Item 1", "Item 2", "N°49 — Carte secrète"]);
   await expect(page.getByRole("banner")).toContainText(/1\s\/\s3 · 33\s%/);
 
   // Persisté, et visible sur l'accueil.
@@ -116,6 +116,6 @@ test("ajouter le premier item d'une collection vide", async ({ page }, testInfo)
   await page.getByRole("dialog").getByLabel("Intitulé").fill("Premier objet");
   await page.getByRole("dialog").getByRole("button", { name: "Ajouter", exact: true }).click();
 
-  await expect(page.getByRole("list", { name: "Items" }).getByRole("heading")).toHaveText(["Premier objet"]);
+  await expect(page.getByRole("list", { name: "Items" }).getByTestId("intitule")).toHaveText(["Premier objet"]);
   await expect(page.getByText("Aucun item dans cette collection pour l’instant.")).toHaveCount(0);
 });
