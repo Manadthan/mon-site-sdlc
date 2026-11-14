@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { CollectionCard } from "@/components/CollectionCard";
 import { toCollectionCards } from "@/lib/collections/cards";
@@ -47,16 +48,35 @@ export default async function Home() {
           </div>
           <h2 className="mt-1 text-xl font-bold">Aucune collection pour l’instant</h2>
           <p className="text-[15px] leading-relaxed text-texte-doux">
-            Créez une collection avec le bouton « Nouvelle collection » : donnez-lui un nom, puis ajoutez vos objets.
+            Créez une collection en lui donnant un nom, puis ajoutez-y vos objets.
           </p>
+          <Link
+            href="/collections/new"
+            className="mt-2.5 flex h-[50px] items-center gap-2 rounded-xl bg-action px-6 text-base font-semibold text-white"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Créer ma première collection
+          </Link>
         </main>
       ) : (
-        <main className="px-4 py-3">
+        <main className="px-4 pt-3 pb-28">
           <ul className="flex flex-col gap-2.5" aria-label="Mes collections">
             {cartes.map((carte) => (
               <CollectionCard key={carte.id} carte={carte} />
             ))}
           </ul>
+          {/* Bouton flottant, à portée de pouce (maquette n° 1). */}
+          <Link
+            href="/collections/new"
+            className="fixed right-5 bottom-[max(env(safe-area-inset-bottom),24px)] flex h-14 items-center gap-2 rounded-full bg-action pr-5.5 pl-4.5 text-[15px] font-semibold text-white shadow-[0_6px_18px_rgba(29,78,216,0.35)]"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Nouvelle collection
+          </Link>
         </main>
       )}
     </div>

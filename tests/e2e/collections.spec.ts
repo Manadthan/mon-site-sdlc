@@ -9,7 +9,36 @@ test("un état vide explique comment créer la première collection", async ({ p
   await seConnecter(page, utilisateur);
 
   await expect(page.getByRole("heading", { name: "Aucune collection pour l’instant" })).toBeVisible();
-  await expect(page.getByText("Nouvelle collection")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Créer ma première collection" })).toBeVisible();
+});
+
+// US-03 (1/2) — Créer une collection vide
+
+test("créer une collection vide depuis l'accueil", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("creation", testInfo);
+  await seConnecter(page, utilisateur);
+
+  await page.getByRole("link", { name: "Créer ma première collection" }).click();
+  await expect(page).toHaveURL("/collections/new");
+
+  // Nom obligatoire.
+  await page.getByRole("button", { name: "Créer une collection vide" }).click();
+  await expect(page.locator("form").getByRole("alert")).toHaveText("Donnez un nom à la collection.");
+
+  await page.getByLabel("Nom de la collection").fill("  Film   comics ");
+  await page.getByRole("button", { name: "Créer une collection vide" }).click();
+
+  await expect(page).toHaveURL("/");
+  const cartes = page.getByRole("list", { name: "Mes collections" }).getByRole("listitem");
+  await expect(cartes).toHaveCount(1);
+  await expect(cartes.first()).toContainText("Film comics");
+  await expect(cartes.first()).toContainText(/0\s\/\s0 · 0\s%/);
+
+  // Une fois la liste non vide, le bouton flottant mène aussi à la création ; la croix ramène à l'accueil.
+  await page.getByRole("link", { name: "Nouvelle collection" }).click();
+  await expect(page).toHaveURL("/collections/new");
+  await page.getByRole("link", { name: "Annuler et revenir" }).click();
+  await expect(page).toHaveURL("/");
 });
 
 test("chaque collection affiche son nom et « possédés / total » avec le %", async ({ page }, testInfo) => {
