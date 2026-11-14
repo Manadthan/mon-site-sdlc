@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { isUuid } from "@/lib/ids";
 import { messageEchecImage, telechargerImage } from "@/lib/images/download";
-import { BUCKET_IMAGES, cheminImage } from "@/lib/images/storage";
-import { TAILLE_MAX_ENVOI, versVignette } from "@/lib/images/thumbnail";
+import { enregistrerImage } from "@/lib/images/enregistrer";
+import { BUCKET_IMAGES } from "@/lib/images/storage";
+import { TAILLE_MAX_ENVOI } from "@/lib/images/thumbnail";
 import { positionSuivante, validateItemTitle } from "@/lib/items/title";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -76,37 +77,6 @@ export async function addItem(collectionId: string, _previous: AddItemState, for
     if (error.code !== POSITION_DEJA_PRISE) break;
   }
   return retour("L’item n’a pas pu être ajouté. Réessayez dans un instant.");
-}
-
-type Supabase = Awaited<ReturnType<typeof createSupabaseServerClient>>;
-
-/** Convertit l'image en vignette, la range dans le dossier de l'utilisateur (ADR-05) et la relie à l'item. */
-async function enregistrerImage(
-  supabase: Supabase,
-  collectionId: string,
-  itemId: string,
-  image: { donnees: Buffer | ArrayBuffer; source: string | null },
-) {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return false;
-    const chemin = cheminImage(user.id, collectionId, itemId);
-    const vignette = await versVignette(image.donnees);
-    const { error } = await supabase.storage
-      .from(BUCKET_IMAGES)
-      .upload(chemin, vignette, { contentType: "image/webp", upsert: true, cacheControl: "31536000" });
-    if (error) return false;
-    const { error: lien } = await supabase
-      .from("items")
-      .update({ image_path: chemin, source_image: image.source })
-      .eq("id", itemId);
-    return !lien;
-  } catch {
-    // Image illisible (fichier abîmé, format inconnu) : l'item reste, sans image.
-    return false;
-  }
 }
 
 /**
