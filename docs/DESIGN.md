@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.1 — 14/11/2026 — statut : **validé**
+> Version 1.2 — 14/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.2 | 14/11/2026 | Plan §10 : ajout d'un item (intitulé seul) avancé à l'étape 4 (issue #32) ; étapes suivies par des milestones GitHub |
 > | 1.1 | 14/11/2026 | Plan §10 : création d'une collection vide avancée à l'étape 3 (issue #24) ; `proxy.ts` remplace `middleware.ts` (Next.js 16) |
 > | 1.0 | 13/11/2026 | Revue (issue #6) : `move_item` en fonction SQL, RLS des items via la collection, images publiques (ADR-05) et chemins de stockage, réduction des photos dans le navigateur, liste SSRF complétée, maquettes complétées |
 
@@ -154,9 +155,10 @@ supabase/        migrations SQL (le schéma est versionné dans Git)
 1. **Socle** : projet Next.js, Tailwind, CI, déploiement Vercel d'une page vide.
 2. **Connexion** (US-01) + schéma de base de données.
 3. **Accueil** (US-02, US-04, US-05) + **création d'une collection vide** (US-03, partie 1/2) : sans elle, le site en ligne resterait vide jusqu'à l'étape 6.
-4. **Page collection** (US-06, US-07).
-5. **Édition** (US-08, US-10).
+4. **Page collection** (US-06, US-07) + **ajout d'un item, intitulé seul** (US-08, partie 1/2) : sans lui, il n'y aurait rien à cocher avant l'étape 5.
+5. **Édition** (US-08 partie 2/2 : mode édition, image, renommer, supprimer ; US-10).
 6. **Scraper** + création depuis une URL (US-03, partie 2/2 : aperçu et import).
 7. **Recherche et filtres** (US-09).
 
 Chaque étape produit un site déployé et utilisable : on peut s'arrêter ou réorienter à tout moment.
+Chaque étape est suivie par un **milestone GitHub** (« Étape 4 — Page collection », etc.) qui regroupe ses issues.
