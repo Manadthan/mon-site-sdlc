@@ -1,10 +1,13 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { CollectionCard } from "@/components/CollectionCard";
+import { SortBar } from "@/components/SortBar";
 import { toCollectionCards } from "@/lib/collections/cards";
+import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-// Accueil : liste des collections (US-02) — maquettes n° 1 et n° 6.
+// Accueil : liste des collections (US-02), suppression (US-04), tri mémorisé (US-05) — maquettes n° 1 et n° 6.
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
   // La RLS ne renvoie que les collections de l'utilisateur connecté.
@@ -13,7 +16,8 @@ export default async function Home() {
     supabase.from("collection_stats").select("collection_id, owned, total"),
   ]);
   const erreur = collections.error ?? stats.error;
-  const cartes = erreur ? [] : toCollectionCards(collections.data ?? [], stats.data ?? []);
+  const tri = parseSort((await cookies()).get(SORT_COOKIE)?.value);
+  const cartes = erreur ? [] : sortCards(toCollectionCards(collections.data ?? [], stats.data ?? []), tri);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
@@ -61,8 +65,9 @@ export default async function Home() {
           </Link>
         </main>
       ) : (
-        <main className="px-4 pt-3 pb-28">
-          <ul className="flex flex-col gap-2.5" aria-label="Mes collections">
+        <main className="pb-28">
+          <SortBar sort={tri} />
+          <ul className="flex flex-col gap-2.5 px-4 pt-2" aria-label="Mes collections">
             {cartes.map((carte) => (
               <CollectionCard key={carte.id} carte={carte} />
             ))}

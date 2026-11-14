@@ -117,3 +117,50 @@ test("supprimer une collection demande confirmation et efface aussi ses items", 
     .eq("collection_id", idGardee);
   expect(itemsGardes).toBe(2);
 });
+
+// US-05 — Trier les collections
+
+test("trier par nom, date et % complété, et retrouver le dernier tri à la visite suivante", async ({ page, context }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("tri", testInfo);
+  // Créées dans cet ordre : Bravo (la plus ancienne), puis alpha, puis Charlie (la plus récente).
+  await creerCollection(utilisateur.id, "Bravo", 4, 4); // 100 %
+  await creerCollection(utilisateur.id, "alpha", 4, 1); // 25 %
+  await creerCollection(utilisateur.id, "Charlie", 4, 2); // 50 %
+  await seConnecter(page, utilisateur);
+
+  const noms = page.getByRole("list", { name: "Mes collections" }).getByRole("heading");
+  const bouton = (libelle: string) => page.getByRole("button", { name: new RegExp(`^Trier par ${libelle}`) });
+
+  // Par défaut : les plus récentes d'abord.
+  await expect(noms).toHaveText(["Charlie", "alpha", "Bravo"]);
+
+  // Nom : A → Z (sans tenir compte des majuscules), puis Z → A en touchant à nouveau.
+  await bouton("nom").click();
+  await expect(noms).toHaveText(["alpha", "Bravo", "Charlie"]);
+  await expect(bouton("nom")).toHaveAttribute("aria-pressed", "true");
+  await bouton("nom").click();
+  await expect(noms).toHaveText(["Charlie", "Bravo", "alpha"]);
+
+  // % complété : les plus complètes d'abord, puis l'inverse.
+  await bouton("pourcentage").click();
+  await expect(noms).toHaveText(["Bravo", "Charlie", "alpha"]);
+  await bouton("pourcentage").click();
+  await expect(noms).toHaveText(["alpha", "Charlie", "Bravo"]);
+
+  // Date : les plus récentes d'abord, puis les plus anciennes.
+  await bouton("date").click();
+  await expect(noms).toHaveText(["Charlie", "alpha", "Bravo"]);
+  await bouton("date").click();
+  await expect(noms).toHaveText(["Bravo", "alpha", "Charlie"]);
+
+  // Le dernier tri est conservé : rechargement, puis nouvel onglet (même navigateur).
+  await page.reload();
+  await expect(noms).toHaveText(["Bravo", "alpha", "Charlie"]);
+  const autreOnglet = await context.newPage();
+  await autreOnglet.goto("/");
+  await expect(autreOnglet.getByRole("list", { name: "Mes collections" }).getByRole("heading")).toHaveText([
+    "Bravo",
+    "alpha",
+    "Charlie",
+  ]);
+});
