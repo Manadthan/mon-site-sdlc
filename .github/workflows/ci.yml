@@ -41,6 +41,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Supabase écoute sur des ports fixes (54320-54329), situés dans la plage des ports temporaires
+      # que Linux attribue aux connexions sortantes (32768-60999) : pendant le téléchargement des images,
+      # l'un d'eux peut déjà être pris (« address already in use »). On déplace cette plage au-dessus.
+      - name: Libérer les ports de Supabase
+        run: sudo sysctl -w net.ipv4.ip_local_port_range="60000 65000"
       # Base Supabase locale et jetable (connexion US-01) : jamais la base de production.
       - run: npx supabase start
       - name: Variables de la base locale
@@ -79,6 +84,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Supabase écoute sur des ports fixes (54320-54329), situés dans la plage des ports temporaires
+      # que Linux attribue aux connexions sortantes (32768-60999) : pendant le téléchargement des images,
+      # l'un d'eux peut déjà être pris (« address already in use »). On déplace cette plage au-dessus.
+      - name: Libérer les ports de Supabase
+        run: sudo sysctl -w net.ipv4.ip_local_port_range="60000 65000"
       # Base Supabase locale et jetable : les migrations y sont appliquées depuis zéro.
       - run: npx supabase db start
       - name: Tests pgTAP (schéma et Row Level Security)
