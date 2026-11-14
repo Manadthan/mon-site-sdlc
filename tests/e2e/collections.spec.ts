@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { creerCollection, nouvelUtilisateur } from "./supabase-admin";
+import { adminSupabase, creerCollection, nouvelUtilisateur } from "./supabase-admin";
 import { seConnecter } from "./utilisateur";
 
 // US-02 — Voir mes collections (docs/SPEC.md)
@@ -73,4 +73,47 @@ test("la liste reste lisible à 375 px, même avec un nom très long", async ({ 
   await expect(page.getByRole("list", { name: "Mes collections" })).toBeVisible();
   const largeur = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(largeur).toBeLessThanOrEqual(375);
+});
+
+// US-04 — Supprimer une collection
+
+test("supprimer une collection demande confirmation et efface aussi ses items", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("suppression", testInfo);
+  const idGardee = await creerCollection(utilisateur.id, "À garder", 2, 1);
+  const idSupprimee = await creerCollection(utilisateur.id, "Cartes DBZ", 3, 1);
+  await seConnecter(page, utilisateur);
+
+  const cartes = page.getByRole("list", { name: "Mes collections" }).getByRole("listitem");
+  await expect(cartes).toHaveCount(2);
+
+  // La confirmation annonce ce qui sera supprimé ; « Annuler » ne supprime rien.
+  await page.getByRole("button", { name: "Supprimer la collection Cartes DBZ" }).click();
+  const dialogue = page.getByRole("alertdialog");
+  await expect(dialogue).toBeVisible();
+  await expect(dialogue.getByRole("heading")).toHaveText("Supprimer « Cartes DBZ » et ses 3 items ?");
+  await dialogue.getByRole("button", { name: "Annuler" }).click();
+  await expect(dialogue).toBeHidden();
+  await expect(cartes).toHaveCount(2);
+
+  // Confirmer supprime la collection, et seulement elle.
+  await page.getByRole("button", { name: "Supprimer la collection Cartes DBZ" }).click();
+  await dialogue.getByRole("button", { name: "Supprimer" }).click();
+  await expect(dialogue).toBeHidden();
+  await expect(cartes).toHaveCount(1);
+  await expect(cartes.first()).toContainText("À garder");
+
+  // Persisté, et les items sont partis avec la collection.
+  await page.reload();
+  await expect(cartes).toHaveCount(1);
+  const admin = adminSupabase();
+  const { count: itemsSupprimes } = await admin
+    .from("items")
+    .select("id", { count: "exact", head: true })
+    .eq("collection_id", idSupprimee);
+  expect(itemsSupprimes).toBe(0);
+  const { count: itemsGardes } = await admin
+    .from("items")
+    .select("id", { count: "exact", head: true })
+    .eq("collection_id", idGardee);
+  expect(itemsGardes).toBe(2);
 });
