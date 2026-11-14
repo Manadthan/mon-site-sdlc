@@ -36,7 +36,9 @@ npm test           # tests unitaires (Vitest)
 npm run e2e        # tests bout en bout (Playwright, écran iPhone 12 mini)
 ```
 
-Première fois pour les tests e2e : `npx playwright install chromium`.
+Tests e2e : ils utilisent une base Supabase **locale** (jamais la production) et un compte fictif créé
+automatiquement. Première fois : `npx playwright install chromium`, `npm run db:start`, puis copier dans `.env.local`
+les valeurs affichées par `npx supabase status` (`API_URL`, clé publishable, clé secrète → `E2E_SUPABASE_SECRET_KEY`).
 
 ### Base de données
 

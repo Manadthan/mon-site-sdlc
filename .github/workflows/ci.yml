@@ -41,6 +41,23 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Base Supabase locale et jetable (connexion US-01) : jamais la base de production.
+      - run: npx supabase start
+      - name: Variables de la base locale
+        run: |
+          npx supabase status -o env > "$RUNNER_TEMP/supabase.env"
+          echo "Variables disponibles :" && cut -d= -f1 "$RUNNER_TEMP/supabase.env"
+          set -a && . "$RUNNER_TEMP/supabase.env" && set +a
+          publishable="${PUBLISHABLE_KEY:-$ANON_KEY}"
+          secret="${SECRET_KEY:-$SERVICE_ROLE_KEY}"
+          if [ -z "$API_URL" ] || [ -z "$publishable" ] || [ -z "$secret" ]; then
+            echo "::error::Clés de la base locale introuvables dans supabase status" && exit 1
+          fi
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$publishable"
+            echo "E2E_SUPABASE_SECRET_KEY=$secret"
+          } >> "$GITHUB_ENV"
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run e2e
       - name: Rapport en cas d'échec

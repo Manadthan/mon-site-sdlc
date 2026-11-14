@@ -98,21 +98,23 @@ mon-site-sdlc/
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   └── seed.sql                       3   données de démo
 ├── src/
-│   ├── middleware.ts                  2   redirige vers /login si non connecté
+│   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/
 │   │   ├── layout.tsx                 ✅
 │   │   ├── globals.css                ✅
-│   │   ├── page.tsx                   3   accueil (US-02, 04, 05)
-│   │   ├── login/page.tsx             2   US-01
+│   │   ├── page.tsx                   3   accueil (US-02, 04, 05) — provisoire : déconnexion
+│   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           6   création + aperçu (US-03)
 │   │   │   └── [id]/page.tsx          4   grille de vignettes (US-06 à 10)
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
+│   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         3   create, delete, sort
 │   │       ├── items.ts               4-5 toggleOwned, moveItem, add, rename, delete
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
+│   │   ├── LoginForm.tsx              ✅   US-01
 │   │   ├── CollectionCard.tsx         3
 │   │   ├── SortBar.tsx                3
 │   │   ├── ConfirmDialog.tsx          3
@@ -124,6 +126,7 @@ mon-site-sdlc/
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
+│   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -146,7 +149,7 @@ mon-site-sdlc/
     └── e2e/
         ├── home.spec.ts               ✅
         ├── pwa.spec.ts                ✅
-        ├── login.spec.ts              2
+        ├── login.spec.ts              ✅   US-01 (base Supabase locale)
         ├── collections.spec.ts        3
         ├── owned.spec.ts              4
         └── edit.spec.ts               5
