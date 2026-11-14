@@ -27,9 +27,11 @@ select throws_ok(
 );
 
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-00000000000b", "role": "authenticated"}';
+-- (La suppression directe en SQL est interdite par Supabase : elle est testée de bout en bout, via l'API, en e2e.)
 select is_empty(
-  $$delete from storage.objects where name = '00000000-0000-0000-0000-00000000000a/c/i.webp' returning name$$,
-  'Bruno ne peut pas supprimer une image d''Alice'
+  $$update storage.objects set name = '00000000-0000-0000-0000-00000000000b/vol.webp'
+    where name = '00000000-0000-0000-0000-00000000000a/c/i.webp' returning name$$,
+  'Bruno ne peut ni voir ni modifier une image d''Alice'
 );
 
 select * from finish();
