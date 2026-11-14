@@ -1,11 +1,19 @@
 import { ItemImage } from "@/components/ItemImage";
 import type { Item } from "@/components/ItemTile";
 
-type Props = { item: Item; position: number; onRename: () => void; onDelete: () => void };
+type Props = {
+  item: Item;
+  position: number;
+  premier: boolean;
+  dernier: boolean;
+  onMove: (direction: "up" | "down") => void;
+  onRename: () => void;
+  onDelete: () => void;
+};
 
-// Vignette en mode édition (US-08) — maquette n° 3. Un tap ne coche plus : on renomme (intitulé) ou on supprime.
-// Les flèches haut / bas arriveront avec US-10 (#34).
-export function ItemEditTile({ item, position, onRename, onDelete }: Props) {
+// Vignette en mode édition — maquette n° 3. Un tap ne coche plus : on réordonne (US-10),
+// on renomme en touchant l'intitulé ou on supprime (US-08).
+export function ItemEditTile({ item, position, premier, dernier, onMove, onRename, onDelete }: Props) {
   return (
     <li className="flex flex-col gap-1.5 rounded-[14px] border border-bordure bg-white p-1.5 [contain-intrinsic-size:auto_240px] [content-visibility:auto]">
       <div className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]">
@@ -27,16 +35,40 @@ export function ItemEditTile({ item, position, onRename, onDelete }: Props) {
           <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
         </svg>
       </button>
-      <button
-        type="button"
-        onClick={onDelete}
-        aria-label={`Supprimer « ${item.title} »`}
-        className="flex h-11 items-center justify-center rounded-[10px] border border-[#f1c4c4] bg-[#fff5f5] text-danger"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-        </svg>
-      </button>
+      <div className="grid grid-cols-3 gap-1">
+        <button
+          type="button"
+          onClick={() => onMove("up")}
+          disabled={premier}
+          aria-label={`Monter « ${item.title} »`}
+          className="flex h-11 items-center justify-center rounded-[10px] border border-[#d3d6dc] bg-white text-texte disabled:opacity-35"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => onMove("down")}
+          disabled={dernier}
+          aria-label={`Descendre « ${item.title} »`}
+          className="flex h-11 items-center justify-center rounded-[10px] border border-[#d3d6dc] bg-white text-texte disabled:opacity-35"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 5v14M19 12l-7 7-7-7" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={`Supprimer « ${item.title} »`}
+          className="flex h-11 items-center justify-center rounded-[10px] border border-[#f1c4c4] bg-[#fff5f5] text-danger"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+          </svg>
+        </button>
+      </div>
     </li>
   );
 }
