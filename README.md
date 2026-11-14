@@ -37,3 +37,9 @@ npm run e2e        # tests bout en bout (Playwright, écran iPhone 12 mini)
 ```
 
 Première fois pour les tests e2e : `npx playwright install chromium`.
+
+### Base de données
+
+Le schéma est défini **uniquement** par les fichiers de `supabase/migrations/`.
+Avec Docker installé : `npm run db:start` lance une base Supabase locale, `npm run db:test` vérifie le schéma
+et la Row Level Security, `npm run db:types` régénère `src/types/database.ts` après une migration.

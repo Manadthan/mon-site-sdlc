@@ -90,9 +90,11 @@ mon-site-sdlc/
 │   ├── manifest.webmanifest           ✅   installation sur l'écran d'accueil iPhone
 │   └── icons/                         ✅   icon.svg (source) → PNG 192, 512, apple-touch-icon 180
 ├── supabase/
+│   ├── config.toml                    ✅   base locale (inscriptions désactivées)
 │   ├── migrations/
-│   │   ├── 0001_schema.sql            2   tables + vue collection_stats
-│   │   └── 0002_rls.sql               2   Row Level Security
+│   │   ├── 0001_schema.sql            ✅   tables + vue collection_stats
+│   │   └── 0002_rls.sql               ✅   Row Level Security
+│   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   └── seed.sql                       3   données de démo
 ├── src/
 │   ├── middleware.ts                  2   redirige vers /login si non connecté
@@ -138,7 +140,7 @@ mon-site-sdlc/
 │   │           ├── ssrf.test.ts       6
 │   │           └── fixtures/          6   copies HTML des pages de référence
 │   └── types/
-│       └── database.ts                2   types générés depuis Supabase
+│       └── database.ts                ✅   types générés (npm run db:types), vérifiés en CI
 └── tests/
     └── e2e/
         ├── home.spec.ts               ✅
@@ -169,6 +171,9 @@ npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
 npm test           # Vitest
 npm run e2e        # Playwright
+npm run db:start   # base Supabase locale (Docker)
+npm run db:test    # tests pgTAP du schéma et de la RLS
+npm run db:types   # régénérer src/types/database.ts après une migration
 ```
 
 ## Avancement

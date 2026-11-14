@@ -50,3 +50,28 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  base-de-donnees:
+    name: Base de données (migrations, RLS, types)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Base Supabase locale et jetable : les migrations y sont appliquées depuis zéro.
+      - run: npx supabase db start
+      - name: Tests pgTAP (schéma et Row Level Security)
+        run: npm run db:test
+      - name: Types TypeScript à jour avec le schéma
+        run: |
+          # Le générateur produit un fichier non formaté : on le passe par Prettier, comme npm run db:types.
+          npx supabase gen types typescript --schema public \
+            | npx prettier --stdin-filepath src/types/database.ts > "$RUNNER_TEMP/database.ts"
+          if ! diff -u src/types/database.ts "$RUNNER_TEMP/database.ts"; then
+            echo "::error::src/types/database.ts n'est pas à jour : lancer npm run db:types"
+            exit 1
+          fi
