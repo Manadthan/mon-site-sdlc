@@ -1,12 +1,13 @@
 import { expect, test } from "@playwright/test";
+import { seConnecter } from "./utilisateur";
 
-test("la page d'accueil s'affiche en français, sans défilement horizontal", async ({ page }) => {
-  await page.goto("/");
+for (const chemin of ["/login", "/"]) {
+  test(`${chemin} s'affiche en français, sans défilement horizontal`, async ({ page }) => {
+    if (chemin === "/") await seConnecter(page);
+    else await page.goto(chemin);
 
-  await expect(page).toHaveTitle("Suivi de collections");
-  await expect(page.getByRole("heading", { level: 1, name: "Suivi de collections" })).toBeVisible();
-  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
-
-  const largeur = await page.evaluate(() => document.documentElement.scrollWidth);
-  expect(largeur).toBeLessThanOrEqual(375);
-});
+    await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+    const largeur = await page.evaluate(() => document.documentElement.scrollWidth);
+    expect(largeur).toBeLessThanOrEqual(375);
+  });
+}

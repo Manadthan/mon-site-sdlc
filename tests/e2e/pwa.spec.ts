@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 test("le site est installable sur l'écran d'accueil de l'iPhone", async ({ page, request }) => {
-  await page.goto("/");
+  // Page publique : Safari lit ces balises avant même la connexion.
+  await page.goto("/login");
 
   // Balises lues par Safari iOS.
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute("href", "/manifest.webmanifest");
