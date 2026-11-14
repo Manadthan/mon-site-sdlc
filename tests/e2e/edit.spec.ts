@@ -140,3 +140,37 @@ test("supprimer une collection supprime aussi ses images", async ({ page }, test
   await expect(page.getByRole("heading", { name: "Aucune collection pour l’instant" })).toBeVisible();
   expect((await stockage.list(dossier)).data).toHaveLength(0);
 });
+
+// US-10 — Réordonner les items
+
+test("réordonner avec les flèches haut / bas, l'ordre est enregistré", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("ordre", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes", 3, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  // Les flèches n'existent qu'en mode édition.
+  await expect(page.getByRole("button", { name: /^Monter/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Modifier" }).click();
+
+  const intitules = page.getByRole("list", { name: "Items" }).getByTestId("intitule");
+  await expect(intitules).toHaveText(["Item 1", "Item 2", "Item 3"]);
+
+  // Flèche haut désactivée sur le premier, flèche bas sur le dernier.
+  await expect(page.getByRole("button", { name: "Monter « Item 1 »" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Descendre « Item 3 »" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Descendre « Item 1 »" })).toBeEnabled();
+
+  // Monter Item 3 : il échange sa place avec Item 2.
+  await page.getByRole("button", { name: "Monter « Item 3 »" }).click();
+  await expect(intitules).toHaveText(["Item 1", "Item 3", "Item 2"]);
+  // Descendre Item 1 : il échange sa place avec Item 3.
+  await page.getByRole("button", { name: "Descendre « Item 1 »" }).click();
+  await expect(intitules).toHaveText(["Item 3", "Item 1", "Item 2"]);
+  await expect(page.getByRole("button", { name: "Monter « Item 3 »" })).toBeDisabled();
+
+  // Enregistré : l'ordre persiste après rechargement, aussi en mode cocher.
+  await page.waitForLoadState("networkidle");
+  await page.reload();
+  await expect(intitules).toHaveText(["Item 3", "Item 1", "Item 2"]);
+});

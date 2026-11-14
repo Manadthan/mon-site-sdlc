@@ -139,3 +139,16 @@ export async function deleteItem(itemId: string): Promise<{ error?: string }> {
   revalidatePath("/");
   return {};
 }
+
+/** Monte ou descend un item d'une place (US-10), via la fonction SQL move_item (ADR-04). */
+export async function moveItem(collectionId: string, itemId: string, direction: "up" | "down"): Promise<{ error?: string }> {
+  if (!isUuid(collectionId) || !isUuid(itemId) || (direction !== "up" && direction !== "down")) {
+    return { error: "Item introuvable." };
+  }
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc("move_item", { p_item_id: itemId, p_direction: direction });
+  if (error) return { error: "Le nouvel ordre n’a pas pu être enregistré. Réessayez." };
+
+  revalidatePath(`/collections/${collectionId}`);
+  return {};
+}

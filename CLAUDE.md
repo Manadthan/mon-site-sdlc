@@ -95,9 +95,11 @@ mon-site-sdlc/
 │   ├── migrations/
 │   │   ├── 0001_schema.sql            ✅   tables + vue collection_stats
 │   │   ├── 0002_rls.sql               ✅   Row Level Security
-│   │   └── 0003_images.sql            ✅   bucket public « items », écriture dans son dossier
+│   │   ├── 0003_images.sql            ✅   bucket public « items », écriture dans son dossier
+│   │   └── 0004_move_item.sql         ✅   fonction move_item (ADR-04)
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   ├── tests/database/storage.test.sql ✅  tests pgTAP du stockage des images
+│   ├── tests/database/move_item.test.sql ✅ tests pgTAP de move_item
 ├── src/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/
@@ -112,7 +114,7 @@ mon-site-sdlc/
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
-│   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem ; moveItem à venir (US-10)
+│   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
@@ -125,7 +127,7 @@ mon-site-sdlc/
 │   │   ├── ItemTile.tsx               ✅   vignette + coche verte (US-06, US-07)
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
-│   │   ├── ItemEditTile.tsx           ✅   renommer, supprimer (US-08) ; flèches haut/bas à venir (US-10)
+│   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
@@ -136,6 +138,7 @@ mon-site-sdlc/
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
 │   │   ├── items/title.ts             ✅   validation de l'intitulé, position suivante (+ title.test.ts)
 │   │   ├── items/owned.ts             ✅   état possédé affiché, comptage (+ owned.test.ts)
+│   │   ├── items/order.ts             ✅   échange avec le voisin à l'affichage (+ order.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -170,7 +173,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer
+        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo ; US-10
 ```
 
 ## Règles de travail (SDLC)

@@ -100,7 +100,10 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      move_item: {
+        Args: { p_direction: string; p_item_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       [_ in never]: never;

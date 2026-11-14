@@ -2,25 +2,29 @@
 
 import Link from "next/link";
 import { useOptimistic, useRef, useState, useTransition } from "react";
-import { deleteItem, setOwned } from "@/app/actions/items";
+import { deleteItem, moveItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
 import { RenameItemSheet } from "@/components/RenameItemSheet";
+import { moveInList, type Direction } from "@/lib/items/order";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
 
 type Props = { collectionId: string; name: string; items: Item[] };
+type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre"; id: string; direction: Direction };
 
 // Page d'une collection côté navigateur — maquettes n° 2 (mode cocher : US-06, US-07)
 // et n° 3 (mode édition : US-08 — ajouter, renommer, supprimer).
 // Les deux modes sont séparés pour éviter les suppressions accidentelles (US-08).
 export function CollectionBoard({ collectionId, name, items }: Props) {
-  // Affichage « optimiste » : la coche et le compteur changent tout de suite, sans attendre le serveur.
+  // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
-  const [affiches, appliquer] = useOptimistic(items, (etat, { id, owned }: { id: string; owned: boolean }) =>
-    applyOwned(etat, id, owned),
+  const [affiches, appliquer] = useOptimistic(items, (etat, changement: Changement) =>
+    changement.type === "coche"
+      ? applyOwned(etat, changement.id, changement.owned)
+      : moveInList(etat, changement.id, changement.direction),
   );
   const [, startTransition] = useTransition();
   const [erreur, setErreur] = useState<string>();
@@ -35,6 +39,15 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
   const supprimerRef = useRef<HTMLDialogElement>(null);
   const [suppressionEnCours, startSuppression] = useTransition();
   const [erreurSuppression, setErreurSuppression] = useState<string>();
+
+  function deplacer(item: Item, direction: Direction) {
+    setErreur(undefined);
+    startTransition(async () => {
+      appliquer({ type: "ordre", id: item.id, direction });
+      const resultat = await moveItem(collectionId, item.id, direction);
+      if (resultat.error) setErreur(resultat.error);
+    });
+  }
 
   function ouvrirRenommer(item: Item) {
     setCible(item);
@@ -61,7 +74,7 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
     voulu.current.set(item.id, owned);
     setErreur(undefined);
     startTransition(async () => {
-      appliquer({ id: item.id, owned });
+      appliquer({ type: "coche", id: item.id, owned });
       // Next.js envoie les actions serveur une par une, dans l'ordre : le dernier tap gagne toujours.
       const resultat = await setOwned(item.id, owned);
       if (resultat.error) {
@@ -150,6 +163,9 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
                     key={item.id}
                     item={item}
                     position={index + 1}
+                    premier={index === 0}
+                    dernier={index === affiches.length - 1}
+                    onMove={(direction) => deplacer(item, direction)}
                     onRename={() => ouvrirRenommer(item)}
                     onDelete={() => ouvrirSupprimer(item)}
                   />
