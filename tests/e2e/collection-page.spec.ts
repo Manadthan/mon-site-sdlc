@@ -73,3 +73,49 @@ test("une collection inconnue ou appartenant à un autre affiche « Collection i
     await expect(page.getByText("Collection privée")).toHaveCount(0);
   }
 });
+
+// US-08 (1/2) — Ajouter un item
+
+test("ajouter un item : intitulé obligatoire, placé en fin de liste, compteur mis à jour", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("ajout", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes DBZ", 2, 1);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  await page.getByRole("button", { name: "Ajouter un item" }).click();
+  const panneau = page.getByRole("dialog", { name: "Ajouter un item" });
+  await expect(panneau).toBeVisible();
+
+  // Intitulé obligatoire.
+  await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(panneau.getByRole("alert")).toHaveText("Donnez un intitulé à l’item.");
+
+  await panneau.getByLabel("Intitulé").fill("  N°49 —   Carte secrète ");
+  await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(panneau).toBeHidden();
+
+  const vignettes = page.getByRole("list", { name: "Items" }).getByRole("listitem");
+  await expect(vignettes.getByRole("heading")).toHaveText(["Item 1", "Item 2", "N°49 — Carte secrète"]);
+  await expect(page.getByRole("banner")).toContainText(/1\s\/\s3 · 33\s%/);
+
+  // Persisté, et visible sur l'accueil.
+  await page.reload();
+  await expect(vignettes).toHaveCount(3);
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /Cartes DBZ/ })).toContainText(/1\s\/\s3 · 33\s%/);
+});
+
+test("ajouter le premier item d'une collection vide", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("premier", testInfo);
+  const id = await creerCollection(utilisateur.id, "Vide", 0, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  await expect(page.getByText("Aucun item dans cette collection pour l’instant.")).toBeVisible();
+  await page.getByRole("button", { name: "Ajouter un item" }).click();
+  await page.getByRole("dialog").getByLabel("Intitulé").fill("Premier objet");
+  await page.getByRole("dialog").getByRole("button", { name: "Ajouter", exact: true }).click();
+
+  await expect(page.getByRole("list", { name: "Items" }).getByRole("heading")).toHaveText(["Premier objet"]);
+  await expect(page.getByText("Aucun item dans cette collection pour l’instant.")).toHaveCount(0);
+});

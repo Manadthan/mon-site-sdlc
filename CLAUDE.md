@@ -105,12 +105,12 @@ mon-site-sdlc/
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
-│   │   │   └── [id]/page.tsx          ✅   grille de vignettes (US-06) ; cocher, éditer à venir (US-07 à 10)
+│   │   │   └── [id]/page.tsx          ✅   grille (US-06), ajout d'item (US-08 1/2) ; cocher, éditer à venir
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
-│   │       ├── items.ts               4-5 toggleOwned, moveItem, add, rename, delete
+│   │       ├── items.ts               ✅   addItem ; toggleOwned (4), moveItem, rename, delete (5) à venir
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
@@ -123,12 +123,13 @@ mon-site-sdlc/
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
 │   │   ├── ItemEditTile.tsx           5   flèches haut/bas, suppression
-│   │   ├── AddItemForm.tsx            5
+│   │   ├── AddItemForm.tsx            ✅   US-08 1/2 (intitulé seul ; image à l'étape 5)
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
+│   │   ├── items/title.ts             ✅   validation de l'intitulé, position suivante (+ title.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -157,7 +158,7 @@ mon-site-sdlc/
         ├── pwa.spec.ts                ✅
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
         ├── collections.spec.ts        ✅   US-02, US-03 1/2, US-04, US-05 (données créées par supabase-admin.ts)
-        ├── collection-page.spec.ts    ✅   US-06
+        ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              4
         └── edit.spec.ts               5
@@ -169,6 +170,7 @@ mon-site-sdlc/
 - Branches : `feat/us-07-cocher-item`, `fix/…`, `docs/…`, `chore/…`.
 - Commits au format **Conventional Commits** : `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `refactor:`.
 - PR petites (idéalement < 300 lignes) ; la description suit `.github/pull_request_template.md` et cite les critères d'acceptation couverts.
+- **Donner le lien de prévisualisation Vercel dès l'ouverture d'une PR** (message au propriétaire + « Comment tester ») : `https://mon-site-sdlc-git-<branche, / remplacés par ->-manadthan.vercel.app`.
 - Toute fonctionnalité arrive avec ses tests. La CI doit être verte avant merge.
 - Aucun secret dans le dépôt : `.env.local` est ignoré, `.env.example` liste les variables.
 - Le schéma de base de données évolue **uniquement** par des fichiers dans `supabase/migrations/`. Une migration déjà appliquée en production ne se modifie jamais : on en ajoute une nouvelle.

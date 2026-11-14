@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { AddItemForm } from "@/components/AddItemForm";
 import { ItemTile } from "@/components/ItemTile";
 import { isUuid } from "@/lib/ids";
 import { computeProgress, formatProgress } from "@/lib/progress";
@@ -72,14 +73,26 @@ export default async function CollectionPage({ params }: Props) {
           <p role="alert" className="py-16 text-center text-[15px] text-danger">
             Impossible de charger les items. Rechargez la page dans un instant.
           </p>
-        ) : liste.length === 0 ? (
-          <p className="py-16 text-center text-[15px] text-texte-doux">Aucun item dans cette collection pour l’instant.</p>
         ) : (
-          <ul aria-label="Items" className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-            {liste.map((item) => (
-              <ItemTile key={item.id} item={item} />
-            ))}
-          </ul>
+          <>
+            {liste.length === 0 && (
+              <p className="pt-6 pb-4 text-center text-[15px] text-texte-doux">Aucun item dans cette collection pour l’instant.</p>
+            )}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+              {liste.length > 0 && (
+                // display: contents : vignettes et bouton « Ajouter » partagent la même grille.
+                // role="list" explicite : sinon Safari (VoiceOver) ne l'annonce plus comme une liste.
+                <ul role="list" aria-label="Items" className="contents">
+                  {liste.map((item) => (
+                    <ItemTile key={item.id} item={item} />
+                  ))}
+                </ul>
+              )}
+              <div>
+                <AddItemForm collectionId={collection.id} />
+              </div>
+            </div>
+          </>
         )}
       </main>
     </div>
