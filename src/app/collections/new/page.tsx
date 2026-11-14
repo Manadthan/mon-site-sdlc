@@ -4,8 +4,7 @@ import { NewCollectionForm } from "@/components/NewCollectionForm";
 
 export const metadata: Metadata = { title: "Nouvelle collection · Suivi de collections" };
 
-// Création d'une collection (US-03). Partie 1/2 : collection vide — maquette n° 11 (bas de l'écran).
-// L'adresse de la page source, l'aperçu et l'import s'ajouteront ici à l'étape 6.
+// Création d'une collection (US-03) : depuis l'adresse d'une page (aperçu puis import), ou vide.
 export default function NewCollectionPage() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
@@ -17,7 +16,7 @@ export default function NewCollectionPage() {
         </Link>
         <h1 className="text-lg font-bold">Nouvelle collection</h1>
       </header>
-      <main className="px-4 pt-4">
+      <main className="px-4 pt-4 pb-6">
         <NewCollectionForm />
       </main>
     </div>
