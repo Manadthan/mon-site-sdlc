@@ -68,7 +68,9 @@ jobs:
         run: npm run db:test
       - name: Types TypeScript à jour avec le schéma
         run: |
-          npx supabase gen types typescript --local --schema public > "$RUNNER_TEMP/database.ts"
+          # Le générateur produit un fichier non formaté : on le passe par Prettier, comme npm run db:types.
+          npx supabase gen types typescript --schema public \
+            | npx prettier --stdin-filepath src/types/database.ts > "$RUNNER_TEMP/database.ts"
           if ! diff -u src/types/database.ts "$RUNNER_TEMP/database.ts"; then
             echo "::error::src/types/database.ts n'est pas à jour : lancer npm run db:types"
             exit 1
