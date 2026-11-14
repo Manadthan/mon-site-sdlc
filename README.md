@@ -43,3 +43,8 @@ Première fois pour les tests e2e : `npx playwright install chromium`.
 Le schéma est défini **uniquement** par les fichiers de `supabase/migrations/`.
 Avec Docker installé : `npm run db:start` lance une base Supabase locale, `npm run db:test` vérifie le schéma
 et la Row Level Security, `npm run db:types` régénère `src/types/database.ts` après une migration.
+
+**Déploiement** : à chaque merge sur `main` qui touche `supabase/migrations/`, le workflow
+« Déploiement du schéma » applique les nouvelles migrations à la base de production (`supabase db push --remote`).
+Il peut aussi être lancé à la main : onglet Actions → Déploiement du schéma → Run workflow.
+Secrets GitHub requis : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`.
