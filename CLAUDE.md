@@ -105,12 +105,12 @@ mon-site-sdlc/
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
-│   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard (US-06, 07, 08 1/2)
+│   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
-│   │       ├── items.ts               ✅   addItem, setOwned ; moveItem, rename, delete à venir (5)
+│   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem ; moveItem à venir (US-10)
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
@@ -119,12 +119,13 @@ mon-site-sdlc/
 │   │   ├── SortBar.tsx                ✅   US-05
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
-│   │   ├── CollectionBoard.tsx        ✅   grille, compteur, coche immédiate (US-06, US-07)
+│   │   ├── CollectionBoard.tsx        ✅   modes cocher / édition, compteur, coche immédiate (US-06, 07, 08)
 │   │   ├── ItemTile.tsx               ✅   vignette + coche verte (US-06, US-07)
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
-│   │   ├── ItemEditTile.tsx           5   flèches haut/bas, suppression
-│   │   ├── AddItemForm.tsx            ✅   US-08 1/2 (intitulé seul ; image à l'étape 5)
+│   │   ├── ItemEditTile.tsx           ✅   renommer, supprimer (US-08) ; flèches haut/bas à venir (US-10)
+│   │   ├── RenameItemSheet.tsx        ✅   US-08
+│   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition (image à venir, #33)
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
@@ -163,7 +164,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        └── edit.spec.ts               5
+        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer
 ```
 
 ## Règles de travail (SDLC)
@@ -201,7 +202,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 1 — Socle (#1 à #5)
   - [x] Étape 2 — Supabase, schéma, migrations auto, connexion US-01 (#13 à #16)
   - [x] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
-  - [ ] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
+  - [x] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
   - [ ] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [ ] Étape 6 — Import depuis une URL : US-03 2/2 (#35)
   - [ ] Étape 7 — Recherche et filtres : US-09 (#36)
@@ -214,5 +215,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 4 : #30 → #32 → #31, puis étapes 5 à 7, une issue à la fois. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étape 5 : #33 en plusieurs PR (1. mode édition + renommer + supprimer ; 2. images), puis #34. Ensuite étapes 6 et 7. Toute nouvelle issue est rattachée au milestone de son étape.
 6. **À ne pas oublier** : quand le bucket d'images arrivera (étape 5-6), `deleteCollection` doit aussi effacer le dossier `{user_id}/{collection_id}/` (US-04, ADR-05).

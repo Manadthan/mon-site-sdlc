@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import { useOptimistic, useRef, useState, useTransition } from "react";
-import { setOwned } from "@/app/actions/items";
+import { deleteItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
+import { RenameItemSheet } from "@/components/RenameItemSheet";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
 
 type Props = { collectionId: string; name: string; items: Item[] };
 
-// Page d'une collection côté navigateur : grille (US-06) et coche immédiate (US-07) — maquette n° 2.
+// Page d'une collection côté navigateur — maquettes n° 2 (mode cocher : US-06, US-07)
+// et n° 3 (mode édition : US-08 — ajouter, renommer, supprimer).
+// Les deux modes sont séparés pour éviter les suppressions accidentelles (US-08).
 export function CollectionBoard({ collectionId, name, items }: Props) {
   // Affichage « optimiste » : la coche et le compteur changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
@@ -23,6 +28,33 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
   // l'affichage n'a pas encore été redessiné entre les deux.
   const voulu = useRef(new Map<string, boolean>());
   const progress = computeProgress(countOwned(affiches), affiches.length);
+
+  const [edition, setEdition] = useState(false);
+  const [cible, setCible] = useState<Item>();
+  const renommerRef = useRef<HTMLDialogElement>(null);
+  const supprimerRef = useRef<HTMLDialogElement>(null);
+  const [suppressionEnCours, startSuppression] = useTransition();
+  const [erreurSuppression, setErreurSuppression] = useState<string>();
+
+  function ouvrirRenommer(item: Item) {
+    setCible(item);
+    renommerRef.current?.showModal();
+  }
+
+  function ouvrirSupprimer(item: Item) {
+    setCible(item);
+    setErreurSuppression(undefined);
+    supprimerRef.current?.showModal();
+  }
+
+  function confirmerSuppression() {
+    if (!cible) return;
+    startSuppression(async () => {
+      const resultat = await deleteItem(cible.id);
+      if (resultat.error) setErreurSuppression(resultat.error);
+      else supprimerRef.current?.close();
+    });
+  }
 
   function basculer(item: Item) {
     const owned = !(voulu.current.get(item.id) ?? item.owned);
@@ -42,11 +74,33 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-5xl flex-col">
       <header className="sticky top-0 z-10 flex flex-col gap-2.5 border-b border-bordure bg-white pt-[max(env(safe-area-inset-top),8px)] pr-2 pb-3 pl-2">
-        <Link href="/" aria-label="Retour aux collections" className="flex size-11 items-center justify-center text-texte">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Retour aux collections" className="flex size-11 items-center justify-center text-texte">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Link>
+          {edition ? (
+            <button
+              type="button"
+              onClick={() => setEdition(false)}
+              className="mr-2 flex h-9 items-center rounded-full bg-action px-4 text-sm font-semibold text-white"
+            >
+              Terminé
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEdition(true)}
+              className="mr-2 flex h-9 items-center gap-1.5 rounded-full border border-[#d3d6dc] bg-white px-3.5 text-sm font-semibold text-texte"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Modifier
+            </button>
+          )}
+        </div>
         <div className="flex flex-col gap-2 px-3">
           <h1 className="text-[22px] leading-tight font-bold tracking-tight break-words">{name}</h1>
           <div className="flex items-center gap-2.5">
@@ -70,6 +124,14 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
               {erreur}
             </p>
           )}
+          {edition && (
+            <p className="flex items-center gap-2 rounded-[10px] border border-[#f3d9a4] bg-[#fff7e6] px-3 py-2 text-[13px] text-[#7a4b00]">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+              </svg>
+              Mode édition — un tap ne coche plus les items
+            </p>
+          )}
         </div>
       </header>
 
@@ -82,16 +144,42 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
             // display: contents : vignettes et bouton « Ajouter » partagent la même grille.
             // role="list" explicite : sinon Safari (VoiceOver) ne l'annonce plus comme une liste.
             <ul role="list" aria-label="Items" className="contents">
-              {affiches.map((item) => (
-                <ItemTile key={item.id} item={item} onToggle={() => basculer(item)} />
-              ))}
+              {affiches.map((item, index) =>
+                edition ? (
+                  <ItemEditTile
+                    key={item.id}
+                    item={item}
+                    position={index + 1}
+                    onRename={() => ouvrirRenommer(item)}
+                    onDelete={() => ouvrirSupprimer(item)}
+                  />
+                ) : (
+                  <ItemTile key={item.id} item={item} onToggle={() => basculer(item)} />
+                ),
+              )}
             </ul>
           )}
-          <div>
-            <AddItemForm collectionId={collectionId} />
-          </div>
+          {edition && (
+            <div>
+              <AddItemForm collectionId={collectionId} />
+            </div>
+          )}
         </div>
+        {!edition && affiches.length === 0 && (
+          <p className="text-center text-sm text-texte-doux">Touchez « Modifier » pour ajouter des items.</p>
+        )}
       </main>
+
+      <RenameItemSheet dialogRef={renommerRef} item={cible} />
+      <ConfirmDialog
+        dialogRef={supprimerRef}
+        title={cible ? `Supprimer « ${cible.title} » ?` : ""}
+        description="Cette action est définitive."
+        confirmLabel="Supprimer"
+        onConfirm={confirmerSuppression}
+        pending={suppressionEnCours}
+        error={erreurSuppression}
+      />
     </div>
   );
 }

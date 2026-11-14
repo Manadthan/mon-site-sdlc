@@ -82,6 +82,8 @@ test("ajouter un item : intitulé obligatoire, placé en fin de liste, compteur 
   await seConnecter(page, utilisateur);
   await page.goto(`/collections/${id}`);
 
+  // L'ajout se fait en mode édition (US-08).
+  await page.getByRole("button", { name: "Modifier" }).click();
   await page.getByRole("button", { name: "Ajouter un item" }).click();
   const panneau = page.getByRole("dialog", { name: "Ajouter un item" });
   await expect(panneau).toBeVisible();
@@ -112,6 +114,7 @@ test("ajouter le premier item d'une collection vide", async ({ page }, testInfo)
   await page.goto(`/collections/${id}`);
 
   await expect(page.getByText("Aucun item dans cette collection pour l’instant.")).toBeVisible();
+  await page.getByRole("button", { name: "Modifier" }).click();
   await page.getByRole("button", { name: "Ajouter un item" }).click();
   await page.getByRole("dialog").getByLabel("Intitulé").fill("Premier objet");
   await page.getByRole("dialog").getByRole("button", { name: "Ajouter", exact: true }).click();
