@@ -153,15 +153,15 @@ mon-site-sdlc/
 │   │   ├── images/resize.ts           ✅   réduction de la photo dans le navigateur (+ resize.test.ts)
 │   │   ├── images/download.ts         ✅   téléchargement d'une image par URL (SSRF)
 │   │   └── scraper/
-│   │       ├── index.ts               6   scrapePreview(url)
-│   │       ├── fetchPage.ts           6   délai, taille max, encodage, HTTP accepté
+│   │       ├── index.ts               ✅   scrapePreview(url)
+│   │       ├── fetchPage.ts           ✅   délai, taille max, encodage, HTTP accepté
 │   │       ├── ssrf.ts                ✅   blocage des adresses privées, redirections, délai, taille
-│   │       ├── extract.ts             6   <img> + recherche d'intitulé
-│   │       ├── filters.ts             6   logos, bannières, doublons
+│   │       ├── extract.ts             ✅   <img> + recherche d'intitulé
+│   │       ├── filters.ts             ✅   doublons retirés ; décor (logos, bannières, hors dossier principal) décoché
 │   │       └── __tests__/
-│   │           ├── extract.test.ts    6
+│   │           ├── extract.test.ts    ✅
 │   │           ├── ssrf.test.ts       ✅
-│   │           └── fixtures/          6   copies HTML des pages de référence
+│   │           └── fixtures/          ✅   copies HTML des pages de référence (+ README : origine)
 │   └── types/
 │       └── database.ts                ✅   types générés (npm run db:types), vérifiés en CI
 └── tests/
@@ -224,5 +224,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur + aperçu ; 3. import des images par lots. Puis étape 7. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur ✅ ; 3. écran d'aperçu + création de la collection ; 4. import des images par lots. Puis étape 7. Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
