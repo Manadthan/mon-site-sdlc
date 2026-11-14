@@ -34,7 +34,7 @@ Les critères d'acceptation de SPEC.md sont la **définition de « terminé »**
 - **Supabase** — Postgres (RLS activée), Storage (images), Auth (e-mail + mot de passe, inscriptions désactivées)
 - **cheerio** (analyse HTML du scraper), **sharp** (vignettes WebP 400 px)
 - **Vitest** (unitaires), **Playwright** (e2e, viewport 375 × 812)
-- **Vercel** (hébergement), **GitHub Actions** (CI)
+- **Vercel** (hébergement, région Paris `cdg1`), **GitHub Actions** (CI)
 
 ## Architecture en bref
 
@@ -75,6 +75,7 @@ mon-site-sdlc/
 ├── postcss.config.mjs                 ✅
 ├── vitest.config.ts                   ✅
 ├── playwright.config.ts               ✅
+├── vercel.json                        ✅   région des fonctions : Paris (cdg1)
 ├── .github/
 │   ├── pull_request_template.md       ✅
 │   ├── ISSUE_TEMPLATE/

@@ -7,6 +7,8 @@ Application web personnelle pour suivre mes collections (jeux, cartes, mangas, o
 - Créer une collection à partir de l'URL d'une page qui la recense déjà (images et intitulés récupérés automatiquement).
 - Cocher les objets possédés, réordonner, corriger les items.
 
+**En ligne : https://mon-site-sdlc.vercel.app** (redéployé automatiquement à chaque merge sur `main`).
+
 Projet construit avec Claude en suivant un cycle SDLC complet.
 
 ## Documentation

@@ -20,7 +20,7 @@
 | Stockage des images | **Supabase Storage** | Les images copiées survivent aux redéploiements |
 | Connexion | **Supabase Auth** (e-mail + mot de passe) | Rien à coder côté sécurité des mots de passe |
 | Style | **Tailwind CSS** | Mise en page mobile rapide, cohérente |
-| Hébergement | **Vercel** (gratuit) | Déploiement automatique à chaque merge sur `main` |
+| Hébergement | **Vercel** (gratuit), fonctions en région **Paris** (`cdg1`) | Déploiement automatique à chaque merge sur `main` ; serveur proche de l'utilisateur et de Supabase (UE) |
 | Tests | **Vitest** (unitaires) + **Playwright** (bout en bout, viewport iPhone 12 mini) | Standard, intégrés à la CI |
 | CI | **GitHub Actions** | Lint + types + tests à chaque pull request |
 
