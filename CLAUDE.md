@@ -87,8 +87,8 @@ mon-site-sdlc/
 │   ├── DESIGN.md                      ✅
 │   └── MAQUETTES.md                   ✅
 ├── public/
-│   ├── manifest.webmanifest           1   installation sur l'écran d'accueil iPhone
-│   └── icons/                         1
+│   ├── manifest.webmanifest           ✅   installation sur l'écran d'accueil iPhone
+│   └── icons/                         ✅   icon.svg (source) → PNG 192, 512, apple-touch-icon 180
 ├── supabase/
 │   ├── migrations/
 │   │   ├── 0001_schema.sql            2   tables + vue collection_stats
@@ -141,6 +141,7 @@ mon-site-sdlc/
 └── tests/
     └── e2e/
         ├── home.spec.ts               ✅
+        ├── pwa.spec.ts                ✅
         ├── login.spec.ts              2
         ├── collections.spec.ts        3
         ├── owned.spec.ts              4
@@ -180,6 +181,6 @@ npm run e2e        # Playwright
 
 1. ~~Valider DESIGN.md et les maquettes~~ (fait, #6).
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
-3. Développer l'**étape 1 — Socle** : issues #1 à #5, dans l'ordre (#1 d'abord).
+3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. Créer le projet Supabase (région UE) et renseigner les variables sur Vercel.
 5. Enchaîner les étapes 2 à 7 de DESIGN.md §10, une issue à la fois.
