@@ -81,7 +81,8 @@ mon-site-sdlc/
 │   ├── ISSUE_TEMPLATE/
 │   │   └── user-story.md              ✅
 │   └── workflows/
-│       └── ci.yml                     ✅   lint + types + tests + build + e2e (Chromium et WebKit)
+│       ├── ci.yml                     ✅   lint + types + tests + build + e2e + base de données
+│       └── deploy-db.yml              ✅   applique les migrations en production (merge sur main)
 ├── docs/
 │   ├── SPEC.md                        ✅
 │   ├── DESIGN.md                      ✅
@@ -159,7 +160,7 @@ mon-site-sdlc/
 - PR petites (idéalement < 300 lignes) ; la description suit `.github/pull_request_template.md` et cite les critères d'acceptation couverts.
 - Toute fonctionnalité arrive avec ses tests. La CI doit être verte avant merge.
 - Aucun secret dans le dépôt : `.env.local` est ignoré, `.env.example` liste les variables.
-- Le schéma de base de données évolue **uniquement** par des fichiers dans `supabase/migrations/`.
+- Le schéma de base de données évolue **uniquement** par des fichiers dans `supabase/migrations/`. Une migration déjà appliquée en production ne se modifie jamais : on en ajoute une nouvelle.
 - Le scraper est testé sur des fixtures HTML, jamais sur les sites en direct.
 - Si une demande contredit SPEC.md ou DESIGN.md : le signaler et proposer de mettre le document à jour d'abord.
 
