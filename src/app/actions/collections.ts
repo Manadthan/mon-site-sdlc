@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { validateCollectionName } from "@/lib/collections/name";
+import { isUuid } from "@/lib/ids";
 import { nextSort, parseSort, serializeSort, SORT_COOKIE, SORT_KEYS, type SortKey } from "@/lib/collections/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -27,8 +28,6 @@ export async function createCollection(
   redirect("/");
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 /**
  * Supprime une collection (US-04). Ses items partent avec elle (ON DELETE CASCADE).
  * La RLS empêche de supprimer la collection d'un autre : 0 ligne supprimée = refus.
@@ -36,7 +35,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * ({user_id}/{collection_id}/, ADR-05) sera ajoutée ici avec le bucket.
  */
 export async function deleteCollection(id: string): Promise<{ error?: string }> {
-  if (!UUID.test(id)) return { error: "Collection introuvable." };
+  if (!isUuid(id)) return { error: "Collection introuvable." };
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.from("collections").delete().eq("id", id).select("id");

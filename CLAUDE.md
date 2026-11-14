@@ -105,7 +105,7 @@ mon-site-sdlc/
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
-│   │   │   └── [id]/page.tsx          4   grille de vignettes (US-06 à 10)
+│   │   │   └── [id]/page.tsx          ✅   grille de vignettes (US-06) ; cocher, éditer à venir (US-07 à 10)
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
@@ -119,7 +119,7 @@ mon-site-sdlc/
 │   │   ├── SortBar.tsx                ✅   US-05
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
-│   │   ├── ItemTile.tsx               4   vignette + coche verte
+│   │   ├── ItemTile.tsx               ✅   vignette (US-06) ; coche verte à venir (US-07)
 │   │   ├── FilterTabs.tsx             7
 │   │   ├── SearchField.tsx            7
 │   │   ├── ItemEditTile.tsx           5   flèches haut/bas, suppression
@@ -128,6 +128,7 @@ mon-site-sdlc/
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
+│   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -156,6 +157,7 @@ mon-site-sdlc/
         ├── pwa.spec.ts                ✅
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
         ├── collections.spec.ts        ✅   US-02, US-03 1/2, US-04, US-05 (données créées par supabase-admin.ts)
+        ├── collection-page.spec.ts    ✅   US-06
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              4
         └── edit.spec.ts               5
