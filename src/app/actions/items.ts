@@ -44,3 +44,19 @@ export async function addItem(collectionId: string, _previous: AddItemState, for
   }
   return { error: "L’item n’a pas pu être ajouté. Réessayez dans un instant.", title: resultat.title };
 }
+
+/**
+ * Enregistre l'état « possédé » d'un item (US-07). On envoie l'état voulu plutôt que « inverse » :
+ * deux taps rapides donnent toujours le bon résultat, même si les requêtes se croisent.
+ */
+export async function setOwned(itemId: string, owned: boolean): Promise<{ error?: string }> {
+  if (!isUuid(itemId) || typeof owned !== "boolean") return { error: "Item introuvable." };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("items").update({ owned }).eq("id", itemId).select("collection_id");
+  if (error || data.length === 0) return { error: "Le changement n’a pas pu être enregistré. Réessayez." };
+
+  revalidatePath(`/collections/${data[0]!.collection_id}`);
+  revalidatePath("/");
+  return {};
+}
