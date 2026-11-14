@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.3 — 14/11/2026 — statut : **validé**
+> Version 1.4 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.4 | 15/11/2026 | §2, §5 : l'analyse d'une page est une server action (`analyserPage`), pas une route `/api/scrape` ; `importerCollection` crée la collection et ses items |
 > | 1.3 | 14/11/2026 | Image par URL d'US-08 déplacée à l'étape 6 (#35), avec la protection SSRF ; §6 : vérification de l'adresse à la connexion, plages réservées complétées |
 > | 1.2 | 14/11/2026 | Plan §10 : ajout d'un item (intitulé seul) avancé à l'étape 4 (issue #32) ; étapes suivies par des milestones GitHub |
 > | 1.1 | 14/11/2026 | Plan §10 : création d'une collection vide avancée à l'étape 3 (issue #24) ; `proxy.ts` remplace `middleware.ts` (Next.js 16) |
@@ -46,7 +47,7 @@
  │  Next.js                               │
  │   • pages (accueil, collection, …)     │
  │   • server actions (CRUD, cocher, …)   │
- │   • /api/scrape  ──────────────┐       │
+ │   • analyse d'une page ───────┐       │
  └───────────┬────────────────────┼───────┘
              │                    │ HTTP(S)
              ▼                    ▼
@@ -95,8 +96,9 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 
 | Action | Effet |
 |---|---|
-| `scrapePreview(url)` | Retourne `{ pageTitle, candidates: [{ imageUrl, title }] }` — n'écrit rien |
-| `createCollection(name, url, candidates)` | Crée la collection et ses items (sans images encore) |
+| `analyserPage(url)` | Appelle `scrapePreview(url)` : retourne `{ pageTitle, candidates: [{ imageUrl, title, decor }] }` — n'écrit rien ; réservé à l'utilisateur connecté |
+| `importerCollection(name, url, éléments retenus)` | Crée la collection et ses items dans l'ordre de la page (adresse de l'image dans `source_image`, sans image copiée encore) |
+| `createCollection(name)` | Crée une collection vide |
 | `importImages(collectionId, itemIds[≤10])` | Télécharge, redimensionne, stocke un lot d'images |
 | `toggleOwned(itemId)` | Bascule `owned` |
 | `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin via la fonction SQL `move_item` (ADR-04) |

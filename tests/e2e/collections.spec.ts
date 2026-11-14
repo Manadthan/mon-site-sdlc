@@ -164,3 +164,32 @@ test("trier par nom, date et % complété, et retrouver le dernier tri à la vis
     "Charlie",
   ]);
 });
+
+// US-03 (2/2) — Créer depuis une URL : page inaccessible → message clair, collection vide possible (maquette n° 11).
+// L'aperçu réussi n'est pas testé ici : la CI ne doit pas dépendre d'un site extérieur, et la protection SSRF
+// interdit au serveur de lire une page servie en local. L'extracteur est testé sur des fixtures (Vitest).
+
+test("une page inaccessible affiche un message et permet de créer une collection vide", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("import-echec", testInfo);
+  await seConnecter(page, utilisateur);
+  await page.goto("/collections/new");
+
+  const adresse = page.getByLabel("Adresse de la page source");
+  await adresse.fill("pas une adresse");
+  await page.getByRole("button", { name: "Analyser" }).click();
+  // Dans <main> : Next.js a aussi une zone role="alert" (annonce des changements de page).
+  await expect(page.getByRole("main").getByRole("alert")).toContainText("Adresse invalide");
+
+  await adresse.fill("http://127.0.0.1:54321/rest/v1/");
+  await page.getByRole("button", { name: "Réessayer" }).click();
+  const alerte = page.getByRole("main").getByRole("alert");
+  await expect(alerte).toContainText("Page inaccessible");
+  await expect(alerte).toContainText("Cette adresse n’est pas autorisée.");
+  // L'adresse reste dans le champ pour être corrigée.
+  await expect(adresse).toHaveValue("http://127.0.0.1:54321/rest/v1/");
+
+  await page.getByLabel("Nom de la collection").fill("Cartes série 12");
+  await page.getByRole("button", { name: "Créer une collection vide" }).click();
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("list", { name: "Mes collections" })).toContainText("Cartes série 12");
+});

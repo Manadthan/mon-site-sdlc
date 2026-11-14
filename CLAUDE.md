@@ -22,14 +22,14 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.3 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.4 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
 
 ## Stack
 
-- **Next.js** (App Router, TypeScript strict) — pages + server actions + route `/api/scrape`
+- **Next.js** (App Router, TypeScript strict) — pages + server actions (dont l'analyse d'une page à scraper)
 - **Tailwind CSS** — mobile d'abord
 - **Supabase** — Postgres (RLS activée), Storage (images), Auth (e-mail + mot de passe, inscriptions désactivées)
 - **cheerio** (analyse HTML du scraper), **sharp** (vignettes WebP 400 px)
@@ -108,18 +108,17 @@ mon-site-sdlc/
 │   │   ├── page.tsx                   ✅   accueil : liste (US-02), suppression (US-04), tri (US-05)
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
-│   │   │   ├── new/page.tsx           ✅   création vide (US-03 1/2) ; aperçu + import à l'étape 6
+│   │   │   ├── new/page.tsx           ✅   création : adresse → aperçu → import, ou collection vide (US-03)
 │   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
-│   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
-│   │       └── import.ts              6   importImages par lots
+│   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection ; importImages par lots (6)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
 │   │   ├── CollectionCard.tsx         ✅   US-02
-│   │   ├── NewCollectionForm.tsx      ✅   US-03 1/2
+│   │   ├── NewCollectionForm.tsx      ✅   US-03 : adresse, nom pré-rempli, aperçu, import ou collection vide
 │   │   ├── SortBar.tsx                ✅   US-05
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
@@ -131,7 +130,7 @@ mon-site-sdlc/
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
-│   │   ├── ScrapePreview.tsx          6
+│   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
@@ -143,6 +142,7 @@ mon-site-sdlc/
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
 │   │   ├── collections/sort.ts        ✅   tri, cookie, sens par défaut (+ sort.test.ts)
+│   │   ├── collections/import.ts      ✅   vérification des éléments importés (+ import.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -157,6 +157,7 @@ mon-site-sdlc/
 │   │       ├── fetchPage.ts           ✅   délai, taille max, encodage, HTTP accepté
 │   │       ├── ssrf.ts                ✅   blocage des adresses privées, redirections, délai, taille
 │   │       ├── extract.ts             ✅   <img> + recherche d'intitulé
+│   │       ├── messages.ts            ✅   messages d'échec de l'analyse (+ messages.test.ts)
 │   │       ├── filters.ts             ✅   doublons retirés ; décor (logos, bannières, hors dossier principal) décoché
 │   │       └── __tests__/
 │   │           ├── extract.test.ts    ✅
@@ -169,7 +170,7 @@ mon-site-sdlc/
         ├── home.spec.ts               ✅
         ├── pwa.spec.ts                ✅
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
-        ├── collections.spec.ts        ✅   US-02, US-03 1/2, US-04, US-05 (données créées par supabase-admin.ts)
+        ├── collections.spec.ts        ✅   US-02, US-03 (vide, page inaccessible), US-04, US-05 (données créées par supabase-admin.ts)
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
@@ -224,5 +225,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur ✅ ; 3. écran d'aperçu + création de la collection ; 4. import des images par lots. Puis étape 7. Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur ✅ ; 3. écran d'aperçu + création de la collection ✅ ; 4. import des images par lots. Puis étape 7. Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
