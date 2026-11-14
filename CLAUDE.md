@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.1 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.2 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -194,7 +194,13 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 - [ ] Phase 4+ — Développement par étapes, revue, tests, déploiement
   - [x] Étape 1 — Socle (#1 à #5)
   - [x] Étape 2 — Supabase, schéma, migrations auto, connexion US-01 (#13 à #16)
-  - [ ] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
+  - [x] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
+  - [ ] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
+  - [ ] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
+  - [ ] Étape 6 — Import depuis une URL : US-03 2/2 (#35)
+  - [ ] Étape 7 — Recherche et filtres : US-09 (#36)
+
+Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
 
 ## Prochaines étapes
 
@@ -202,5 +208,5 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 3 en cours : #21 → #24 → #22 → #23, puis étapes 4 à 7 de DESIGN.md §10, une issue à la fois.
+5. Étape 4 : #30 → #32 → #31, puis étapes 5 à 7, une issue à la fois. Toute nouvelle issue est rattachée au milestone de son étape.
 6. **À ne pas oublier** : quand le bucket d'images arrivera (étape 5-6), `deleteCollection` doit aussi effacer le dossier `{user_id}/{collection_id}/` (US-04, ADR-05).
