@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { validateCollectionName } from "@/lib/collections/name";
 import { isUuid } from "@/lib/ids";
+import { BUCKET_IMAGES, dossierCollection } from "@/lib/images/storage";
 import { nextSort, parseSort, serializeSort, SORT_COOKIE, SORT_KEYS, type SortKey } from "@/lib/collections/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -31,16 +32,25 @@ export async function createCollection(
 /**
  * Supprime une collection (US-04). Ses items partent avec elle (ON DELETE CASCADE).
  * La RLS empêche de supprimer la collection d'un autre : 0 ligne supprimée = refus.
- * Images : il n'y a pas encore de stockage d'images (étape 5-6) ; leur suppression
- * ({user_id}/{collection_id}/, ADR-05) sera ajoutée ici avec le bucket.
+ * Ses images partent aussi : tout le dossier {user_id}/{collection_id}/ (ADR-05).
  */
 export async function deleteCollection(id: string): Promise<{ error?: string }> {
   if (!isUuid(id)) return { error: "Collection introuvable." };
 
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("collections").delete().eq("id", id).select("id");
+  const { data, error } = await supabase.from("collections").delete().eq("id", id).select("id, user_id");
   if (error) return { error: "La suppression a échoué. Réessayez dans un instant." };
   if (data.length === 0) return { error: "Collection introuvable." };
+
+  // Le stockage ne supprime pas un dossier d'un coup : on liste ses fichiers puis on les retire.
+  const stockage = supabase.storage.from(BUCKET_IMAGES);
+  const dossier = dossierCollection(data[0]!.user_id, id);
+  for (;;) {
+    const { data: fichiers } = await stockage.list(dossier, { limit: 1000 });
+    if (!fichiers?.length) break;
+    const { error: erreurRetrait } = await stockage.remove(fichiers.map((f) => `${dossier}/${f.name}`));
+    if (erreurRetrait) break;
+  }
 
   revalidatePath("/");
   return {};

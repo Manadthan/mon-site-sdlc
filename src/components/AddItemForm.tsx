@@ -1,23 +1,37 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { addItem, type AddItemState } from "@/app/actions/items";
+import { reduirePhoto } from "@/lib/images/resize";
 import { INTITULE_MAX } from "@/lib/items/title";
 
-// « Ajouter un item » (US-08 partie 1/2) — maquette n° 8 : panneau qui monte du bas, à portée de pouce.
-// Rejoindra le mode édition à l'étape 5 ; l'image facultative arrive avec la partie 2/2.
+// « Ajouter un item » (US-08), en mode édition — maquette n° 8 : panneau qui monte du bas, à portée de pouce.
+// Photo facultative (appareil photo ou photothèque), réduite dans le navigateur avant l'envoi.
 export function AddItemForm({ collectionId }: { collectionId: string }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, action, pending] = useActionState<AddItemState, FormData>(addItem.bind(null, collectionId), {});
+  const [nomPhoto, setNomPhoto] = useState<string>();
+  const [state, action, pending] = useActionState<AddItemState, FormData>(async (precedent, formData) => {
+    const photo = formData.get("image");
+    if (photo instanceof File && photo.size > 0) {
+      try {
+        formData.set("image", await reduirePhoto(photo));
+      } catch {
+        return { error: "Cette photo n’a pas pu être lue. Essayez-en une autre.", title: String(formData.get("title") ?? "") };
+      }
+    }
+    const resultat = await addItem(collectionId, precedent, formData);
+    if (resultat.ok) setNomPhoto(undefined);
+    return resultat;
+  }, {});
 
-  // Ajout réussi : on vide le champ et on referme le panneau.
+  // Ajout réussi : on vide le formulaire ; on referme le panneau, sauf s'il y a un avertissement à lire.
   useEffect(() => {
     if (state.ok) {
       formRef.current?.reset();
-      dialogRef.current?.close();
+      if (!state.warning) dialogRef.current?.close();
     }
-  }, [state.ok]);
+  }, [state.ok, state.warning]);
 
   return (
     <>
@@ -72,6 +86,30 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
           {state.error && (
             <p id="ajout-erreur" role="alert" className="text-sm text-danger">
               {state.error}
+            </p>
+          )}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[13px] font-semibold text-texte-doux">Image (facultative)</span>
+            <label className="flex h-[60px] cursor-pointer items-center gap-3 rounded-xl border border-[#d3d6dc] bg-white px-4 text-sm font-semibold text-texte has-focus-visible:ring-2 has-focus-visible:ring-action/40">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+              <span className="min-w-0 flex-1 truncate">{nomPhoto ? `Photo : ${nomPhoto}` : "Prendre ou choisir une photo"}</span>
+              {/* accept="image/*" : Safari propose l'appareil photo ou la photothèque. */}
+              <input
+                name="image"
+                type="file"
+                accept="image/*"
+                aria-label="Photo de l’item"
+                className="sr-only"
+                onChange={(e) => setNomPhoto(e.currentTarget.files?.[0]?.name)}
+              />
+            </label>
+          </div>
+          {state.warning && (
+            <p role="status" className="text-sm text-[#7a4b00]">
+              {state.warning}
             </p>
           )}
           <p className="text-[13px] text-texte-doux">L’item sera placé en fin de liste.</p>
