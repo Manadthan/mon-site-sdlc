@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.0 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.1 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -105,12 +105,12 @@ mon-site-sdlc/
 │   │   ├── page.tsx                   3   accueil (US-02, 04, 05) — provisoire : déconnexion
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
-│   │   │   ├── new/page.tsx           6   création + aperçu (US-03)
+│   │   │   ├── new/page.tsx           3/6 création vide (étape 3), puis aperçu + import (étape 6)
 │   │   │   └── [id]/page.tsx          4   grille de vignettes (US-06 à 10)
 │   │   ├── api/scrape/route.ts        6
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
-│   │       ├── collections.ts         3   create, delete, sort
+│   │       ├── collections.ts         3   createCollection, deleteCollection, tri
 │   │       ├── items.ts               4-5 toggleOwned, moveItem, add, rename, delete
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
@@ -186,6 +186,9 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 - [x] Phase 2 — Conception : `docs/DESIGN.md` v1.0 + maquettes v1.0 validées
 - [x] Phase 3 — Issues GitHub pour l'étape 1 du plan (#1 à #5)
 - [ ] Phase 4+ — Développement par étapes, revue, tests, déploiement
+  - [x] Étape 1 — Socle (#1 à #5)
+  - [x] Étape 2 — Supabase, schéma, migrations auto, connexion US-01 (#13 à #16)
+  - [ ] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
 
 ## Prochaines étapes
 
@@ -193,5 +196,4 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-   Étape 2 : issues #13 (Supabase), #14 (schéma), #15 (migrations auto), #16 (US-01).
-5. Enchaîner les étapes 2 à 7 de DESIGN.md §10, une issue à la fois.
+5. Étape 3 en cours : #21 → #24 → #22 → #23, puis étapes 4 à 7 de DESIGN.md §10, une issue à la fois.
