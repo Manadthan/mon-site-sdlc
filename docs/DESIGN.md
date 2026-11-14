@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.2 — 14/11/2026 — statut : **validé**
+> Version 1.3 — 14/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.3 | 14/11/2026 | Image par URL d'US-08 déplacée à l'étape 6 (#35), avec la protection SSRF ; §6 : vérification de l'adresse à la connexion, plages réservées complétées |
 > | 1.2 | 14/11/2026 | Plan §10 : ajout d'un item (intitulé seul) avancé à l'étape 4 (issue #32) ; étapes suivies par des milestones GitHub |
 > | 1.1 | 14/11/2026 | Plan §10 : création d'une collection vide avancée à l'étape 3 (issue #24) ; `proxy.ts` remplace `middleware.ts` (Next.js 16) |
 > | 1.0 | 13/11/2026 | Revue (issue #6) : `move_item` en fonction SQL, RLS des items via la collection, images publiques (ADR-05) et chemins de stockage, réduction des photos dans le navigateur, liste SSRF complétée, maquettes complétées |
@@ -99,7 +100,7 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `importImages(collectionId, itemIds[≤10])` | Télécharge, redimensionne, stocke un lot d'images |
 | `toggleOwned(itemId)` | Bascule `owned` |
 | `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin via la fonction SQL `move_item` (ADR-04) |
-| `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut) |
+| `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut). Ou bien l'**adresse d'une image**, téléchargée côté serveur avec la protection SSRF (§6) *avant* de créer l'item : une adresse refusée n'enregistre rien |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
@@ -117,9 +118,10 @@ Les adaptateurs spécifiques à un site viendront plus tard, seulement si l'extr
 Le serveur va chercher des URL saisies par l'utilisateur : c'est une porte d'entrée classique pour une attaque **SSRF**
 (faire appeler par notre serveur des adresses internes). Protections :
 - uniquement `http` et `https` ;
-- refus des adresses privées / locales après résolution DNS : `localhost`, `0.0.0.0`, `127.*`, `10.*`, `172.16.*` à `172.31.*`, `192.168.*`, `169.254.*`, `100.64.*` à `100.127.*`, et en IPv6 `::1`, `fc00::/7`, `fe80::/10`, adresses IPv4 encapsulées (`::ffff:…`) ;
+- refus des adresses privées / locales après résolution DNS : `localhost`, `0.0.0.0`, `127.*`, `10.*`, `172.16.*` à `172.31.*`, `192.168.*`, `169.254.*`, `100.64.*` à `100.127.*`, et en IPv6 `::1`, `fc00::/7`, `fe80::/10`, adresses IPv4 encapsulées (`::ffff:…`) ; aussi multicast et plages réservées, NAT64 et 6to4 (`src/lib/scraper/ssrf.ts`) ;
+- l'adresse est vérifiée **au moment de la connexion** (et non dans une étape séparée) : un domaine qui changerait d'adresse entre-temps (« DNS rebinding ») est bloqué ;
 - la vérification est refaite **à chaque redirection** (on suit les redirections nous-mêmes, pas automatiquement) ;
-- 5 redirections max ; seules les réponses `image/*` sont acceptées lors de la copie des images.
+- 5 redirections max ; délai total 10 s ; seules les réponses `image/*` (hors SVG, 10 Mo max) sont acceptées lors de la copie des images.
 
 ## 7. Stratégie de test
 
@@ -156,8 +158,8 @@ supabase/        migrations SQL (le schéma est versionné dans Git)
 2. **Connexion** (US-01) + schéma de base de données.
 3. **Accueil** (US-02, US-04, US-05) + **création d'une collection vide** (US-03, partie 1/2) : sans elle, le site en ligne resterait vide jusqu'à l'étape 6.
 4. **Page collection** (US-06, US-07) + **ajout d'un item, intitulé seul** (US-08, partie 1/2) : sans lui, il n'y aurait rien à cocher avant l'étape 5.
-5. **Édition** (US-08 partie 2/2 : mode édition, image, renommer, supprimer ; US-10).
-6. **Scraper** + création depuis une URL (US-03, partie 2/2 : aperçu et import).
+5. **Édition** (US-08 partie 2/2 : mode édition, photo, renommer, supprimer ; US-10).
+6. **Scraper** + création depuis une URL (US-03, partie 2/2 : aperçu et import) ; image par URL d'US-08, qui partage la protection SSRF.
 7. **Recherche et filtres** (US-09).
 
 Chaque étape produit un site déployé et utilisable : on peut s'arrêter ou réorienter à tout moment.

@@ -174,3 +174,35 @@ test("réordonner avec les flèches haut / bas, l'ordre est enregistré", async 
   await page.reload();
   await expect(intitules).toHaveText(["Item 3", "Item 1", "Item 2"]);
 });
+
+// US-08 — Image par adresse : le serveur refuse les adresses internes (protection SSRF, DESIGN.md §6).
+// Le téléchargement réussi est couvert par les tests unitaires (src/lib/scraper/__tests__/ssrf.test.ts) :
+// la CI ne doit pas dépendre d'un site extérieur.
+
+test("une adresse d'image interne est refusée et l'item n'est pas créé", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("image-url", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes", 1, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  await page.getByRole("button", { name: "Modifier" }).click();
+
+  await page.getByRole("button", { name: "Ajouter un item" }).click();
+  const panneau = page.getByRole("dialog", { name: "Ajouter un item" });
+  await panneau.getByLabel("Intitulé").fill("Carte par adresse");
+  await panneau.getByLabel("Adresse de l’image").fill("http://169.254.169.254/latest/meta-data/");
+  await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+
+  await expect(panneau.locator("form").getByRole("alert")).toHaveText("Cette adresse n’est pas autorisée.");
+  // La saisie est conservée pour être corrigée.
+  await expect(panneau.getByLabel("Intitulé")).toHaveValue("Carte par adresse");
+  await expect(panneau.getByLabel("Adresse de l’image")).toHaveValue("http://169.254.169.254/latest/meta-data/");
+
+  await panneau.getByLabel("Adresse de l’image").fill("ftp://exemple.fr/carte.jpg");
+  await panneau.getByRole("button", { name: "Ajouter", exact: true }).click();
+  await expect(panneau.locator("form").getByRole("alert")).toHaveText(
+    "Adresse d’image invalide : elle doit commencer par http:// ou https://.",
+  );
+
+  const { count } = await adminSupabase().from("items").select("id", { count: "exact", head: true }).eq("collection_id", id);
+  expect(count).toBe(1);
+});

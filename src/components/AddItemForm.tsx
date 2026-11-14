@@ -6,7 +6,8 @@ import { reduirePhoto } from "@/lib/images/resize";
 import { INTITULE_MAX } from "@/lib/items/title";
 
 // « Ajouter un item » (US-08), en mode édition — maquette n° 8 : panneau qui monte du bas, à portée de pouce.
-// Photo facultative (appareil photo ou photothèque), réduite dans le navigateur avant l'envoi.
+// Image facultative : une photo (appareil photo ou photothèque, réduite dans le navigateur avant l'envoi)
+// ou l'adresse d'une image sur le web (téléchargée par le serveur).
 export function AddItemForm({ collectionId }: { collectionId: string }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -17,7 +18,11 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
       try {
         formData.set("image", await reduirePhoto(photo));
       } catch {
-        return { error: "Cette photo n’a pas pu être lue. Essayez-en une autre.", title: String(formData.get("title") ?? "") };
+        return {
+          error: "Cette photo n’a pas pu être lue. Essayez-en une autre.",
+          title: String(formData.get("title") ?? ""),
+          imageUrl: String(formData.get("imageUrl") ?? ""),
+        };
       }
     }
     const resultat = await addItem(collectionId, precedent, formData);
@@ -106,6 +111,18 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
                 onChange={(e) => setNomPhoto(e.currentTarget.files?.[0]?.name)}
               />
             </label>
+            <input
+              name="imageUrl"
+              type="url"
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="ou adresse d’une image : https://…"
+              aria-label="Adresse de l’image"
+              defaultValue={state.error ? state.imageUrl : ""}
+              className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20"
+            />
           </div>
           {state.warning && (
             <p role="status" className="text-sm text-[#7a4b00]">
