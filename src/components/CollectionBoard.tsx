@@ -5,9 +5,12 @@ import { useOptimistic, useRef, useState, useTransition } from "react";
 import { deleteItem, moveItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { FilterTabs } from "@/components/FilterTabs";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
 import { RenameItemSheet } from "@/components/RenameItemSheet";
+import { SearchField } from "@/components/SearchField";
+import { filtrerItems, type Filtre } from "@/lib/items/filter";
 import { moveInList, type Direction } from "@/lib/items/order";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
@@ -17,6 +20,7 @@ type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre
 
 // Page d'une collection côté navigateur — maquettes n° 2 (mode cocher : US-06, US-07)
 // et n° 3 (mode édition : US-08 — ajouter, renommer, supprimer).
+// Recherche et filtre (US-09) en mode cocher ; le mode édition montre toujours tous les items, dans l'ordre.
 // Les deux modes sont séparés pour éviter les suppressions accidentelles (US-08).
 export function CollectionBoard({ collectionId, name, items }: Props) {
   // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
@@ -34,6 +38,11 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
   const progress = computeProgress(countOwned(affiches), affiches.length);
 
   const [edition, setEdition] = useState(false);
+  const [filtre, setFiltre] = useState<Filtre>("tous");
+  const [recherche, setRecherche] = useState("");
+  // Le compteur porte sur toute la collection ; seule la grille est filtrée.
+  const visibles = edition ? affiches : filtrerItems(affiches, filtre, recherche);
+  const filtrage = !edition && (filtre !== "tous" || recherche.trim() !== "");
   const [cible, setCible] = useState<Item>();
   const renommerRef = useRef<HTMLDialogElement>(null);
   const supprimerRef = useRef<HTMLDialogElement>(null);
@@ -149,15 +158,29 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
       </header>
 
       <main className="flex-1 px-4 pt-3 pb-8">
+        {!edition && affiches.length > 0 && (
+          <div className="mb-3 flex flex-col gap-2.5">
+            <SearchField valeur={recherche} onChange={setRecherche} />
+            <FilterTabs valeur={filtre} onChange={setFiltre} />
+          </div>
+        )}
+        {filtrage && (
+          <p className="sr-only" role="status">
+            {visibles.length} item{visibles.length > 1 ? "s" : ""} affiché{visibles.length > 1 ? "s" : ""}
+          </p>
+        )}
+        {filtrage && visibles.length === 0 && (
+          <p className="pt-6 pb-4 text-center text-[15px] text-texte-doux">Aucun item ne correspond.</p>
+        )}
         {affiches.length === 0 && (
           <p className="pt-6 pb-4 text-center text-[15px] text-texte-doux">Aucun item dans cette collection pour l’instant.</p>
         )}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {affiches.length > 0 && (
+          {visibles.length > 0 && (
             // display: contents : vignettes et bouton « Ajouter » partagent la même grille.
             // role="list" explicite : sinon Safari (VoiceOver) ne l'annonce plus comme une liste.
             <ul role="list" aria-label="Items" className="contents">
-              {affiches.map((item, index) =>
+              {visibles.map((item, index) =>
                 edition ? (
                   <ItemEditTile
                     key={item.id}
