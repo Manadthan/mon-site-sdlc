@@ -60,3 +60,43 @@ export async function setOwned(itemId: string, owned: boolean): Promise<{ error?
   revalidatePath("/");
   return {};
 }
+
+export type RenameItemState = { error?: string; title?: string; itemId?: string; ok?: number };
+
+/** Modifie l'intitulé d'un item (US-08, mode édition). L'identifiant arrive par un champ caché. */
+export async function renameItem(_previous: RenameItemState, formData: FormData): Promise<RenameItemState> {
+  const itemId = formData.get("itemId");
+  const saisie = formData.get("title");
+  const resultat = validateItemTitle(saisie);
+  if (!isUuid(itemId)) return { error: "Item introuvable." };
+  if (!resultat.ok) return { error: resultat.error, title: typeof saisie === "string" ? saisie : "", itemId };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("items")
+    .update({ title: resultat.title })
+    .eq("id", itemId)
+    .select("collection_id");
+  if (error || data.length === 0) {
+    return { error: "L’intitulé n’a pas pu être modifié. Réessayez dans un instant.", title: resultat.title, itemId };
+  }
+
+  revalidatePath(`/collections/${data[0]!.collection_id}`);
+  return { ok: Date.now() };
+}
+
+/**
+ * Supprime un item (US-08, mode édition, après confirmation).
+ * Les positions des suivants ne sont pas renumérotées : l'ordre reste juste avec des « trous ».
+ */
+export async function deleteItem(itemId: string): Promise<{ error?: string }> {
+  if (!isUuid(itemId)) return { error: "Item introuvable." };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("items").delete().eq("id", itemId).select("collection_id");
+  if (error || data.length === 0) return { error: "La suppression a échoué. Réessayez dans un instant." };
+
+  revalidatePath(`/collections/${data[0]!.collection_id}`);
+  revalidatePath("/");
+  return {};
+}
