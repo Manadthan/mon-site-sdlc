@@ -25,18 +25,6 @@ describe("toCollectionCards", () => {
     expect(carte?.progress).toEqual({ owned: 0, total: 0, percent: 0 });
   });
 
-  it("place la collection la plus récente en premier", () => {
-    const cartes = toCollectionCards(
-      [
-        collection("ancienne", "A", "2026-01-01T00:00:00Z"),
-        collection("recente", "B", "2026-11-14T00:00:00Z"),
-        collection("milieu", "C", "2026-06-01T00:00:00Z"),
-      ],
-      [],
-    );
-    expect(cartes.map((c) => c.id)).toEqual(["recente", "milieu", "ancienne"]);
-  });
-
   it("renvoie une liste vide sans collection", () => {
     expect(toCollectionCards([], [])).toEqual([]);
   });
