@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.2 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.3 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -129,7 +129,7 @@ mon-site-sdlc/
 │   │   ├── SearchField.tsx            7
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
-│   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo facultative
+│   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          6
 │   │   └── ImportProgress.tsx         6
@@ -151,16 +151,16 @@ mon-site-sdlc/
 │   │   ├── images/storage.ts          ✅   bucket, chemins (ADR-05), URL publique
 │   │   ├── images/thumbnail.ts        ✅   sharp → WebP 400 px (+ thumbnail.test.ts)
 │   │   ├── images/resize.ts           ✅   réduction de la photo dans le navigateur (+ resize.test.ts)
-│   │   ├── images/download.ts         6   téléchargement d'une image par URL (SSRF)
+│   │   ├── images/download.ts         ✅   téléchargement d'une image par URL (SSRF)
 │   │   └── scraper/
 │   │       ├── index.ts               6   scrapePreview(url)
 │   │       ├── fetchPage.ts           6   délai, taille max, encodage, HTTP accepté
-│   │       ├── ssrf.ts                6   blocage des adresses privées
+│   │       ├── ssrf.ts                ✅   blocage des adresses privées, redirections, délai, taille
 │   │       ├── extract.ts             6   <img> + recherche d'intitulé
 │   │       ├── filters.ts             6   logos, bannières, doublons
 │   │       └── __tests__/
 │   │           ├── extract.test.ts    6
-│   │           ├── ssrf.test.ts       6
+│   │           ├── ssrf.test.ts       ✅
 │   │           └── fixtures/          6   copies HTML des pages de référence
 │   └── types/
 │       └── database.ts                ✅   types générés (npm run db:types), vérifiés en CI
@@ -173,7 +173,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo ; US-10
+        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10
 ```
 
 ## Règles de travail (SDLC)
@@ -212,8 +212,8 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 2 — Supabase, schéma, migrations auto, connexion US-01 (#13 à #16)
   - [x] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
   - [x] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
-  - [ ] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
-  - [ ] Étape 6 — Import depuis une URL : US-03 2/2 (#35)
+  - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
+  - [ ] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [ ] Étape 7 — Recherche et filtres : US-09 (#36)
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
@@ -224,5 +224,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 5 : #33 en plusieurs PR (1. mode édition ✅ ; 2. photo ✅ ; 3. image par URL, avec la protection SSRF réutilisée à l'étape 6), puis #34. Ensuite étapes 6 et 7. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur + aperçu ; 3. import des images par lots. Puis étape 7. Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).

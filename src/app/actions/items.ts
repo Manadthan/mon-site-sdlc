@@ -2,30 +2,49 @@
 
 import { revalidatePath } from "next/cache";
 import { isUuid } from "@/lib/ids";
+import { messageEchecImage, telechargerImage } from "@/lib/images/download";
 import { BUCKET_IMAGES, cheminImage } from "@/lib/images/storage";
 import { TAILLE_MAX_ENVOI, versVignette } from "@/lib/images/thumbnail";
 import { positionSuivante, validateItemTitle } from "@/lib/items/title";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type AddItemState = { error?: string; warning?: string; title?: string; ok?: number };
+export type AddItemState = { error?: string; warning?: string; title?: string; imageUrl?: string; ok?: number };
 
 const POSITION_DEJA_PRISE = "23505";
 
 /**
  * Ajoute un item en fin de collection (US-08, US-10 « un item ajouté se place en fin de liste »),
- * avec une photo facultative (déjà réduite dans le navigateur), convertie en vignette WebP (ADR-02).
+ * avec une image facultative convertie en vignette WebP (ADR-02) :
+ * - soit une photo, déjà réduite dans le navigateur ;
+ * - soit l'adresse d'une image, téléchargée côté serveur avec la protection SSRF (DESIGN.md §6).
  * La RLS refuse l'ajout dans la collection d'un autre.
  */
 export async function addItem(collectionId: string, _previous: AddItemState, formData: FormData): Promise<AddItemState> {
   const saisie = formData.get("title");
+  const champUrl = formData.get("imageUrl");
+  const imageUrl = typeof champUrl === "string" ? champUrl.trim() : "";
   const resultat = validateItemTitle(saisie);
-  if (!resultat.ok) return { error: resultat.error, title: typeof saisie === "string" ? saisie : "" };
+  if (!resultat.ok) return { error: resultat.error, title: typeof saisie === "string" ? saisie : "", imageUrl };
   if (!isUuid(collectionId)) return { error: "Collection introuvable." };
+  const retour = (error: string): AddItemState => ({ error, title: resultat.title, imageUrl });
 
   const photo = formData.get("image");
   const avecPhoto = photo instanceof File && photo.size > 0;
+  if (avecPhoto && imageUrl) return retour("Choisissez une photo ou une adresse d’image, pas les deux.");
   if (avecPhoto && (!photo.type.startsWith("image/") || photo.size > TAILLE_MAX_ENVOI)) {
-    return { error: "Cette image n’est pas acceptée (photo de 2 Mo au plus).", title: resultat.title };
+    return retour("Cette image n’est pas acceptée (photo de 2 Mo au plus).");
+  }
+
+  // L'image par adresse est téléchargée avant de créer l'item : si l'adresse est mauvaise,
+  // rien n'est enregistré et l'utilisateur peut la corriger.
+  let image: { donnees: Buffer | ArrayBuffer; source: string | null } | undefined;
+  if (avecPhoto) image = { donnees: await photo.arrayBuffer(), source: null };
+  else if (imageUrl) {
+    try {
+      image = { donnees: await telechargerImage(imageUrl), source: imageUrl };
+    } catch (erreur) {
+      return retour(messageEchecImage(erreur));
+    }
   }
 
   const supabase = await createSupabaseServerClient();
@@ -46,7 +65,7 @@ export async function addItem(collectionId: string, _previous: AddItemState, for
       .single();
 
     if (!error) {
-      const imageOk = avecPhoto ? await enregistrerImage(supabase, collectionId, cree.id, photo) : true;
+      const imageOk = image ? await enregistrerImage(supabase, collectionId, cree.id, image) : true;
       revalidatePath(`/collections/${collectionId}`);
       revalidatePath("/");
       // ok : valeur changeante, le formulaire sait qu'un ajout vient de réussir et se vide.
@@ -56,25 +75,33 @@ export async function addItem(collectionId: string, _previous: AddItemState, for
     }
     if (error.code !== POSITION_DEJA_PRISE) break;
   }
-  return { error: "L’item n’a pas pu être ajouté. Réessayez dans un instant.", title: resultat.title };
+  return retour("L’item n’a pas pu être ajouté. Réessayez dans un instant.");
 }
 
 type Supabase = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
-/** Convertit la photo en vignette, la range dans le dossier de l'utilisateur (ADR-05) et la relie à l'item. */
-async function enregistrerImage(supabase: Supabase, collectionId: string, itemId: string, photo: File) {
+/** Convertit l'image en vignette, la range dans le dossier de l'utilisateur (ADR-05) et la relie à l'item. */
+async function enregistrerImage(
+  supabase: Supabase,
+  collectionId: string,
+  itemId: string,
+  image: { donnees: Buffer | ArrayBuffer; source: string | null },
+) {
   try {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) return false;
     const chemin = cheminImage(user.id, collectionId, itemId);
-    const vignette = await versVignette(await photo.arrayBuffer());
+    const vignette = await versVignette(image.donnees);
     const { error } = await supabase.storage
       .from(BUCKET_IMAGES)
       .upload(chemin, vignette, { contentType: "image/webp", upsert: true, cacheControl: "31536000" });
     if (error) return false;
-    const { error: lien } = await supabase.from("items").update({ image_path: chemin }).eq("id", itemId);
+    const { error: lien } = await supabase
+      .from("items")
+      .update({ image_path: chemin, source_image: image.source })
+      .eq("id", itemId);
     return !lien;
   } catch {
     // Image illisible (fichier abîmé, format inconnu) : l'item reste, sans image.
