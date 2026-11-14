@@ -96,13 +96,12 @@ mon-site-sdlc/
 │   │   ├── 0001_schema.sql            ✅   tables + vue collection_stats
 │   │   └── 0002_rls.sql               ✅   Row Level Security
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
-│   └── seed.sql                       3   données de démo
 ├── src/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/
 │   │   ├── layout.tsx                 ✅
 │   │   ├── globals.css                ✅
-│   │   ├── page.tsx                   3   accueil (US-02, 04, 05) — provisoire : déconnexion
+│   │   ├── page.tsx                   ✅   accueil : liste (US-02) ; suppression et tri à venir (US-04, 05)
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           3/6 création vide (étape 3), puis aperçu + import (étape 6)
@@ -115,7 +114,7 @@ mon-site-sdlc/
 │   │       └── import.ts              6   importImages par lots
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
-│   │   ├── CollectionCard.tsx         3
+│   │   ├── CollectionCard.tsx         ✅   US-02
 │   │   ├── SortBar.tsx                3
 │   │   ├── ConfirmDialog.tsx          3
 │   │   ├── ItemTile.tsx               4   vignette + coche verte
@@ -127,6 +126,7 @@ mon-site-sdlc/
 │   │   └── ImportProgress.tsx         6
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
+│   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -150,7 +150,8 @@ mon-site-sdlc/
         ├── home.spec.ts               ✅
         ├── pwa.spec.ts                ✅
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
-        ├── collections.spec.ts        3
+        ├── collections.spec.ts        ✅   US-02 (données créées par supabase-admin.ts)
+        ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              4
         └── edit.spec.ts               5
 ```

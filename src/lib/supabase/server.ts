@@ -10,8 +10,10 @@ import type { Database } from "@/types/database";
  * À créer à chaque requête, jamais partagé entre deux utilisateurs.
  */
 export async function createSupabaseServerClient() {
-  const { url, publishableKey } = supabaseEnv();
+  // Lire les cookies EN PREMIER : c'est ce qui indique à Next.js que la page dépend de l'utilisateur
+  // (rendu à chaque requête, jamais pré-généré au build, où les variables Supabase n'existent pas).
   const cookieStore = await cookies();
+  const { url, publishableKey } = supabaseEnv();
 
   return createServerClient<Database>(url, publishableKey, {
     cookies: {

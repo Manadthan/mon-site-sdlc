@@ -6,10 +6,10 @@ export const UTILISATEUR_TEST = {
   password: "Mot-de-passe-e2e-42",
 } as const;
 
-export async function seConnecter(page: Page) {
+export async function seConnecter(page: Page, identifiants: { email: string; password: string } = UTILISATEUR_TEST) {
   await page.goto("/login");
-  await page.getByLabel("E-mail").fill(UTILISATEUR_TEST.email);
-  await page.getByLabel("Mot de passe").fill(UTILISATEUR_TEST.password);
+  await page.getByLabel("E-mail").fill(identifiants.email);
+  await page.getByLabel("Mot de passe").fill(identifiants.password);
   await page.getByRole("button", { name: "Se connecter" }).click();
   await expect(page).toHaveURL("/");
 }
