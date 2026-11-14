@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createCollection, type CreateCollectionState } from "@/app/actions/collections";
 import { analyserPage, importerCollection, type AnalyseState, type ImportState } from "@/app/actions/import";
+import { ImportProgress } from "@/components/ImportProgress";
 import { ScrapePreview } from "@/components/ScrapePreview";
 import { NOM_MAX } from "@/lib/collections/name";
 
@@ -12,7 +13,8 @@ const CHAMP =
 // Création d'une collection (US-03) — maquettes n° 4 (aperçu) et n° 11 (page inaccessible).
 // 1. On colle l'adresse d'une page, « Analyser » montre un aperçu (rien n'est enregistré).
 // 2. Le nom est pré-rempli avec le titre de la page ; un tap sur une vignette l'exclut.
-// 3. « Importer » crée la collection et ses items. Sans adresse, ou si la page échoue : collection vide.
+// 3. « Importer » crée la collection et ses items, puis copie leurs images par lots (maquette n° 10).
+// Sans adresse, ou si la page échoue : collection vide.
 export function NewCollectionForm() {
   const [nom, setNom] = useState("");
   const [exclus, setExclus] = useState<ReadonlySet<number>>(new Set());
@@ -34,6 +36,10 @@ export function NewCollectionForm() {
   const retenus = apercu?.candidates.filter((_, i) => !exclus.has(i)) ?? [];
   const erreurNom = importe.error ?? vide.error;
   const occupe = analyseEnCours || videEnCours || importEnCours;
+
+  if (importe.collectionId && importe.itemIds) {
+    return <ImportProgress collectionId={importe.collectionId} nom={nom.trim()} itemIds={importe.itemIds} />;
+  }
 
   const basculer = (index: number) =>
     setExclus((avant) => {

@@ -4,6 +4,10 @@ import { NewCollectionForm } from "@/components/NewCollectionForm";
 
 export const metadata: Metadata = { title: "Nouvelle collection · Suivi de collections" };
 
+// Les actions serveur de cette page (analyse, copie d'un lot de 10 images) peuvent attendre des sites lents :
+// jusqu'à 60 s par appel au lieu de la limite par défaut (ADR-03).
+export const maxDuration = 60;
+
 // Création d'une collection (US-03) : depuis l'adresse d'une page (aperçu puis import), ou vide.
 export default function NewCollectionPage() {
   return (

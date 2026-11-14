@@ -114,7 +114,7 @@ mon-site-sdlc/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
-│   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection ; importImages par lots (6)
+│   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, importerImages (lot de 10)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
 │   │   ├── CollectionCard.tsx         ✅   US-02
@@ -131,7 +131,7 @@ mon-site-sdlc/
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché
-│   │   └── ImportProgress.tsx         6
+│   │   └── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
@@ -143,6 +143,7 @@ mon-site-sdlc/
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
 │   │   ├── collections/sort.ts        ✅   tri, cookie, sens par défaut (+ sort.test.ts)
 │   │   ├── collections/import.ts      ✅   vérification des éléments importés (+ import.test.ts)
+│   │   ├── collections/lots.ts        ✅   lots de 10, exécution limitée en parallèle (+ lots.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -152,6 +153,7 @@ mon-site-sdlc/
 │   │   ├── images/thumbnail.ts        ✅   sharp → WebP 400 px (+ thumbnail.test.ts)
 │   │   ├── images/resize.ts           ✅   réduction de la photo dans le navigateur (+ resize.test.ts)
 │   │   ├── images/download.ts         ✅   téléchargement d'une image par URL (SSRF)
+│   │   ├── images/enregistrer.ts      ✅   vignette → Storage → lien avec l'item (ajout et import)
 │   │   └── scraper/
 │   │       ├── index.ts               ✅   scrapePreview(url)
 │   │       ├── fetchPage.ts           ✅   délai, taille max, encodage, HTTP accepté
@@ -214,7 +216,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
   - [x] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
-  - [ ] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
+  - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [ ] Étape 7 — Recherche et filtres : US-09 (#36)
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
@@ -225,5 +227,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 6 (#35) en plusieurs PR : 1. protection SSRF + image par URL ✅ ; 2. extracteur ✅ ; 3. écran d'aperçu + création de la collection ✅ ; 4. import des images par lots. Puis étape 7. Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étape 6 terminée (#35). Ensuite étape 7 : recherche et filtres (US-09, #36). Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
