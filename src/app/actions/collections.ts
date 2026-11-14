@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { validateCollectionName } from "@/lib/collections/name";
 import { nextSort, parseSort, serializeSort, SORT_COOKIE, SORT_KEYS, type SortKey } from "@/lib/collections/sort";
@@ -54,12 +54,15 @@ export async function changeSort(formData: FormData) {
 
   const cookieStore = await cookies();
   const actuel = parseSort(cookieStore.get(SORT_COOKIE)?.value);
+  // « Secure » seulement en HTTPS (Vercel l'indique dans x-forwarded-proto) : Safari/WebKit refuse
+  // un cookie Secure sur http://localhost, où tournent les tests.
+  const enHttps = (await headers()).get("x-forwarded-proto") === "https";
   cookieStore.set(SORT_COOKIE, serializeSort(nextSort(actuel, choisi as SortKey)), {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: enHttps,
   });
   revalidatePath("/");
 }
