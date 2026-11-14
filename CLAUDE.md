@@ -123,8 +123,9 @@ mon-site-sdlc/
 │   ├── lib/
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
-│   │   │   ├── server.ts              2
-│   │   │   └── client.ts              2
+│   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
+│   │   │   ├── server.ts              ✅
+│   │   │   └── client.ts              ✅
 │   │   ├── images.ts                  6   téléchargement + sharp → WebP
 │   │   └── scraper/
 │   │       ├── index.ts               6   scrapePreview(url)
@@ -182,5 +183,6 @@ npm run e2e        # Playwright
 1. ~~Valider DESIGN.md et les maquettes~~ (fait, #6).
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
-4. Créer le projet Supabase (région UE) et renseigner les variables sur Vercel.
+4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
+   Étape 2 : issues #13 (Supabase), #14 (schéma), #15 (migrations auto), #16 (US-01).
 5. Enchaîner les étapes 2 à 7 de DESIGN.md §10, une issue à la fois.
