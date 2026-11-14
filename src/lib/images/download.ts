@@ -32,6 +32,7 @@ const MESSAGES: Record<RaisonEchec, string> = {
   http: "L’image n’a pas pu être récupérée à cette adresse.",
   "trop-de-redirections": "L’image n’a pas pu être récupérée à cette adresse.",
   reseau: "L’image n’a pas pu être récupérée à cette adresse.",
+  "aucun-element": "L’image n’a pas pu être récupérée à cette adresse.",
 };
 
 /** Message à afficher à l'utilisateur pour un échec de téléchargement. */

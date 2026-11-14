@@ -60,7 +60,8 @@ export type RaisonEchec =
   | "type"
   | "http"
   | "trop-de-redirections"
-  | "reseau";
+  | "reseau"
+  | "aucun-element";
 
 export class ErreurRecuperation extends Error {
   constructor(readonly raison: RaisonEchec) {
@@ -107,7 +108,8 @@ export function creerLookup(interdite: Filtre = adresseInterdite, resoudre: Reso
   };
 }
 
-export type Reponse = { url: URL; type: string; corps: Buffer };
+/** type : le type seul (« text/html ») ; contentType : l'en-tête complet, avec l'éventuel charset. */
+export type Reponse = { url: URL; type: string; contentType: string; corps: Buffer };
 
 export type OptionsRecuperation = {
   /** Délai total, redirections comprises (10 s par défaut, DESIGN.md §6). */
@@ -169,7 +171,8 @@ function unAppel(
         }
         if (statut < 200 || statut >= 300) return echec("http");
 
-        const type = (reponse.headers["content-type"] ?? "").split(";")[0]!.trim().toLowerCase();
+        const contentType = reponse.headers["content-type"] ?? "";
+        const type = contentType.split(";")[0]!.trim().toLowerCase();
         if (options.typeAccepte && !options.typeAccepte(type)) return echec("type");
         if (Number(reponse.headers["content-length"] ?? 0) > options.tailleMax) return echec("trop-gros");
 
@@ -180,7 +183,7 @@ function unAppel(
           if (taille > options.tailleMax) return echec("trop-gros");
           morceaux.push(morceau);
         });
-        reponse.on("end", () => resolve({ url, type, corps: Buffer.concat(morceaux) }));
+        reponse.on("end", () => resolve({ url, type, contentType, corps: Buffer.concat(morceaux) }));
         reponse.on("error", () => reject(new ErreurRecuperation(signal.aborted ? "delai" : "reseau")));
       },
     );
