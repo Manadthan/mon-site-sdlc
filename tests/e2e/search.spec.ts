@@ -49,3 +49,39 @@ test("rechercher sur l'intitulé et filtrer Tous / Possédés / Manquants", asyn
   await expect(page.getByRole("searchbox")).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Items" }).getByRole("listitem")).toHaveCount(12);
 });
+
+// US-14 — Nombre d'items par ligne : zoomer / dézoomer, choix mémorisé.
+test("changer le nombre d'items par ligne", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("grille", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes", 8, 1);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  const vignettes = page.getByRole("list", { name: "Items" }).getByRole("listitem");
+  const parLigne = async () => {
+    const tops = await vignettes.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+    return tops.filter((top) => top === tops[0]).length;
+  };
+  const plus = page.getByRole("button", { name: "Plus d’items par ligne" });
+  const moins = page.getByRole("button", { name: "Moins d’items par ligne" });
+
+  await expect.poll(parLigne).toBe(2);
+  await expect(moins).toBeDisabled();
+  await plus.click();
+  await expect.poll(parLigne).toBe(3);
+  await plus.click();
+  await expect.poll(parLigne).toBe(4);
+  await expect(plus).toBeDisabled();
+
+  // À 4 par ligne, l'intitulé n'est plus affiché mais reste lu (accessibilité) ; la coche reste visible.
+  await expect(page.getByRole("button", { name: /Item 1/ }).getByTestId("coche-possede")).toBeVisible();
+  await expect(page.getByRole("list", { name: "Items" }).getByTestId("intitule")).toHaveCount(8);
+
+  // Mémorisé : rechargement et autre page de collection.
+  await page.reload();
+  await expect.poll(parLigne).toBe(4);
+
+  // Le mode édition garde 2 par ligne.
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await expect.poll(parLigne).toBe(2);
+});
