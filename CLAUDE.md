@@ -132,7 +132,8 @@ mon-site-sdlc/
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché
-│   │   └── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
+│   │   ├── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
+│   │   └── CopieImagesManquantes.tsx  ✅   reprise d'un import interrompu, en mode édition (#51)
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
@@ -179,7 +180,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10
+        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51)
         └── search.spec.ts             ✅   US-09
 ```
 
@@ -231,5 +232,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étapes 1 à 7 terminées. Suite possible : exigences « S » de SPEC.md §4 (export des données), reprise d'un import interrompu, fixture dbzcollection.fr. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étapes 1 à 7 terminées. Suite possible : exigences « S » de SPEC.md §4 (export des données), fixture dbzcollection.fr. Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).

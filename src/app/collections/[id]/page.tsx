@@ -8,6 +8,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
 
+// La copie des images manquantes (lot de 10) peut attendre des sites lents : 60 s par appel (ADR-03).
+export const maxDuration = 60;
+
 // cache : une seule requête par affichage, partagée entre le titre de l'onglet et la page.
 const chargerCollection = cache(async (id: string) => {
   if (!isUuid(id)) return null;
@@ -29,11 +32,17 @@ export default async function CollectionPage({ params }: Props) {
   if (!collection) notFound();
 
   const supabase = await createSupabaseServerClient();
-  const { data: items, error } = await supabase
-    .from("items")
-    .select("id, title, image_path, owned")
-    .eq("collection_id", id)
-    .order("position");
+  const [{ data: items, error }, { data: sansImage }] = await Promise.all([
+    supabase.from("items").select("id, title, image_path, owned").eq("collection_id", id).order("position"),
+    // Items importés dont l'image reste à copier (import interrompu ou échoué, issue #51).
+    supabase
+      .from("items")
+      .select("id")
+      .eq("collection_id", id)
+      .not("source_image", "is", null)
+      .is("image_path", null)
+      .order("position"),
+  ]);
   if (error) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-3 px-8 text-center">
@@ -48,5 +57,12 @@ export default async function CollectionPage({ params }: Props) {
     );
   }
 
-  return <CollectionBoard collectionId={collection.id} name={collection.name} items={items} />;
+  return (
+    <CollectionBoard
+      collectionId={collection.id}
+      name={collection.name}
+      items={items}
+      imagesACopier={(sansImage ?? []).map((item) => item.id)}
+    />
+  );
 }

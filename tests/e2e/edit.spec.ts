@@ -206,3 +206,29 @@ test("une adresse d'image interne est refusée et l'item n'est pas créé", asyn
   const { count } = await adminSupabase().from("items").select("id", { count: "exact", head: true }).eq("collection_id", id);
   expect(count).toBe(1);
 });
+
+// Issue #51 — Reprendre la copie des images d'un import interrompu (mode édition seulement).
+test("les images restées à copier sont signalées en mode édition et peuvent être recopiées", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("reprise", testInfo);
+  const id = await creerCollection(utilisateur.id, "Import interrompu", 3, 0);
+  // 2 items importés dont l'image n'a pas été copiée. Adresse interne : la copie échouera (protection SSRF),
+  // la CI ne dépendant d'aucun site extérieur.
+  const { error } = await adminSupabase()
+    .from("items")
+    .update({ source_image: "http://127.0.0.1:54321/image.png" })
+    .eq("collection_id", id)
+    .in("title", ["Item 1", "Item 3"]);
+  expect(error).toBeNull();
+
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  // Rien en mode cocher.
+  await expect(page.getByText(/images? à copier/)).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await expect(page.getByText("2 images à copier depuis le site d’origine.")).toBeVisible();
+  await page.getByRole("button", { name: "Copier les images" }).click();
+  await expect(page.getByText("2 images n’ont pas pu être copiées. Réessayez plus tard, ou ajoutez-les à la main.")).toBeVisible();
+  // On peut réessayer.
+  await expect(page.getByRole("button", { name: "Copier les images" })).toBeVisible();
+});
