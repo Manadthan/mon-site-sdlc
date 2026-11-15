@@ -226,6 +226,19 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
               <AddItemForm collectionId={collectionId} />
             </div>
           )}
+          {edition && (
+            // US-13 : ajouter les éléments d'une autre page, avec l'aperçu du scraper.
+            <Link
+              href={`/collections/${collectionId}/completer`}
+              className="flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[#b9bec7] px-2 text-center text-sm font-semibold text-action"
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
+                <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
+              </svg>
+              Compléter depuis une adresse
+            </Link>
+          )}
         </div>
         {!edition && affiches.length === 0 && (
           <p className="text-center text-sm text-texte-doux">Touchez « Modifier » pour ajouter des items.</p>

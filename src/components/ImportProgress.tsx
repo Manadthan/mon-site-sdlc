@@ -6,12 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import { importerImages } from "@/app/actions/import";
 import { enLots } from "@/lib/collections/lots";
 
-type Props = { collectionId: string; nom: string; itemIds: string[] };
+type Props = { collectionId: string; nom: string; itemIds: string[]; ajout?: boolean };
 
 // Import des images (US-03, maquette n° 10) : le navigateur envoie les items par lots de 10 (ADR-03),
 // pour rester sous la durée maximale d'une fonction serveur et afficher la progression.
 // À la fin, la collection s'ouvre ; s'il y a eu des échecs, on laisse le temps de lire l'avertissement.
-export function ImportProgress({ collectionId, nom, itemIds }: Props) {
+export function ImportProgress({ collectionId, nom, itemIds, ajout = false }: Props) {
   const router = useRouter();
   const lancement = useRef(false);
   const [traites, setTraites] = useState(0);
@@ -78,7 +78,7 @@ export function ImportProgress({ collectionId, nom, itemIds }: Props) {
       </div>
 
       <ul className="flex flex-col gap-2.5 text-sm">
-        <Etape etat="fait">Collection et {total} items enregistrés</Etape>
+        <Etape etat="fait">{ajout ? `${total} items ajoutés à la collection` : `Collection et ${total} items enregistrés`}</Etape>
         <Etape etat={fini ? "fait" : "en-cours"}>Copie des images{fini ? "" : "…"}</Etape>
         <Etape etat={fini ? (echecs ? "a-faire" : "en-cours") : "a-faire"}>Ouverture de la collection</Etape>
       </ul>

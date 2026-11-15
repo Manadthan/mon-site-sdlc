@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.2 — 15/11/2026 — statut : **validé**
+> Version 1.3 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.3 | 15/11/2026 | Ajout d'US-13 : compléter une collection depuis une URL |
 > | 1.2 | 15/11/2026 | Ajout d'US-12 : renommer une collection |
 > | 1.1 | 15/11/2026 | Ajout d'US-11 : importer une sauvegarde (complète l'export, §4) |
 > | 1.0 | 13/11/2026 | Questions ouvertes tranchées : doublons hors périmètre, réordonnancement par flèches (US-10), sections fusionnées |
@@ -111,6 +112,13 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 - [ ] En mode édition, un bouton à côté du nom de la collection ouvre un panneau « Renommer la collection ».
 - [ ] Le nom est obligatoire (200 caractères au plus) ; un nom invalide donne un message clair.
 - [ ] Le nouveau nom s'affiche aussitôt sur la page et sur l'accueil, et persiste après rechargement.
+
+### US-13 — Compléter une collection depuis une URL (S)
+*En tant que collectionneur, j'ajoute à une collection existante les éléments d'une autre page (suite d'une série, nouvelle page du site…).*
+- [ ] En mode édition, « Compléter depuis une adresse » ouvre le même aperçu que la création (US-03), sans changer le nom de la collection.
+- [ ] Les éléments déjà présents dans la collection (même image d'origine) sont signalés et présentés décochés.
+- [ ] Les éléments retenus sont ajoutés **en fin de collection**, dans l'ordre de la page ; leurs images sont copiées avec la même progression qu'à la création.
+- [ ] Page inaccessible ou sans élément : message clair, rien n'est ajouté.
 
 ## 4. Exigences non fonctionnelles
 
