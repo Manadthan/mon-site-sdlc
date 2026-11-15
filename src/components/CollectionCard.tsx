@@ -1,22 +1,19 @@
 import Link from "next/link";
 import { DeleteCollectionButton } from "@/components/DeleteCollectionButton";
+import { ItemImage } from "@/components/ItemImage";
 import { formatProgress } from "@/lib/progress";
 import type { CollectionCard as Carte } from "@/lib/collections/cards";
 
 // Carte d'une collection sur l'accueil (US-02), avec bouton de suppression (US-04) — maquette n° 1.
-// L'image de couverture arrivera avec l'import (étape 6) ; d'ici là, une vignette neutre.
+// Couverture : image du premier item qui en a une (issue #59), sinon une vignette neutre.
 // Toute la carte (sauf la corbeille) mène à la page de la collection (US-06).
 export function CollectionCard({ carte }: { carte: Carte }) {
-  const { id, name, progress } = carte;
+  const { id, name, coverPath, progress } = carte;
   return (
     <li className="flex items-center gap-3 rounded-[14px] border border-bordure bg-white py-2.5 pr-1.5 pl-2.5">
       <Link href={`/collections/${id}`} className="flex min-w-0 flex-1 items-center gap-3 text-texte">
-        <div className="flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]" aria-hidden="true">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="M21 15l-5-5L5 21" />
-          </svg>
+        <div className="relative flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]" aria-hidden="true">
+          <ItemImage chemin={coverPath} taille={24} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <h2 className="truncate text-base font-semibold">{name}</h2>
