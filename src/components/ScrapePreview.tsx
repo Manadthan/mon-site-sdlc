@@ -74,7 +74,7 @@ function Vignette({ src }: { src: string }) {
       decoding="async"
       referrerPolicy="no-referrer"
       onError={() => setEssai((n) => n + 1)}
-      className="absolute inset-0 size-full object-cover"
+      className="absolute inset-0 size-full object-contain"
     />
   );
 }

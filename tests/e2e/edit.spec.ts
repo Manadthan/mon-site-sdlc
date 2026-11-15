@@ -102,6 +102,8 @@ test("ajouter un item avec une photo, puis le supprimer avec son image", async (
   await expect(image).toHaveAttribute("src", new RegExp(`/storage/v1/object/public/items/${dossier}/[0-9a-f-]+\\.webp$`));
   await expect(image).toHaveJSProperty("complete", true);
   expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(400);
+  // L'image entière est visible dans la vignette, sans être recadrée (issue #57).
+  await expect(image).toHaveCSS("object-fit", "contain");
   const reponse = await request.get((await image.getAttribute("src"))!);
   expect(reponse.headers()["content-type"]).toBe("image/webp");
 

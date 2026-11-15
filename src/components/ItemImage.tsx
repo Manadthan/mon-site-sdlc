@@ -6,10 +6,11 @@ type Props = { chemin: string | null; taille?: number };
 export function ItemImage({ chemin, taille = 28 }: Props) {
   if (chemin) {
     return (
+      // object-contain : l'image entière reste visible, quelles que soient ses proportions (bandes grises si besoin).
       // Vignettes déjà optimisées (WebP 400 px, ADR-02) : <img> simple, chargée seulement à l'approche
       // de l'écran (loading="lazy") pour rester fluide avec 300+ items (US-06).
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={urlImage(chemin)} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full rounded-[inherit] object-cover" />
+      <img src={urlImage(chemin)} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full rounded-[inherit] object-contain" />
     );
   }
   return (
