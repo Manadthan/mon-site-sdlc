@@ -12,19 +12,21 @@ import { ItemTile, type Item } from "@/components/ItemTile";
 import { RenameCollectionSheet } from "@/components/RenameCollectionSheet";
 import { RenameItemSheet } from "@/components/RenameItemSheet";
 import { SearchField } from "@/components/SearchField";
+import { ZoomGrille } from "@/components/ZoomGrille";
+import { CLASSES_GRILLE, changerColonnes, COOKIE_GRILLE, type Colonnes } from "@/lib/items/grille";
 import { filtrerItems, type Filtre } from "@/lib/items/filter";
 import { moveInList, type Direction } from "@/lib/items/order";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
 
-type Props = { collectionId: string; name: string; items: Item[]; imagesACopier?: string[] };
+type Props = { collectionId: string; name: string; items: Item[]; imagesACopier?: string[]; colonnes?: Colonnes };
 type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre"; id: string; direction: Direction };
 
 // Page d'une collection côté navigateur — maquettes n° 2 (mode cocher : US-06, US-07)
 // et n° 3 (mode édition : US-08 — ajouter, renommer, supprimer).
 // Recherche et filtre (US-09) en mode cocher ; le mode édition montre toujours tous les items, dans l'ordre.
 // Les deux modes sont séparés pour éviter les suppressions accidentelles (US-08).
-export function CollectionBoard({ collectionId, name, items, imagesACopier = [] }: Props) {
+export function CollectionBoard({ collectionId, name, items, imagesACopier = [], colonnes: colonnesInitiales = 2 }: Props) {
   // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
   const [affiches, appliquer] = useOptimistic(items, (etat, changement: Changement) =>
@@ -42,6 +44,13 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
   const [edition, setEdition] = useState(false);
   const [filtre, setFiltre] = useState<Filtre>("tous");
   const [recherche, setRecherche] = useState("");
+  // US-14 : items par ligne, mémorisés dans un cookie (toutes collections, cet appareil).
+  const [colonnes, setColonnes] = useState<Colonnes>(colonnesInitiales);
+  function zoomer(sens: "plus" | "moins") {
+    const suivant = changerColonnes(colonnes, sens);
+    setColonnes(suivant);
+    document.cookie = `${COOKIE_GRILLE}=${suivant}; path=/; max-age=31536000; samesite=lax`;
+  }
   // Le compteur porte sur toute la collection ; seule la grille est filtrée.
   const visibles = edition ? affiches : filtrerItems(affiches, filtre, recherche);
   const filtrage = !edition && (filtre !== "tous" || recherche.trim() !== "");
@@ -183,7 +192,12 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
         )}
         {!edition && affiches.length > 0 && (
           <div className="mb-3 flex flex-col gap-2.5">
-            <SearchField valeur={recherche} onChange={setRecherche} />
+            <div className="flex gap-1.5">
+              <div className="min-w-0 flex-1">
+                <SearchField valeur={recherche} onChange={setRecherche} />
+              </div>
+              <ZoomGrille colonnes={colonnes} onChange={zoomer} />
+            </div>
             <FilterTabs valeur={filtre} onChange={setFiltre} />
           </div>
         )}
@@ -198,7 +212,8 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
         {affiches.length === 0 && (
           <p className="pt-6 pb-4 text-center text-[15px] text-texte-doux">Aucun item dans cette collection pour l’instant.</p>
         )}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {/* Le mode édition garde 2 items par ligne : ses boutons doivent rester utilisables (US-14). */}
+        <div className={`grid ${CLASSES_GRILLE[edition ? 2 : colonnes]}`}>
           {/* Mode édition : les actions d'ajout en tête de grille, avant les items (demande du propriétaire). */}
           {edition && (
             <div>
@@ -235,7 +250,7 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
                     onDelete={() => ouvrirSupprimer(item)}
                   />
                 ) : (
-                  <ItemTile key={item.id} item={item} onToggle={() => basculer(item)} />
+                  <ItemTile key={item.id} item={item} densite={colonnes} onToggle={() => basculer(item)} />
                 ),
               )}
             </ul>
