@@ -18,6 +18,12 @@ test("le mode édition est distinct du mode cocher", async ({ page }, testInfo) 
   await expect(page.getByText("Mode édition — un tap ne coche plus les items")).toBeVisible();
   await expect(page.getByRole("button", { name: "Ajouter un item" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Supprimer « Item 1 »" })).toBeVisible();
+  // Les actions d'ajout sont en tête de grille, avant le premier item.
+  const [ajout, premierItem] = await Promise.all([
+    page.getByRole("button", { name: "Ajouter un item" }).boundingBox(),
+    page.getByRole("button", { name: "Supprimer « Item 1 »" }).boundingBox(),
+  ]);
+  expect(ajout!.y).toBeLessThan(premierItem!.y);
   // Aucune vignette n'est cochable en mode édition.
   await expect(page.locator("[aria-pressed]")).toHaveCount(0);
 
