@@ -3,7 +3,7 @@
 > Dernière phase du SDLC : **rétrospective**. Ce qui a été livré, ce qui a bien marché, ce qui a coincé,
 > et ce qu'on en retient pour travailler avec Claude sur un prochain projet.
 >
-> Version 0.1 — 15/11/2026 — statut : **brouillon** (la partie « Ton point de vue » reste à compléter)
+> Version 1.0 — 15/11/2026 — statut : **validé**
 
 ## 1. En chiffres
 
@@ -65,8 +65,18 @@
 - Vérifier que la protection de `main` est bien appliquée (dépôt privé : règle active seulement avec GitHub Pro).
 - Si le projet grandit : suivi dans un outil comme Jira, en gardant une issue GitHub par PR.
 
-## 6. Ton point de vue (à compléter)
+## 6. Le point de vue du propriétaire
 
-- Qu'est-ce qui t'a le plus aidé pour apprendre à travailler avec Claude ?
-- Qu'est-ce qui t'a ralenti ou agacé (trop de questions, messages trop longs, attentes de CI…) ?
-- Que ferais-tu différemment sur ton prochain projet ?
+| Question | Réponse |
+|---|---|
+| Ce qui a le plus aidé | **Travailler selon le playbook SDLC** : besoins, conception, issues, PR, revue, déploiement, bilan. |
+| Ce qui a ralenti | **Depuis l'iPhone, copier des clés et des variables d'environnement** (Supabase, Vercel, GitHub Secrets) n'est pas pratique. |
+| À faire différemment | **Utiliser son PC à distance** pour les étapes de configuration. |
+
+### Ce qu'on en tire
+
+- Le cadre SDLC est à garder tel quel pour le prochain projet : SPEC → DESIGN → issues → petites PR → bilan.
+- Regrouper les **réglages de comptes** (création des projets, clés, variables, secrets) dans une session
+  dédiée, faite depuis un ordinateur. Claude Code peut s'y connecter à distance (*Remote Control*, depuis
+  l'app Claude sur le PC) : les copier-coller se font alors sur le PC, et l'iPhone sert au suivi et à la revue.
+- Garder l'iPhone pour ce qu'il fait bien : relire les PR, tester sur l'appareil réel, décider.
