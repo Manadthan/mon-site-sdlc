@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { CollectionCard } from "@/components/CollectionCard";
+import { ExportButton } from "@/components/ExportButton";
 import { SortBar } from "@/components/SortBar";
 import { toCollectionCards } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
@@ -72,6 +73,7 @@ export default async function Home() {
               <CollectionCard key={carte.id} carte={carte} />
             ))}
           </ul>
+          <ExportButton />
           {/* Bouton flottant, à portée de pouce (maquette n° 1). */}
           <Link
             href="/collections/new"

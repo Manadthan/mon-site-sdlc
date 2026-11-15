@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.5 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.6 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -32,7 +32,7 @@ Les critères d'acceptation de SPEC.md sont la **définition de « terminé »**
 - **Next.js** (App Router, TypeScript strict) — pages + server actions (dont l'analyse d'une page à scraper)
 - **Tailwind CSS** — mobile d'abord
 - **Supabase** — Postgres (RLS activée), Storage (images), Auth (e-mail + mot de passe, inscriptions désactivées)
-- **cheerio** (analyse HTML du scraper), **sharp** (vignettes WebP 400 px)
+- **cheerio** (analyse HTML du scraper), **sharp** (vignettes WebP 400 px), **fflate** (zip de la sauvegarde)
 - **Vitest** (unitaires), **Playwright** (e2e, viewport 375 × 812)
 - **Vercel** (hébergement, région Paris `cdg1`), **GitHub Actions** (CI)
 
@@ -115,9 +115,11 @@ mon-site-sdlc/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
+│   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
 │   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, importerImages (lot de 10)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
+│   │   ├── ExportButton.tsx           ✅   sauvegarde .zip (JSON + images) fabriquée dans le navigateur (#53)
 │   │   ├── CollectionCard.tsx         ✅   US-02
 │   │   ├── NewCollectionForm.tsx      ✅   US-03 : adresse, nom pré-rempli, aperçu, import ou collection vide
 │   │   ├── SortBar.tsx                ✅   US-05
@@ -147,6 +149,7 @@ mon-site-sdlc/
 │   │   ├── collections/sort.ts        ✅   tri, cookie, sens par défaut (+ sort.test.ts)
 │   │   ├── collections/import.ts      ✅   vérification des éléments importés (+ import.test.ts)
 │   │   ├── collections/lots.ts        ✅   lots de 10, exécution limitée en parallèle (+ lots.test.ts)
+│   │   ├── export.ts                  ✅   format de la sauvegarde donnees.json (+ export.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -181,7 +184,8 @@ mon-site-sdlc/
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
         ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51)
-        └── search.spec.ts             ✅   US-09
+        ├── search.spec.ts             ✅   US-09
+        └── export.spec.ts             ✅   sauvegarde (#53)
 ```
 
 ## Règles de travail (SDLC)
@@ -232,5 +236,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étapes 1 à 7 terminées. Suite possible : exigences « S » de SPEC.md §4 (export des données), fixture dbzcollection.fr. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étapes 1 à 7 terminées. Sauvegarde faite (#53). Suite possible : fixture dbzcollection.fr, bilan du projet. Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).

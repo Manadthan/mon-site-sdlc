@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.5 — 15/11/2026 — statut : **validé**
+> Version 1.6 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.6 | 15/11/2026 | §5 : sauvegarde (export .zip fabriqué dans le navigateur, issue #53) |
 > | 1.5 | 15/11/2026 | §6 : relais des images de l'aperçu par notre serveur (sites en HTTP, issue #49) |
 > | 1.4 | 15/11/2026 | §2, §5 : l'analyse d'une page est une server action (`analyserPage`), pas une route `/api/scrape` ; `importerCollection` crée la collection et ses items |
 > | 1.3 | 14/11/2026 | Image par URL d'US-08 déplacée à l'étape 6 (#35), avec la protection SSRF ; §6 : vérification de l'adresse à la connexion, plages réservées complétées |
@@ -104,6 +105,7 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `toggleOwned(itemId)` | Bascule `owned` |
 | `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin via la fonction SQL `move_item` (ADR-04) |
 | `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut). Ou bien l'**adresse d'une image**, téléchargée côté serveur avec la protection SSRF (§6) *avant* de créer l'item : une adresse refusée n'enregistre rien |
+| `preparerExport()` | Sauvegarde (SPEC §4) : renvoie `donnees.json` et l'adresse publique des images ; le **navigateur** télécharge les images et fabrique le .zip (`fflate`), car une réponse serveur Vercel est limitée en taille |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
