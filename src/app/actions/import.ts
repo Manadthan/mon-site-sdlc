@@ -75,6 +75,46 @@ export async function importerCollection(_previous: ImportState, formData: FormD
   return { collectionId: collection.id, itemIds: items.sort((a, b) => a.position - b.position).map((i) => i.id) };
 }
 
+/**
+ * Complète une collection existante (US-13) : ajoute les éléments retenus en fin de collection,
+ * dans l'ordre de la page. Les images sont copiées ensuite par lots, comme à la création.
+ */
+export async function completerCollection(collectionId: string, _previous: ImportState, formData: FormData): Promise<ImportState> {
+  if (!isUuid(collectionId)) return { error: "Collection introuvable." };
+  const selection = validerElements(formData.get("items"));
+  if (!selection.ok) return { error: selection.error };
+
+  const supabase = await createSupabaseServerClient();
+  // La RLS ne renvoie rien pour la collection d'un autre : même réponse qu'une collection inexistante.
+  const { data: collection } = await supabase.from("collections").select("id").eq("id", collectionId).maybeSingle();
+  if (!collection) return { error: "Collection introuvable." };
+  const { data: dernier } = await supabase
+    .from("items")
+    .select("position")
+    .eq("collection_id", collectionId)
+    .order("position", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const depart = (dernier?.position ?? 0) + 1;
+
+  const { data: items, error } = await supabase
+    .from("items")
+    .insert(
+      selection.elements.map((element, index) => ({
+        collection_id: collectionId,
+        title: element.title,
+        source_image: element.imageUrl,
+        position: depart + index,
+      })),
+    )
+    .select("id, position");
+  if (error) return { error: "Les éléments n’ont pas pu être ajoutés. Réessayez dans un instant." };
+
+  revalidatePath(`/collections/${collectionId}`);
+  revalidatePath("/");
+  return { collectionId, itemIds: items.sort((a, b) => a.position - b.position).map((i) => i.id) };
+}
+
 /** Téléchargements simultanés au plus, vers le site source. */
 const SIMULTANES = 4;
 

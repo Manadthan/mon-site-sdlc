@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.8 — 15/11/2026 — statut : **validé**
+> Version 1.9 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.9 | 15/11/2026 | §4, §5 : compléter une collection depuis une URL (US-13) |
 > | 1.8 | 15/11/2026 | §3 : couverture d'une collection calculée par `collection_stats` (migration 0005, issue #59) |
 > | 1.7 | 15/11/2026 | §5 : import d'une sauvegarde (US-11) |
 > | 1.6 | 15/11/2026 | §5 : sauvegarde (export .zip fabriqué dans le navigateur, issue #53) |
@@ -93,7 +94,8 @@ created_at   timestamptz            position      integer NOT NULL
 | `/login` | Connexion | US-01 |
 | `/` | Accueil : liste des collections, tri, bouton « + » | US-02, US-04, US-05 |
 | `/collections/new` | Création : URL → aperçu → import avec progression | US-03 |
-| `/collections/[id]` | Collection : grille de vignettes, mode cocher / mode édition | US-06 à US-10 |
+| `/collections/[id]` | Collection : grille de vignettes, mode cocher / mode édition | US-06 à US-10, US-12 |
+| `/collections/[id]/completer` | Compléter : URL → aperçu (doublons décochés) → ajout en fin de collection | US-13 |
 
 Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les états vides, confirmations, progression et erreurs.
 
@@ -104,6 +106,7 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `analyserPage(url)` | Appelle `scrapePreview(url)` : retourne `{ pageTitle, candidates: [{ imageUrl, title, decor }] }` — n'écrit rien ; réservé à l'utilisateur connecté |
 | `importerCollection(name, url, éléments retenus)` | Crée la collection et ses items dans l'ordre de la page (adresse de l'image dans `source_image`, sans image copiée encore) |
 | `createCollection(name)` | Crée une collection vide |
+| `completerCollection(id, éléments retenus)` | Ajoute les éléments en fin de collection (positions après la dernière) ; images copiées ensuite par `importerImages`. Doublons = même `source_image`, décochés dans l'aperçu |
 | `importImages(collectionId, itemIds[≤10])` | Télécharge, redimensionne, stocke un lot d'images |
 | `toggleOwned(itemId)` | Bascule `owned` |
 | `moveItem(itemId, 'up' \| 'down')` | Échange les positions avec le voisin via la fonction SQL `move_item` (ADR-04) |

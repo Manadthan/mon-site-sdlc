@@ -18,6 +18,12 @@ test("le mode édition est distinct du mode cocher", async ({ page }, testInfo) 
   await expect(page.getByText("Mode édition — un tap ne coche plus les items")).toBeVisible();
   await expect(page.getByRole("button", { name: "Ajouter un item" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Supprimer « Item 1 »" })).toBeVisible();
+  // Les actions d'ajout sont en tête de grille, avant le premier item.
+  const [ajout, premierItem] = await Promise.all([
+    page.getByRole("button", { name: "Ajouter un item" }).boundingBox(),
+    page.getByRole("button", { name: "Supprimer « Item 1 »" }).boundingBox(),
+  ]);
+  expect(ajout!.y).toBeLessThan(premierItem!.y);
   // Aucune vignette n'est cochable en mode édition.
   await expect(page.locator("[aria-pressed]")).toHaveCount(0);
 
@@ -266,4 +272,32 @@ test("renommer une collection", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cartes série 243");
   await page.goto("/");
   await expect(page.getByRole("list", { name: "Mes collections" })).toContainText("Cartes série 243");
+});
+
+// US-13 — Compléter une collection depuis une URL : accès depuis le mode édition, page inaccessible.
+// L'aperçu réussi n'est pas testé ici (pas de site extérieur en CI, protection SSRF) ; l'extracteur l'est sur fixtures.
+test("compléter une collection : accès en mode édition et page inaccessible", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("completer", testInfo);
+  const id = await creerCollection(utilisateur.id, "Film comics", 2, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  await expect(page.getByRole("link", { name: "Compléter depuis une adresse" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await page.getByRole("link", { name: "Compléter depuis une adresse" }).click();
+
+  await expect(page).toHaveURL(`/collections/${id}/completer`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compléter la collection");
+  await expect(page.getByRole("banner")).toContainText("Film comics");
+
+  await page.getByLabel("Adresse de la page à ajouter").fill("http://127.0.0.1:54321/");
+  await page.getByRole("button", { name: "Analyser" }).click();
+  const alerte = page.getByRole("main").getByRole("alert");
+  await expect(alerte).toContainText("Page inaccessible");
+  await expect(alerte).toContainText("Cette adresse n’est pas autorisée.");
+
+  // Rien n'a été ajouté ; la croix ramène à la collection.
+  await page.getByRole("link", { name: "Annuler et revenir" }).click();
+  await expect(page).toHaveURL(`/collections/${id}`);
+  await expect(page.getByRole("list", { name: "Items" }).getByTestId("intitule")).toHaveText(["Item 1", "Item 2"]);
 });

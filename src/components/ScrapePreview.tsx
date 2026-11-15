@@ -8,12 +8,14 @@ type Props = {
   candidats: Candidat[];
   exclus: ReadonlySet<number>;
   onBasculer: (index: number) => void;
+  /** Adresses d'images déjà présentes dans la collection (US-13) : signalées sur la vignette. */
+  dejaPresents?: ReadonlySet<string>;
 };
 
 // Aperçu du scraping (US-03, maquette n° 4) : grille de 3 vignettes, un tap exclut ou reprend l'élément.
 // Rien n'est copié avant l'import : les images viennent du site source, ou passent par notre serveur
 // (site en HTTP, refusé par Safari dans une page HTTPS ; site qui bloque l'affichage ailleurs).
-export function ScrapePreview({ candidats, exclus, onBasculer }: Props) {
+export function ScrapePreview({ candidats, exclus, onBasculer, dejaPresents }: Props) {
   return (
     <ul aria-label="Éléments trouvés" className="grid grid-cols-3 gap-2.5">
       {candidats.map((candidat, index) => {
@@ -28,6 +30,11 @@ export function ScrapePreview({ candidats, exclus, onBasculer }: Props) {
             >
               <span className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[10px] bg-[#e9ecf1] text-[#8a909a]">
                 <Vignette src={candidat.imageUrl} />
+                {dejaPresents?.has(candidat.imageUrl) && (
+                  <span className="absolute inset-x-1 bottom-1 rounded-md bg-white/90 px-1 py-0.5 text-center text-[10px] leading-tight font-semibold text-texte-doux">
+                    Déjà dans la collection
+                  </span>
+                )}
                 <span
                   aria-hidden="true"
                   className={`absolute top-1.5 left-1.5 flex size-[22px] items-center justify-center rounded-md border-2 text-white ${

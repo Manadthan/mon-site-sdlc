@@ -21,8 +21,8 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-12 + critères d'acceptation | v1.2 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.8 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-13 + critères d'acceptation | v1.3 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.9 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
@@ -114,14 +114,15 @@ mon-site-sdlc/
 │   │   ├── apercu-image/route.ts      ✅   relais des images de l'aperçu (HTTP, SSRF, connecté seulement — #49)
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création : adresse → aperçu → import, ou collection vide (US-03)
-│   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
+│   │   │   ├── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
+│   │   │   └── [id]/completer/page.tsx ✅  compléter depuis une URL (US-13)
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
 │   │       ├── collections.ts         ✅   createCollection, renameCollection (US-12), deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
 │   │       ├── sauvegarde.ts          ✅   import d'une sauvegarde : collection, items, images (US-11)
-│   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, importerImages (lot de 10)
+│   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, completerCollection (US-13), importerImages (lot de 10)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
 │   │   ├── ExportButton.tsx           ✅   sauvegarde .zip (JSON + images) fabriquée dans le navigateur (#53)
@@ -140,7 +141,8 @@ mon-site-sdlc/
 │   │   ├── RenameCollectionSheet.tsx  ✅   US-12, en mode édition
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
-│   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché
+│   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché, « déjà dans la collection »
+│   │   ├── CompleterCollectionForm.tsx ✅  aperçu + ajout en fin de collection (US-13)
 │   │   ├── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
 │   │   └── CopieImagesManquantes.tsx  ✅   reprise d'un import interrompu, en mode édition (#51)
 │   ├── lib/
@@ -191,7 +193,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51) ; US-12
+        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51) ; US-12 ; US-13
         ├── search.spec.ts             ✅   US-09
         ├── export.spec.ts             ✅   sauvegarde (#53)
         └── sauvegarde.spec.ts         ✅   import d'une sauvegarde (US-11)
