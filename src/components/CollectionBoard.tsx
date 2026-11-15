@@ -5,6 +5,7 @@ import { useOptimistic, useRef, useState, useTransition } from "react";
 import { deleteItem, moveItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { CopieImagesManquantes } from "@/components/CopieImagesManquantes";
 import { FilterTabs } from "@/components/FilterTabs";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
@@ -15,14 +16,14 @@ import { moveInList, type Direction } from "@/lib/items/order";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
 
-type Props = { collectionId: string; name: string; items: Item[] };
+type Props = { collectionId: string; name: string; items: Item[]; imagesACopier?: string[] };
 type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre"; id: string; direction: Direction };
 
 // Page d'une collection côté navigateur — maquettes n° 2 (mode cocher : US-06, US-07)
 // et n° 3 (mode édition : US-08 — ajouter, renommer, supprimer).
 // Recherche et filtre (US-09) en mode cocher ; le mode édition montre toujours tous les items, dans l'ordre.
 // Les deux modes sont séparés pour éviter les suppressions accidentelles (US-08).
-export function CollectionBoard({ collectionId, name, items }: Props) {
+export function CollectionBoard({ collectionId, name, items, imagesACopier = [] }: Props) {
   // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
   const [affiches, appliquer] = useOptimistic(items, (etat, changement: Changement) =>
@@ -158,6 +159,11 @@ export function CollectionBoard({ collectionId, name, items }: Props) {
       </header>
 
       <main className="flex-1 px-4 pt-3 pb-8">
+        {edition && (
+          <div className="mb-3 empty:hidden">
+            <CopieImagesManquantes collectionId={collectionId} itemIds={imagesACopier} />
+          </div>
+        )}
         {!edition && affiches.length > 0 && (
           <div className="mb-3 flex flex-col gap-2.5">
             <SearchField valeur={recherche} onChange={setRecherche} />
