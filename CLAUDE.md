@@ -122,10 +122,10 @@ mon-site-sdlc/
 │   │   ├── SortBar.tsx                ✅   US-05
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
-│   │   ├── CollectionBoard.tsx        ✅   modes cocher / édition, compteur, coche immédiate (US-06, 07, 08)
+│   │   ├── CollectionBoard.tsx        ✅   modes cocher / édition, compteur, coche immédiate, recherche et filtre (US-06 à 09)
 │   │   ├── ItemTile.tsx               ✅   vignette + coche verte (US-06, US-07)
-│   │   ├── FilterTabs.tsx             7
-│   │   ├── SearchField.tsx            7
+│   │   ├── FilterTabs.tsx             ✅   Tous / Possédés / Manquants (US-09)
+│   │   ├── SearchField.tsx            ✅   recherche sur l'intitulé (US-09)
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
@@ -138,6 +138,7 @@ mon-site-sdlc/
 │   │   ├── items/title.ts             ✅   validation de l'intitulé, position suivante (+ title.test.ts)
 │   │   ├── items/owned.ts             ✅   état possédé affiché, comptage (+ owned.test.ts)
 │   │   ├── items/order.ts             ✅   échange avec le voisin à l'affichage (+ order.test.ts)
+│   │   ├── items/filter.ts            ✅   filtre et recherche sans accents (+ filter.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -176,7 +177,8 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        └── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10
+        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10
+        └── search.spec.ts             ✅   US-09
 ```
 
 ## Règles de travail (SDLC)
@@ -217,7 +219,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 4 — Page collection : US-06 (#30), US-07 (#31), ajouter un item US-08 1/2 (#32)
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
-  - [ ] Étape 7 — Recherche et filtres : US-09 (#36)
+  - [x] Étape 7 — Recherche et filtres : US-09 (#36)
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
 
@@ -227,5 +229,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étape 6 terminée (#35). Ensuite étape 7 : recherche et filtres (US-09, #36). Fixture dbzcollection.fr à ajouter (site HTTP seulement, inaccessible depuis l'environnement de Claude). Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étapes 1 à 7 terminées. Suite possible : exigences « S » de SPEC.md §4 (export des données), reprise d'un import interrompu, fixture dbzcollection.fr. Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
