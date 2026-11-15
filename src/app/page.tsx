@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { CollectionCard } from "@/components/CollectionCard";
 import { ExportButton } from "@/components/ExportButton";
+import { ImportSauvegarde } from "@/components/ImportSauvegarde";
 import { SortBar } from "@/components/SortBar";
 import { toCollectionCards } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
@@ -64,6 +65,9 @@ export default async function Home() {
             </svg>
             Créer ma première collection
           </Link>
+          <div className="mt-4">
+            <ImportSauvegarde />
+          </div>
         </main>
       ) : (
         <main className="pb-28">
@@ -74,6 +78,7 @@ export default async function Home() {
             ))}
           </ul>
           <ExportButton />
+          <ImportSauvegarde />
           {/* Bouton flottant, à portée de pouce (maquette n° 1). */}
           <Link
             href="/collections/new"

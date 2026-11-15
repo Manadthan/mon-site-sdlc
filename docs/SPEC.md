@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.0 — 13/11/2026 — statut : **validé**
+> Version 1.1 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.1 | 15/11/2026 | Ajout d'US-11 : importer une sauvegarde (complète l'export, §4) |
 > | 1.0 | 13/11/2026 | Questions ouvertes tranchées : doublons hors périmètre, réordonnancement par flèches (US-10), sections fusionnées |
 
 ## 1. Contexte et objectif
@@ -96,6 +97,13 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 ### US-09 — Rechercher et filtrer dans une collection (S)
 - [ ] Champ de recherche sur l'intitulé.
 - [ ] Filtre « Tous / Possédés / Manquants ».
+
+### US-11 — Importer une sauvegarde (S)
+*En tant que collectionneur, je réimporte un fichier de sauvegarde (export, §4) pour retrouver mes collections.*
+- [ ] Depuis l'accueil, je choisis un fichier `.zip` produit par « Exporter mes données ».
+- [ ] Chaque collection du fichier est **ajoutée** avec ses items (ordre, intitulés, coches) et ses images ; rien d'existant n'est modifié ni supprimé.
+- [ ] Si une collection porte déjà le même nom, la copie est nommée « Nom (importée) ».
+- [ ] Une progression s'affiche ; un fichier qui n'est pas une sauvegarde valide donne un message clair et n'ajoute rien.
 
 ## 4. Exigences non fonctionnelles
 
