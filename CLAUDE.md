@@ -21,7 +21,7 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-11 + critères d'acceptation | v1.1 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-12 + critères d'acceptation | v1.2 validée |
 | `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.8 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
@@ -117,7 +117,7 @@ mon-site-sdlc/
 │   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
-│   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
+│   │       ├── collections.ts         ✅   createCollection, renameCollection (US-12), deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
 │   │       ├── sauvegarde.ts          ✅   import d'une sauvegarde : collection, items, images (US-11)
@@ -137,6 +137,7 @@ mon-site-sdlc/
 │   │   ├── SearchField.tsx            ✅   recherche sur l'intitulé (US-09)
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
+│   │   ├── RenameCollectionSheet.tsx  ✅   US-12, en mode édition
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché
@@ -190,7 +191,7 @@ mon-site-sdlc/
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
-        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51)
+        ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51) ; US-12
         ├── search.spec.ts             ✅   US-09
         ├── export.spec.ts             ✅   sauvegarde (#53)
         └── sauvegarde.spec.ts         ✅   import d'une sauvegarde (US-11)
