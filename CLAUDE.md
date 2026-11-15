@@ -21,8 +21,8 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.6 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-11 + critères d'acceptation | v1.1 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.7 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -116,10 +116,12 @@ mon-site-sdlc/
 │   │       ├── collections.ts         ✅   createCollection, deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
+│   │       ├── sauvegarde.ts          ✅   import d'une sauvegarde : collection, items, images (US-11)
 │   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, importerImages (lot de 10)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
 │   │   ├── ExportButton.tsx           ✅   sauvegarde .zip (JSON + images) fabriquée dans le navigateur (#53)
+│   │   ├── ImportSauvegarde.tsx       ✅   import d'une sauvegarde, collections ajoutées (US-11)
 │   │   ├── CollectionCard.tsx         ✅   US-02
 │   │   ├── NewCollectionForm.tsx      ✅   US-03 : adresse, nom pré-rempli, aperçu, import ou collection vide
 │   │   ├── SortBar.tsx                ✅   US-05
@@ -150,6 +152,7 @@ mon-site-sdlc/
 │   │   ├── collections/import.ts      ✅   vérification des éléments importés (+ import.test.ts)
 │   │   ├── collections/lots.ts        ✅   lots de 10, exécution limitée en parallèle (+ lots.test.ts)
 │   │   ├── export.ts                  ✅   format de la sauvegarde donnees.json (+ export.test.ts)
+│   │   ├── sauvegarde.ts              ✅   lecture vérifiée d'une sauvegarde, nom sans doublon (+ sauvegarde.test.ts)
 │   │   ├── progress.ts                ✅   possédés / total / % (+ progress.test.ts)
 │   │   ├── supabase/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
@@ -185,7 +188,8 @@ mon-site-sdlc/
         ├── owned.spec.ts              ✅   US-07
         ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51)
         ├── search.spec.ts             ✅   US-09
-        └── export.spec.ts             ✅   sauvegarde (#53)
+        ├── export.spec.ts             ✅   sauvegarde (#53)
+        └── sauvegarde.spec.ts         ✅   import d'une sauvegarde (US-11)
 ```
 
 ## Règles de travail (SDLC)
@@ -227,6 +231,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
+  - [ ] Hors plan : sauvegarde (#53), import d'une sauvegarde US-11 (#55)
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
 
