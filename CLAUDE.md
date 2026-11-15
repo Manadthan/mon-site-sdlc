@@ -24,6 +24,7 @@ sur son ordinateur.
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-11 + critères d'acceptation | v1.1 validée |
 | `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.8 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
+| `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
 
@@ -86,6 +87,7 @@ mon-site-sdlc/
 ├── docs/
 │   ├── SPEC.md                        ✅
 │   ├── DESIGN.md                      ✅
+│   ├── BILAN.md                       ✅   rétrospective du projet
 │   └── MAQUETTES.md                   ✅
 ├── public/
 │   ├── manifest.webmanifest           ✅   installation sur l'écran d'accueil iPhone
@@ -225,7 +227,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
 - [x] Phase 1 — Besoins : `docs/SPEC.md` v1.0 validée
 - [x] Phase 2 — Conception : `docs/DESIGN.md` v1.0 + maquettes v1.0 validées
 - [x] Phase 3 — Issues GitHub pour l'étape 1 du plan (#1 à #5)
-- [ ] Phase 4+ — Développement par étapes, revue, tests, déploiement
+- [x] Phase 4+ — Développement par étapes, revue, tests, déploiement
   - [x] Étape 1 — Socle (#1 à #5)
   - [x] Étape 2 — Supabase, schéma, migrations auto, connexion US-01 (#13 à #16)
   - [x] Étape 3 — Accueil : US-02 (#21), US-04 (#22), US-05 (#23), collection vide US-03 1/2 (#24)
@@ -233,7 +235,8 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
-  - [ ] Hors plan : sauvegarde (#53), import d'une sauvegarde US-11 (#55)
+  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59)
+- [x] Phase finale — Bilan : `docs/BILAN.md` v1.0
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
 
@@ -243,5 +246,5 @@ Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une is
 2. Labels : `chore`, `docs`, `bug` créés ; `us` sera créé avec la première user story. **Protéger `main`** (réglage GitHub à faire par le propriétaire).
 3. ~~Développer l'**étape 1 — Socle**~~ : issues #1 à #5 (fait).
 4. ~~Créer le projet Supabase (région Paris) et renseigner les variables sur Vercel~~ (fait).
-5. Étapes 1 à 7 terminées. Sauvegarde faite (#53). Suite possible : fixture dbzcollection.fr, bilan du projet. Toute nouvelle issue est rattachée au milestone de son étape.
+5. Étapes 1 à 7 terminées, plus les évolutions hors plan. Bilan fait (`docs/BILAN.md`). Suite possible : fixture dbzcollection.fr, pistes du bilan §5. Toute nouvelle issue est rattachée au milestone de son étape.
 6. ~~Supprimer les images avec la collection (US-04)~~ : fait avec le bucket (#33).
