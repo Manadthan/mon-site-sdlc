@@ -193,3 +193,17 @@ test("une page inaccessible affiche un message et permet de créer une collectio
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("list", { name: "Mes collections" })).toContainText("Cartes série 12");
 });
+
+// Issue #49 — Relais des images de l'aperçu : réservé à l'utilisateur connecté, protection SSRF conservée.
+test("le relais d'images de l'aperçu est protégé", async ({ page, request }, testInfo) => {
+  // Sans session : renvoyé vers la connexion.
+  const anonyme = await request.get("/apercu-image?url=https%3A%2F%2Fexample.com%2Fa.png", { maxRedirects: 0 });
+  expect(anonyme.status()).toBe(307);
+  expect(anonyme.headers()["location"]).toContain("/login");
+
+  // Connecté : une adresse interne est refusée.
+  const utilisateur = await nouvelUtilisateur("relais", testInfo);
+  await seConnecter(page, utilisateur);
+  const interne = await page.request.get("/apercu-image?url=http%3A%2F%2F127.0.0.1%3A54321%2F");
+  expect(interne.status()).toBe(404);
+});
