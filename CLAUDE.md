@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-10 + critères d'acceptation | v1.0 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.4 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.5 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -107,6 +107,7 @@ mon-site-sdlc/
 │   │   ├── globals.css                ✅
 │   │   ├── page.tsx                   ✅   accueil : liste (US-02), suppression (US-04), tri (US-05)
 │   │   ├── login/page.tsx             ✅   US-01
+│   │   ├── apercu-image/route.ts      ✅   relais des images de l'aperçu (HTTP, SSRF, connecté seulement — #49)
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création : adresse → aperçu → import, ou collection vide (US-03)
 │   │   │   └── [id]/page.tsx          ✅   chargement ; affichage dans CollectionBoard
@@ -160,6 +161,7 @@ mon-site-sdlc/
 │   │       ├── fetchPage.ts           ✅   délai, taille max, encodage, HTTP accepté
 │   │       ├── ssrf.ts                ✅   blocage des adresses privées, redirections, délai, taille
 │   │       ├── extract.ts             ✅   <img> + recherche d'intitulé
+│   │       ├── apercu.ts              ✅   adresses à essayer pour une image de l'aperçu (+ apercu.test.ts)
 │   │       ├── messages.ts            ✅   messages d'échec de l'analyse (+ messages.test.ts)
 │   │       ├── filters.ts             ✅   doublons retirés ; décor (logos, bannières, hors dossier principal) décoché
 │   │       └── __tests__/

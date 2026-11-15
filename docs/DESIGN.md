@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.4 — 15/11/2026 — statut : **validé**
+> Version 1.5 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.5 | 15/11/2026 | §6 : relais des images de l'aperçu par notre serveur (sites en HTTP, issue #49) |
 > | 1.4 | 15/11/2026 | §2, §5 : l'analyse d'une page est une server action (`analyserPage`), pas une route `/api/scrape` ; `importerCollection` crée la collection et ses items |
 > | 1.3 | 14/11/2026 | Image par URL d'US-08 déplacée à l'étape 6 (#35), avec la protection SSRF ; §6 : vérification de l'adresse à la connexion, plages réservées complétées |
 > | 1.2 | 14/11/2026 | Plan §10 : ajout d'un item (intitulé seul) avancé à l'étape 4 (issue #32) ; étapes suivies par des milestones GitHub |
@@ -123,6 +124,7 @@ Le serveur va chercher des URL saisies par l'utilisateur : c'est une porte d'ent
 - refus des adresses privées / locales après résolution DNS : `localhost`, `0.0.0.0`, `127.*`, `10.*`, `172.16.*` à `172.31.*`, `192.168.*`, `169.254.*`, `100.64.*` à `100.127.*`, et en IPv6 `::1`, `fc00::/7`, `fe80::/10`, adresses IPv4 encapsulées (`::ffff:…`) ; aussi multicast et plages réservées, NAT64 et 6to4 (`src/lib/scraper/ssrf.ts`) ;
 - l'adresse est vérifiée **au moment de la connexion** (et non dans une étape séparée) : un domaine qui changerait d'adresse entre-temps (« DNS rebinding ») est bloqué ;
 - la vérification est refaite **à chaque redirection** (on suit les redirections nous-mêmes, pas automatiquement) ;
+- **Aperçu** : une image en HTTP est refusée par Safari dans une page HTTPS ; elle passe par la route `/apercu-image` (même protection, vignette WebP, rien d'enregistré, utilisateur connecté seulement). Une image HTTPS est affichée depuis le site source, la route servant de second essai.
 - 5 redirections max ; délai total 10 s ; seules les réponses `image/*` (hors SVG, 10 Mo max) sont acceptées lors de la copie des images.
 
 ## 7. Stratégie de test

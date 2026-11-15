@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sourcesApercu } from "@/lib/scraper/apercu";
 import type { Candidat } from "@/lib/scraper/filters";
 
 type Props = {
@@ -10,7 +11,8 @@ type Props = {
 };
 
 // Aperçu du scraping (US-03, maquette n° 4) : grille de 3 vignettes, un tap exclut ou reprend l'élément.
-// Les images sont affichées depuis le site source, le temps de l'aperçu : elles ne sont copiées qu'à l'import.
+// Rien n'est copié avant l'import : les images viennent du site source, ou passent par notre serveur
+// (site en HTTP, refusé par Safari dans une page HTTPS ; site qui bloque l'affichage ailleurs).
 export function ScrapePreview({ candidats, exclus, onBasculer }: Props) {
   return (
     <ul aria-label="Éléments trouvés" className="grid grid-cols-3 gap-2.5">
@@ -48,10 +50,12 @@ export function ScrapePreview({ candidats, exclus, onBasculer }: Props) {
   );
 }
 
-/** Image du site source ; vignette neutre si elle ne s'affiche pas (site en HTTP, image protégée…). */
+/** Image de l'aperçu : chaque adresse de sourcesApercu à tour de rôle, puis une vignette neutre. */
 function Vignette({ src }: { src: string }) {
-  const [echec, setEchec] = useState(false);
-  if (echec) {
+  const sources = sourcesApercu(src);
+  const [essai, setEssai] = useState(0);
+  const adresse = sources[essai];
+  if (!adresse) {
     return (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -63,12 +67,13 @@ function Vignette({ src }: { src: string }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={src}
+      key={adresse}
+      src={adresse}
       alt=""
       loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
-      onError={() => setEchec(true)}
+      onError={() => setEssai((n) => n + 1)}
       className="absolute inset-0 size-full object-cover"
     />
   );
