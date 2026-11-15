@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.1 — 15/11/2026 — statut : **validé**
+> Version 1.2 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.2 | 15/11/2026 | Ajout d'US-12 : renommer une collection |
 > | 1.1 | 15/11/2026 | Ajout d'US-11 : importer une sauvegarde (complète l'export, §4) |
 > | 1.0 | 13/11/2026 | Questions ouvertes tranchées : doublons hors périmètre, réordonnancement par flèches (US-10), sections fusionnées |
 
@@ -104,6 +105,12 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 - [ ] Chaque collection du fichier est **ajoutée** avec ses items (ordre, intitulés, coches) et ses images ; rien d'existant n'est modifié ni supprimé.
 - [ ] Si une collection porte déjà le même nom, la copie est nommée « Nom (importée) ».
 - [ ] Une progression s'affiche ; un fichier qui n'est pas une sauvegarde valide donne un message clair et n'ajoute rien.
+
+### US-12 — Renommer une collection (S)
+*En tant que collectionneur, je corrige le nom d'une collection après sa création.*
+- [ ] En mode édition, un bouton à côté du nom de la collection ouvre un panneau « Renommer la collection ».
+- [ ] Le nom est obligatoire (200 caractères au plus) ; un nom invalide donne un message clair.
+- [ ] Le nouveau nom s'affiche aussitôt sur la page et sur l'accueil, et persiste après rechargement.
 
 ## 4. Exigences non fonctionnelles
 

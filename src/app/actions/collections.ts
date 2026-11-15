@@ -29,6 +29,26 @@ export async function createCollection(
   redirect("/");
 }
 
+export type RenameCollectionState = { error?: string; name?: string; ok?: number };
+
+/** Renomme une collection (US-12). L'identifiant arrive par un champ caché ; la RLS refuse la collection d'un autre. */
+export async function renameCollection(_previous: RenameCollectionState, formData: FormData): Promise<RenameCollectionState> {
+  const id = formData.get("collectionId");
+  const saisie = formData.get("name");
+  if (!isUuid(id)) return { error: "Collection introuvable." };
+  const resultat = validateCollectionName(saisie);
+  if (!resultat.ok) return { error: resultat.error, name: typeof saisie === "string" ? saisie : "" };
+
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.from("collections").update({ name: resultat.name }).eq("id", id).select("id");
+  if (error || data.length === 0) {
+    return { error: "Le nom n’a pas pu être modifié. Réessayez dans un instant.", name: resultat.name };
+  }
+  revalidatePath(`/collections/${id}`);
+  revalidatePath("/");
+  return { ok: Date.now() };
+}
+
 /**
  * Supprime une collection (US-04). Ses items partent avec elle (ON DELETE CASCADE).
  * La RLS empêche de supprimer la collection d'un autre : 0 ligne supprimée = refus.

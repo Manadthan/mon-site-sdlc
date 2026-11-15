@@ -234,3 +234,36 @@ test("les images restées à copier sont signalées en mode édition et peuvent 
   // On peut réessayer.
   await expect(page.getByRole("button", { name: "Copier les images" })).toBeVisible();
 });
+
+// US-12 — Renommer une collection (mode édition seulement).
+test("renommer une collection", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("renommer-collection", testInfo);
+  const id = await creerCollection(utilisateur.id, "Cartes", 1, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+
+  // Pas de bouton en mode cocher.
+  await expect(page.getByRole("button", { name: "Renommer la collection" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await page.getByRole("button", { name: "Renommer la collection" }).click();
+
+  const panneau = page.getByRole("dialog", { name: "Renommer la collection" });
+  const champ = panneau.getByLabel("Nom de la collection");
+  await expect(champ).toHaveValue("Cartes");
+
+  // Nom obligatoire.
+  await champ.fill("  ");
+  await panneau.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(panneau.getByRole("alert")).toHaveText("Donnez un nom à la collection.");
+
+  await panneau.getByLabel("Nom de la collection").fill("Cartes série 243");
+  await panneau.getByRole("button", { name: "Enregistrer" }).click();
+  await expect(panneau).toBeHidden();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cartes série 243");
+
+  // Persiste et apparaît sur l'accueil.
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Cartes série 243");
+  await page.goto("/");
+  await expect(page.getByRole("list", { name: "Mes collections" })).toContainText("Cartes série 243");
+});

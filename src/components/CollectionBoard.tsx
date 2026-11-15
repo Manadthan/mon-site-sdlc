@@ -9,6 +9,7 @@ import { CopieImagesManquantes } from "@/components/CopieImagesManquantes";
 import { FilterTabs } from "@/components/FilterTabs";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
+import { RenameCollectionSheet } from "@/components/RenameCollectionSheet";
 import { RenameItemSheet } from "@/components/RenameItemSheet";
 import { SearchField } from "@/components/SearchField";
 import { filtrerItems, type Filtre } from "@/lib/items/filter";
@@ -46,6 +47,7 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
   const filtrage = !edition && (filtre !== "tous" || recherche.trim() !== "");
   const [cible, setCible] = useState<Item>();
   const renommerRef = useRef<HTMLDialogElement>(null);
+  const renommerCollectionRef = useRef<HTMLDialogElement>(null);
   const supprimerRef = useRef<HTMLDialogElement>(null);
   const [suppressionEnCours, startSuppression] = useTransition();
   const [erreurSuppression, setErreurSuppression] = useState<string>();
@@ -125,7 +127,22 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
           )}
         </div>
         <div className="flex flex-col gap-2 px-3">
-          <h1 className="text-[22px] leading-tight font-bold tracking-tight break-words">{name}</h1>
+          <div className="flex items-start gap-1">
+            <h1 className="min-w-0 flex-1 text-[22px] leading-tight font-bold tracking-tight break-words">{name}</h1>
+            {edition && (
+              // US-12 : renommer la collection, seulement en mode édition.
+              <button
+                type="button"
+                aria-label="Renommer la collection"
+                onClick={() => renommerCollectionRef.current?.showModal()}
+                className="-mt-2 -mr-2 flex size-11 shrink-0 items-center justify-center text-texte-doux"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                </svg>
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-2.5">
             <p className="text-sm whitespace-nowrap text-texte-doux" aria-live="polite">
               <span className="sr-only">Possédés : </span>
@@ -216,6 +233,7 @@ export function CollectionBoard({ collectionId, name, items, imagesACopier = [] 
       </main>
 
       <RenameItemSheet dialogRef={renommerRef} item={cible} />
+      <RenameCollectionSheet dialogRef={renommerCollectionRef} collectionId={collectionId} name={name} />
       <ConfirmDialog
         dialogRef={supprimerRef}
         title={cible ? `Supprimer « ${cible.title} » ?` : ""}
