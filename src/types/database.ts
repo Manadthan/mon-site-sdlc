@@ -91,6 +91,7 @@ export type Database = {
       collection_stats: {
         Row: {
           collection_id: string;
+          cover_path: string | null;
           owned: number | null;
           percent: number | null;
           total: number | null;

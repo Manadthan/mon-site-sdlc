@@ -29,3 +29,21 @@ describe("toCollectionCards", () => {
     expect(toCollectionCards([], [])).toEqual([]);
   });
 });
+
+describe("toCollectionCards — couverture (issue #59)", () => {
+  it("prend la couverture calculée par la vue, sinon cover_path, sinon rien", () => {
+    const cartes = toCollectionCards(
+      [
+        { id: "a", name: "A", cover_path: null, created_at: "2026-11-13" },
+        { id: "b", name: "B", cover_path: "u/b/choisie.webp", created_at: "2026-11-13" },
+        { id: "c", name: "C", cover_path: null, created_at: "2026-11-13" },
+      ],
+      [
+        { collection_id: "a", owned: 0, total: 2, cover_path: "u/a/premier.webp" },
+        { collection_id: "b", owned: 0, total: 0, cover_path: null },
+        { collection_id: "c", owned: 0, total: 0, cover_path: null },
+      ],
+    );
+    expect(cartes.map((c) => c.coverPath)).toEqual(["u/a/premier.webp", "u/b/choisie.webp", null]);
+  });
+});

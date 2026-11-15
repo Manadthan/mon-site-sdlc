@@ -15,7 +15,7 @@ export default async function Home() {
   // La RLS ne renvoie que les collections de l'utilisateur connecté.
   const [collections, stats] = await Promise.all([
     supabase.from("collections").select("id, name, cover_path, created_at"),
-    supabase.from("collection_stats").select("collection_id, owned, total"),
+    supabase.from("collection_stats").select("collection_id, owned, total, cover_path"),
   ]);
   const erreur = collections.error ?? stats.error;
   const tri = parseSort((await cookies()).get(SORT_COOKIE)?.value);

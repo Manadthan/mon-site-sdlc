@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-11 + critères d'acceptation | v1.1 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.7 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.8 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 
 Les critères d'acceptation de SPEC.md sont la **définition de « terminé »** d'une fonctionnalité.
@@ -47,7 +47,7 @@ iPhone ──HTTPS──▶ Vercel / Next.js ──▶ Supabase (Auth, Postgres,
 Modèle de données :
 - `collections(id, user_id, name, source_url, cover_path, created_at)`
 - `items(id, collection_id, title, image_path, source_image, position, owned, created_at)`
-- vue `collection_stats` : possédés / total / % (calculés, jamais stockés)
+- vue `collection_stats` : possédés / total / % et couverture (calculés, jamais stockés)
 
 Décisions clés (détail dans DESIGN.md) :
 - **ADR-01** un seul utilisateur, compte créé à la main.
@@ -96,10 +96,12 @@ mon-site-sdlc/
 │   │   ├── 0001_schema.sql            ✅   tables + vue collection_stats
 │   │   ├── 0002_rls.sql               ✅   Row Level Security
 │   │   ├── 0003_images.sql            ✅   bucket public « items », écriture dans son dossier
-│   │   └── 0004_move_item.sql         ✅   fonction move_item (ADR-04)
+│   │   ├── 0004_move_item.sql         ✅   fonction move_item (ADR-04)
+│   │   └── 0005_collection_cover.sql  ✅   couverture calculée dans collection_stats (#59)
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   ├── tests/database/storage.test.sql ✅  tests pgTAP du stockage des images
 │   ├── tests/database/move_item.test.sql ✅ tests pgTAP de move_item
+│   ├── tests/database/collection_cover.test.sql ✅ tests pgTAP de la couverture
 ├── src/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/

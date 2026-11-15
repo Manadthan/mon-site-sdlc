@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { adminSupabase, creerCollection, nouvelUtilisateur } from "./supabase-admin";
 import { seConnecter } from "./utilisateur";
@@ -206,4 +207,24 @@ test("le relais d'images de l'aperçu est protégé", async ({ page, request }, 
   await seConnecter(page, utilisateur);
   const interne = await page.request.get("/apercu-image?url=http%3A%2F%2F127.0.0.1%3A54321%2F");
   expect(interne.status()).toBe(404);
+});
+
+// Issue #59 — La carte d'une collection montre l'image du premier item qui en a une.
+test("la carte d'une collection affiche une couverture", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("couverture", testInfo);
+  const id = await creerCollection(utilisateur.id, "Avec images", 3, 0);
+  await creerCollection(utilisateur.id, "Sans image", 1, 0);
+  const admin = adminSupabase();
+  const { data: item2 } = await admin.from("items").select("id").eq("collection_id", id).eq("title", "Item 2").single();
+  const chemin = `${utilisateur.id}/${id}/${item2!.id}.webp`;
+  await admin.storage.from("items").upload(chemin, readFileSync("tests/e2e/fixtures/photo.jpg"), { contentType: "image/webp" });
+  await admin.from("items").update({ image_path: chemin }).eq("id", item2!.id);
+
+  await seConnecter(page, utilisateur);
+  const cartes = page.getByRole("list", { name: "Mes collections" });
+  await expect(cartes.getByRole("listitem").filter({ hasText: "Avec images" }).locator("img")).toHaveAttribute(
+    "src",
+    new RegExp(`/storage/v1/object/public/items/${chemin}$`),
+  );
+  await expect(cartes.getByRole("listitem").filter({ hasText: "Sans image" }).locator("img")).toHaveCount(0);
 });

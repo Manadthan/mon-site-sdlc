@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.7 — 15/11/2026 — statut : **validé**
+> Version 1.8 — 15/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.8 | 15/11/2026 | §3 : couverture d'une collection calculée par `collection_stats` (migration 0005, issue #59) |
 > | 1.7 | 15/11/2026 | §5 : import d'une sauvegarde (US-11) |
 > | 1.6 | 15/11/2026 | §5 : sauvegarde (export .zip fabriqué dans le navigateur, issue #53) |
 > | 1.5 | 15/11/2026 | §6 : relais des images de l'aperçu par notre serveur (sites en HTTP, issue #49) |
@@ -77,6 +78,7 @@ created_at   timestamptz            position      integer NOT NULL
 ```
 
 - Le compteur « possédés / total » et le % sont **calculés** par une vue SQL `collection_stats` (pas stockés → jamais désynchronisés).
+- La **couverture** d'une collection (accueil) est aussi calculée par cette vue : `cover_path` si renseignée, sinon l'image du premier item (dans l'ordre) qui en a une.
 - Index : `items (collection_id, position)`.
 - **Row Level Security** activée :
   - `collections` : une ligne n'est visible et modifiable que si `user_id = auth.uid()` ;
