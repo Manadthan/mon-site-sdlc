@@ -133,7 +133,7 @@ mon-site-sdlc/
 │   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
 │   │   ├── CollectionBoard.tsx        ✅   modes cocher / édition, compteur, coche immédiate, recherche et filtre (US-06 à 09)
-│   │   ├── ItemTile.tsx               ✅   vignette + coche verte (US-06, US-07)
+│   │   ├── ItemTile.tsx               ✅   carte : image, intitulé, état ; coche et bordure vertes si possédé (US-06, US-07)
 │   │   ├── FilterTabs.tsx             ✅   Tous / Possédés / Manquants (US-09)
 │   │   ├── SearchField.tsx            ✅   recherche sur l'intitulé (US-09)
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
