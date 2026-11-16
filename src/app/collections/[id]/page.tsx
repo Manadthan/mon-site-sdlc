@@ -6,6 +6,7 @@ import { cache } from "react";
 import { CollectionBoard } from "@/components/CollectionBoard";
 import { isUuid } from "@/lib/ids";
 import { COOKIE_GRILLE, parseColonnes } from "@/lib/items/grille";
+import { COOKIE_TRI_ITEMS, parseTriItems } from "@/lib/items/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
@@ -66,6 +67,7 @@ export default async function CollectionPage({ params }: Props) {
       items={items}
       imagesACopier={(sansImage ?? []).map((item) => item.id)}
       colonnes={parseColonnes((await cookies()).get(COOKIE_GRILLE)?.value)}
+      tri={parseTriItems((await cookies()).get(COOKIE_TRI_ITEMS)?.value)}
     />
   );
 }
