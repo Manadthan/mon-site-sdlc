@@ -84,7 +84,7 @@ export function ImportProgress({ collectionId, nom, itemIds, ajout = false }: Pr
       </ul>
 
       {echecs > 0 && (
-        <p role="status" className="rounded-[10px] border border-[#f3d9a4] bg-[#fff7e6] px-3 py-2.5 text-[13px] leading-snug text-[#7a4b00]">
+        <p role="status" className="rounded-[10px] border border-alerte-bord bg-alerte px-3 py-2.5 text-[13px] leading-snug text-alerte-texte">
           {echecs === 1
             ? "1 image n’a pas pu être copiée : l’item est gardé sans image, vous pourrez en ajouter une."
             : `${echecs} images n’ont pas pu être copiées : les items sont gardés sans image, vous pourrez en ajouter.`}
@@ -105,7 +105,7 @@ export function ImportProgress({ collectionId, nom, itemIds, ajout = false }: Pr
 
 function Etape({ etat, children }: { etat: "fait" | "en-cours" | "a-faire"; children: React.ReactNode }) {
   return (
-    <li className={`flex items-center gap-2.5 ${etat === "a-faire" ? "text-[#6b7079]" : ""}`}>
+    <li className={`flex items-center gap-2.5 ${etat === "a-faire" ? "text-icone" : ""}`}>
       {etat === "fait" ? (
         <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-action text-white">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -113,9 +113,9 @@ function Etape({ etat, children }: { etat: "fait" | "en-cours" | "a-faire"; chil
           </svg>
         </span>
       ) : etat === "en-cours" ? (
-        <span className="size-6 shrink-0 animate-spin rounded-full border-[3px] border-action border-r-[#d3d6dc]" aria-hidden="true" />
+        <span className="size-6 shrink-0 animate-spin rounded-full border-[3px] border-action border-r-champ" aria-hidden="true" />
       ) : (
-        <span className="size-6 shrink-0 rounded-full border-2 border-[#d3d6dc]" aria-hidden="true" />
+        <span className="size-6 shrink-0 rounded-full border-2 border-champ" aria-hidden="true" />
       )}
       {children}
     </li>

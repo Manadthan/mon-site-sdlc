@@ -25,7 +25,7 @@ export function ConfirmDialog({ dialogRef, title, description, confirmLabel, onC
       role="alertdialog"
       aria-labelledby={`${id}-titre`}
       aria-describedby={`${id}-description`}
-      className="m-auto w-[calc(100%-48px)] max-w-sm rounded-2xl bg-white p-5 pb-4 text-texte shadow-[0_12px_32px_rgba(0,0,0,0.25)] backdrop:bg-[rgba(21,23,26,0.45)]"
+      className="m-auto w-[calc(100%-48px)] max-w-sm rounded-2xl bg-surface p-5 pb-4 text-texte shadow-[0_12px_32px_rgba(0,0,0,0.25)] backdrop:bg-[rgba(21,23,26,0.45)]"
     >
       <h2 id={`${id}-titre`} className="text-lg leading-snug font-bold">
         {title}
@@ -34,7 +34,7 @@ export function ConfirmDialog({ dialogRef, title, description, confirmLabel, onC
         {description}
       </p>
       {error && (
-        <p role="alert" className="mt-2.5 text-sm text-danger">
+        <p role="alert" className="mt-2.5 text-sm text-alarme">
           {error}
         </p>
       )}
@@ -43,7 +43,7 @@ export function ConfirmDialog({ dialogRef, title, description, confirmLabel, onC
           type="button"
           autoFocus
           onClick={() => dialogRef.current?.close()}
-          className="h-12 rounded-xl border border-[#d3d6dc] bg-white text-[15px] font-semibold"
+          className="h-12 rounded-xl border border-champ bg-surface text-[15px] font-semibold"
         >
           Annuler
         </button>

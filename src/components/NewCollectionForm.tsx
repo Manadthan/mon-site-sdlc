@@ -8,7 +8,7 @@ import { ScrapePreview } from "@/components/ScrapePreview";
 import { NOM_MAX } from "@/lib/collections/name";
 
 const CHAMP =
-  "h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger";
+  "h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger";
 
 // Création d'une collection (US-03) — maquettes n° 4 (aperçu) et n° 11 (page inaccessible).
 // 1. On colle l'adresse d'une page, « Analyser » montre un aperçu (rien n'est enregistré).
@@ -70,7 +70,7 @@ export function NewCollectionForm() {
             <button
               type="submit"
               disabled={occupe}
-              className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3.5 text-sm font-semibold text-texte disabled:opacity-60"
+              className="h-12 rounded-[10px] border border-champ bg-surface px-3.5 text-sm font-semibold text-texte disabled:opacity-60"
             >
               {analyseEnCours ? "Analyse…" : analyse.echec ? "Réessayer" : "Analyser"}
             </button>
@@ -85,8 +85,8 @@ export function NewCollectionForm() {
       )}
 
       {analyse.echec && !analyseEnCours && (
-        <div id="echec-analyse" role="alert" className="flex flex-col gap-2 rounded-[14px] border border-[#f1c4c4] bg-white p-4">
-          <h2 className="flex items-center gap-2.5 text-base font-bold text-danger">
+        <div id="echec-analyse" role="alert" className="flex flex-col gap-2 rounded-[14px] border border-erreur-bord bg-surface p-4">
+          <h2 className="flex items-center gap-2.5 text-base font-bold text-alarme">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 8v5M12 16h.01" />
@@ -114,7 +114,7 @@ export function NewCollectionForm() {
           />
         </label>
         {erreurNom && (
-          <p id="erreur-nom" role="alert" className="text-sm text-danger">
+          <p id="erreur-nom" role="alert" className="text-sm text-alarme">
             {erreurNom}
           </p>
         )}
@@ -139,7 +139,7 @@ export function NewCollectionForm() {
             <ScrapePreview candidats={apercu.candidates} exclus={exclus} onBasculer={basculer} />
             {/* Barre du bas, à portée de pouce ; l'espace sous la grille évite qu'elle cache les dernières vignettes. */}
             <div className="h-24" aria-hidden="true" />
-            <div className="fixed inset-x-0 bottom-0 border-t border-bordure bg-white px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]">
+            <div className="fixed inset-x-0 bottom-0 border-t border-bordure bg-surface px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]">
               <button
                 type="submit"
                 formAction={importer}
@@ -155,7 +155,7 @@ export function NewCollectionForm() {
             <button
               type="submit"
               disabled={occupe}
-              className="mt-1 h-[50px] rounded-xl border border-action bg-white text-base font-semibold text-action disabled:opacity-60"
+              className="mt-1 h-[50px] rounded-xl border border-action bg-surface text-base font-semibold text-lien disabled:opacity-60"
             >
               {videEnCours ? "Création…" : "Créer une collection vide"}
             </button>

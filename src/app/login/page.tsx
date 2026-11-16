@@ -20,7 +20,7 @@ export default function LoginPage() {
         <p className="text-[15px] text-texte-doux">Connectez-vous pour accéder à vos collections.</p>
       </div>
       <LoginForm />
-      <p className="mt-4 text-center text-xs text-[#6b7079]">Session conservée sur cet appareil.</p>
+      <p className="mt-4 text-center text-xs text-icone">Session conservée sur cet appareil.</p>
     </main>
   );
 }

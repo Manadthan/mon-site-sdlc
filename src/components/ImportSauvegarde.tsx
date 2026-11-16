@@ -82,7 +82,7 @@ export function ImportSauvegarde() {
   return (
     <div className="flex flex-col items-center gap-2 px-4 pt-3 text-center">
       <label
-        className={`flex h-11 cursor-pointer items-center gap-2 rounded-full border border-[#d3d6dc] bg-white px-4 text-sm font-semibold text-texte has-focus-visible:ring-2 has-focus-visible:ring-action/40 ${
+        className={`flex h-11 cursor-pointer items-center gap-2 rounded-full border border-champ bg-surface px-4 text-sm font-semibold text-texte has-focus-visible:ring-2 has-focus-visible:ring-action/40 ${
           etat.type === "en-cours" ? "pointer-events-none opacity-60" : ""
         }`}
       >
@@ -105,7 +105,7 @@ export function ImportSauvegarde() {
         />
       </label>
       {etat.type !== "repos" && (
-        <p role={etat.type === "erreur" ? "alert" : "status"} className={`text-[13px] ${etat.type === "erreur" ? "text-danger" : "text-texte-doux"}`}>
+        <p role={etat.type === "erreur" ? "alert" : "status"} className={`text-[13px] ${etat.type === "erreur" ? "text-alarme" : "text-texte-doux"}`}>
           {etat.texte}
         </p>
       )}

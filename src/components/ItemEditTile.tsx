@@ -15,8 +15,8 @@ type Props = {
 // on renomme en touchant l'intitulé ou on supprime (US-08).
 export function ItemEditTile({ item, position, premier, dernier, onMove, onRename, onDelete }: Props) {
   return (
-    <li className="flex flex-col gap-1.5 rounded-[14px] border border-bordure bg-white p-1.5 [contain-intrinsic-size:auto_240px] [content-visibility:auto]">
-      <div className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]">
+    <li className="flex flex-col gap-1.5 rounded-[14px] border border-bordure bg-surface p-1.5 [contain-intrinsic-size:auto_240px] [content-visibility:auto]">
+      <div className="relative flex aspect-[4/3] w-full items-center justify-center rounded-[10px] bg-neutre text-icone">
         <ItemImage chemin={item.image_path} taille={26} />
         <span className="absolute top-1.5 left-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-[rgba(21,23,26,0.75)] px-1.5 text-xs font-semibold text-white" aria-hidden="true">
           {position}
@@ -41,7 +41,7 @@ export function ItemEditTile({ item, position, premier, dernier, onMove, onRenam
           onClick={() => onMove("up")}
           disabled={premier}
           aria-label={`Monter « ${item.title} »`}
-          className="flex h-11 items-center justify-center rounded-[10px] border border-[#d3d6dc] bg-white text-texte disabled:opacity-35"
+          className="flex h-11 items-center justify-center rounded-[10px] border border-champ bg-surface text-texte disabled:opacity-35"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 19V5M5 12l7-7 7 7" />
@@ -52,7 +52,7 @@ export function ItemEditTile({ item, position, premier, dernier, onMove, onRenam
           onClick={() => onMove("down")}
           disabled={dernier}
           aria-label={`Descendre « ${item.title} »`}
-          className="flex h-11 items-center justify-center rounded-[10px] border border-[#d3d6dc] bg-white text-texte disabled:opacity-35"
+          className="flex h-11 items-center justify-center rounded-[10px] border border-champ bg-surface text-texte disabled:opacity-35"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 5v14M19 12l-7 7-7-7" />
@@ -62,7 +62,7 @@ export function ItemEditTile({ item, position, premier, dernier, onMove, onRenam
           type="button"
           onClick={onDelete}
           aria-label={`Supprimer « ${item.title} »`}
-          className="flex h-11 items-center justify-center rounded-[10px] border border-[#f1c4c4] bg-[#fff5f5] text-danger"
+          className="flex h-11 items-center justify-center rounded-[10px] border border-erreur-bord bg-erreur text-alarme"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />

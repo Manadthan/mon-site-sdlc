@@ -19,11 +19,11 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
         type="button"
         onClick={onToggle}
         aria-pressed={item.owned}
-        className={`flex h-full w-full flex-col overflow-hidden border bg-white text-left text-texte transition-colors ${
+        className={`flex h-full w-full flex-col overflow-hidden border bg-surface text-left text-texte transition-colors ${
           densite === 4 ? "rounded-md" : "rounded-[10px]"
         } ${item.owned ? "border-possede" : "border-bordure"}`}
       >
-        <span className="relative flex aspect-square w-full items-center justify-center bg-fond text-[#8a909a]">
+        <span className="relative flex aspect-square w-full items-center justify-center bg-fond text-icone">
           {/* Marge autour de l'image, comme sur une fiche produit. */}
           <span className={`absolute flex items-center justify-center ${densite === 2 ? "inset-2.5" : "inset-1.5"}`}>
             <ItemImage chemin={item.image_path} taille={densite === 4 ? 18 : 24} />
@@ -32,7 +32,7 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
             // Coche verte dans l'angle haut droit (US-07).
             <span
               data-testid="coche-possede"
-              className={`absolute flex items-center justify-center rounded-full border-2 border-white bg-possede text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] ${
+              className={`absolute flex items-center justify-center rounded-full border-2 border-surface bg-possede text-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] ${
                 densite === 2 ? "top-2 right-2 size-7" : "top-1 right-1 size-5"
               }`}
               aria-hidden="true"

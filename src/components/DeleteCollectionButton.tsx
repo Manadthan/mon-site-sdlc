@@ -28,7 +28,7 @@ export function DeleteCollectionButton({ id, name, total }: { id: string; name: 
           setError(undefined);
           dialogRef.current?.showModal();
         }}
-        className="flex size-11 shrink-0 items-center justify-center rounded-full text-[#6b7079]"
+        className="flex size-11 shrink-0 items-center justify-center rounded-full text-icone"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />

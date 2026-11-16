@@ -27,8 +27,8 @@ export function ItemSortBar({ tri, onChange }: Props) {
             aria-label={actif ? `Trier par ${nom}, ordre ${sens}. Toucher pour inverser.` : `Trier par ${nom}`}
             className={
               actif
-                ? "flex h-[34px] items-center gap-1 rounded-full border border-texte bg-texte px-3.5 text-[13px] font-semibold text-white"
-                : "h-[34px] rounded-full border border-[#d3d6dc] bg-white px-3.5 text-[13px] font-medium text-texte"
+                ? "flex h-[34px] items-center gap-1 rounded-full border border-texte bg-texte px-3.5 text-[13px] font-semibold text-surface"
+                : "h-[34px] rounded-full border border-champ bg-surface px-3.5 text-[13px] font-medium text-texte"
             }
           >
             {libelle}
