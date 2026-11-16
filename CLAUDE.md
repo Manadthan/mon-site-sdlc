@@ -21,7 +21,7 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-15 + critères d'acceptation | v1.5 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-16 + critères d'acceptation | v1.6 validée |
 | `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.9 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
@@ -31,7 +31,7 @@ Les critères d'acceptation de SPEC.md sont la **définition de « terminé »**
 ## Stack
 
 - **Next.js** (App Router, TypeScript strict) — pages + server actions (dont l'analyse d'une page à scraper)
-- **Tailwind CSS** — mobile d'abord
+- **Tailwind CSS** — mobile d'abord ; couleurs en jetons (`globals.css`), thème sombre automatique (US-16) : jamais de couleur en dur dans un composant
 - **Supabase** — Postgres (RLS activée), Storage (images), Auth (e-mail + mot de passe, inscriptions désactivées)
 - **cheerio** (analyse HTML du scraper), **sharp** (vignettes WebP 400 px), **fflate** (zip de la sauvegarde)
 - **Vitest** (unitaires), **Playwright** (e2e, viewport 375 × 812)
@@ -108,7 +108,7 @@ mon-site-sdlc/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté (ex-« middleware » de Next.js)
 │   ├── app/
 │   │   ├── layout.tsx                 ✅
-│   │   ├── globals.css                ✅
+│   │   ├── globals.css                ✅   jetons de couleur, valeurs claires et sombres (US-16)
 │   │   ├── page.tsx                   ✅   accueil : liste (US-02), suppression (US-04), tri (US-05)
 │   │   ├── login/page.tsx             ✅   US-01
 │   │   ├── apercu-image/route.ts      ✅   relais des images de l'aperçu (HTTP, SSRF, connecté seulement — #49)
@@ -191,7 +191,7 @@ mon-site-sdlc/
 └── tests/
     └── e2e/
         ├── home.spec.ts               ✅
-        ├── pwa.spec.ts                ✅
+        ├── pwa.spec.ts                ✅   installation iPhone ; thème sombre (US-16)
         ├── login.spec.ts              ✅   US-01 (base Supabase locale)
         ├── collections.spec.ts        ✅   US-02, US-03 (vide, page inaccessible), US-04, US-05 (données créées par supabase-admin.ts)
         ├── collection-page.spec.ts    ✅   US-06, US-08 1/2

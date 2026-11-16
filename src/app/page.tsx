@@ -23,7 +23,7 @@ export default async function Home() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
-      <header className="flex items-center justify-between border-b border-bordure bg-white pt-[max(env(safe-area-inset-top),12px)] pr-4 pb-3 pl-5">
+      <header className="flex items-center justify-between border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),12px)] pr-4 pb-3 pl-5">
         <h1 className="text-[26px] font-bold tracking-tight">Mes collections</h1>
         <form action={logout}>
           <button type="submit" aria-label="Se déconnecter" className="flex size-11 items-center justify-center rounded-full text-texte-doux">
@@ -38,13 +38,13 @@ export default async function Home() {
 
       {erreur ? (
         <main className="flex flex-1 items-center justify-center px-8 text-center">
-          <p role="alert" className="text-[15px] text-danger">
+          <p role="alert" className="text-[15px] text-alarme">
             Impossible de charger vos collections. Rechargez la page dans un instant.
           </p>
         </main>
       ) : cartes.length === 0 ? (
         <main className="flex flex-1 flex-col items-center justify-center gap-3.5 px-8 pb-20 text-center">
-          <div className="flex size-[88px] items-center justify-center rounded-3xl bg-[#e9ecf1] text-[#6b7079]" aria-hidden="true">
+          <div className="flex size-[88px] items-center justify-center rounded-3xl bg-neutre text-icone" aria-hidden="true">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1.5" />
               <rect x="14" y="3" width="7" height="7" rx="1.5" />

@@ -22,3 +22,21 @@ test("le site est installable sur l'écran d'accueil de l'iPhone", async ({ page
     expect(r.headers()["content-type"]).toContain("image/png");
   }
 });
+
+// US-16 — Thème sombre : suit l'apparence de l'iPhone.
+test("le thème suit l'apparence claire ou sombre de l'appareil", async ({ page }) => {
+  const fond = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/login");
+  expect(await fond()).toBe("rgb(246, 247, 249)");
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  expect(await fond()).toBe("rgb(15, 17, 21)");
+  // Les champs restent lisibles : fond sombre, texte clair.
+  const champ = page.getByLabel("E-mail");
+  expect(await champ.evaluate((el) => getComputedStyle(el).color)).toBe("rgb(236, 238, 241)");
+
+  // Barre de Safari : une couleur par apparence.
+  await expect(page.locator('meta[name="theme-color"][media="(prefers-color-scheme: dark)"]')).toHaveAttribute("content", "#0f1115");
+});

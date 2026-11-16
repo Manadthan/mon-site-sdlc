@@ -64,7 +64,7 @@ export function ExportButton() {
         type="button"
         onClick={exporter}
         disabled={etat.type === "en-cours"}
-        className="flex h-11 items-center gap-2 rounded-full border border-[#d3d6dc] bg-white px-4 text-sm font-semibold text-texte disabled:opacity-60"
+        className="flex h-11 items-center gap-2 rounded-full border border-champ bg-surface px-4 text-sm font-semibold text-texte disabled:opacity-60"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 3v12M7 10l5 5 5-5M5 21h14" />
@@ -74,7 +74,7 @@ export function ExportButton() {
       {etat.type === "repos" ? (
         <p className="text-xs text-texte-doux">Un fichier .zip : toutes vos collections (JSON) et leurs images.</p>
       ) : (
-        <p role={etat.type === "erreur" ? "alert" : "status"} className={`text-[13px] ${etat.type === "erreur" ? "text-danger" : "text-texte-doux"}`}>
+        <p role={etat.type === "erreur" ? "alert" : "status"} className={`text-[13px] ${etat.type === "erreur" ? "text-alarme" : "text-texte-doux"}`}>
           {etat.texte}
         </p>
       )}

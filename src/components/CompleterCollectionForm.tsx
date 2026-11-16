@@ -57,12 +57,12 @@ export function CompleterCollectionForm({ collectionId, nom, imagesExistantes }:
               defaultValue={analyse.url}
               aria-invalid={analyse.echec ? true : undefined}
               aria-describedby={analyse.echec ? "echec-analyse" : undefined}
-              className="h-12 min-w-0 flex-1 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
+              className="h-12 min-w-0 flex-1 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
             />
             <button
               type="submit"
               disabled={occupe}
-              className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3.5 text-sm font-semibold text-texte disabled:opacity-60"
+              className="h-12 rounded-[10px] border border-champ bg-surface px-3.5 text-sm font-semibold text-texte disabled:opacity-60"
             >
               {analyseEnCours ? "Analyse…" : analyse.echec ? "Réessayer" : "Analyser"}
             </button>
@@ -77,8 +77,8 @@ export function CompleterCollectionForm({ collectionId, nom, imagesExistantes }:
       )}
 
       {analyse.echec && !analyseEnCours && (
-        <div id="echec-analyse" role="alert" className="flex flex-col gap-2 rounded-[14px] border border-[#f1c4c4] bg-white p-4">
-          <h2 className="text-base font-bold text-danger">{analyse.echec.titre}</h2>
+        <div id="echec-analyse" role="alert" className="flex flex-col gap-2 rounded-[14px] border border-erreur-bord bg-surface p-4">
+          <h2 className="text-base font-bold text-alarme">{analyse.echec.titre}</h2>
           <p className="text-sm leading-normal text-texte-doux">{analyse.echec.texte}</p>
         </div>
       )}
@@ -100,13 +100,13 @@ export function CompleterCollectionForm({ collectionId, nom, imagesExistantes }:
             Les éléments ajoutés iront en fin de collection.
           </p>
           {ajout.error && (
-            <p role="alert" className="text-sm text-danger">
+            <p role="alert" className="text-sm text-alarme">
               {ajout.error}
             </p>
           )}
           <ScrapePreview candidats={apercu.candidates} exclus={exclus} onBasculer={basculer} dejaPresents={dejaPresents} />
           <div className="h-24" aria-hidden="true" />
-          <div className="fixed inset-x-0 bottom-0 border-t border-bordure bg-white px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]">
+          <div className="fixed inset-x-0 bottom-0 border-t border-bordure bg-surface px-4 pt-3 pb-[max(env(safe-area-inset-bottom),16px)]">
             <button
               type="submit"
               disabled={occupe || retenus.length === 0}

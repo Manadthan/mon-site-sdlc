@@ -40,7 +40,7 @@ export function CopieImagesManquantes({ collectionId, itemIds }: Props) {
   if (itemIds.length === 0 && !echecs) return null;
 
   return (
-    <div className="flex flex-col gap-2 rounded-[10px] border border-bordure bg-white px-3 py-2.5 text-[13px] text-texte-doux">
+    <div className="flex flex-col gap-2 rounded-[10px] border border-bordure bg-surface px-3 py-2.5 text-[13px] text-texte-doux">
       {enCours ? (
         <>
           <p role="status">
@@ -52,7 +52,7 @@ export function CopieImagesManquantes({ collectionId, itemIds }: Props) {
             aria-valuemin={0}
             aria-valuemax={total}
             aria-valuenow={traites}
-            className="h-1.5 overflow-hidden rounded-full bg-[#e9ecf1]"
+            className="h-1.5 overflow-hidden rounded-full bg-neutre"
           >
             <div className="h-1.5 bg-action transition-[width]" style={{ width: `${total ? (traites / total) * 100 : 0}%` }} />
           </div>
@@ -60,7 +60,7 @@ export function CopieImagesManquantes({ collectionId, itemIds }: Props) {
       ) : (
         <>
           {echecs !== undefined && (
-            <p role="status" className={echecs ? "text-[#7a4b00]" : ""}>
+            <p role="status" className={echecs ? "text-alerte-texte" : ""}>
               {echecs === 0
                 ? "Images copiées."
                 : echecs === 1

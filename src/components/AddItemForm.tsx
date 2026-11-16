@@ -43,7 +43,7 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[#b9bec7] text-sm font-semibold text-action"
+        className="flex aspect-square w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-pointille text-sm font-semibold text-lien"
       >
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />
@@ -54,9 +54,9 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
       <dialog
         ref={dialogRef}
         aria-labelledby="ajout-titre"
-        className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[20px] bg-white px-5 pt-2.5 pb-[max(env(safe-area-inset-bottom),24px)] text-texte backdrop:bg-[rgba(21,23,26,0.45)]"
+        className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[20px] bg-surface px-5 pt-2.5 pb-[max(env(safe-area-inset-bottom),24px)] text-texte backdrop:bg-[rgba(21,23,26,0.45)]"
       >
-        <div className="mx-auto h-[5px] w-10 rounded-full bg-[#d3d6dc]" aria-hidden="true" />
+        <div className="mx-auto h-[5px] w-10 rounded-full bg-champ" aria-hidden="true" />
         <div className="mt-2 flex items-center justify-between">
           <h2 id="ajout-titre" className="text-lg font-bold">
             Ajouter un item
@@ -85,17 +85,17 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
               defaultValue={state.error ? state.title : ""}
               aria-invalid={state.error ? true : undefined}
               aria-describedby={state.error ? "ajout-erreur" : undefined}
-              className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
+              className="h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
             />
           </label>
           {state.error && (
-            <p id="ajout-erreur" role="alert" className="text-sm text-danger">
+            <p id="ajout-erreur" role="alert" className="text-sm text-alarme">
               {state.error}
             </p>
           )}
           <div className="flex flex-col gap-1.5">
             <span className="text-[13px] font-semibold text-texte-doux">Image (facultative)</span>
-            <label className="flex h-[60px] cursor-pointer items-center gap-3 rounded-xl border border-[#d3d6dc] bg-white px-4 text-sm font-semibold text-texte has-focus-visible:ring-2 has-focus-visible:ring-action/40">
+            <label className="flex h-[60px] cursor-pointer items-center gap-3 rounded-xl border border-champ bg-surface px-4 text-sm font-semibold text-texte has-focus-visible:ring-2 has-focus-visible:ring-action/40">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
                 <circle cx="12" cy="13" r="3.5" />
@@ -121,11 +121,11 @@ export function AddItemForm({ collectionId }: { collectionId: string }) {
               placeholder="ou adresse d’une image : https://…"
               aria-label="Adresse de l’image"
               defaultValue={state.error ? state.imageUrl : ""}
-              className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20"
+              className="h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20"
             />
           </div>
           {state.warning && (
-            <p role="status" className="text-sm text-[#7a4b00]">
+            <p role="status" className="text-sm text-alerte-texte">
               {state.warning}
             </p>
           )}

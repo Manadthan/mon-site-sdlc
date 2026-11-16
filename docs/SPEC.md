@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.5 — 16/11/2026 — statut : **validé**
+> Version 1.6 — 16/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.6 | 16/11/2026 | Ajout d'US-16 : thème sombre |
 > | 1.5 | 16/11/2026 | Ajout d'US-15 : trier les items ; US-14 : boutons − / + dans la barre du haut |
 > | 1.4 | 15/11/2026 | Ajout d'US-14 : nombre d'items par ligne |
 > | 1.3 | 15/11/2026 | Ajout d'US-13 : compléter une collection depuis une URL |
@@ -135,6 +136,13 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 - [ ] « Nom » trie dans l'ordre naturel (« N°2 » avant « N°10 »), sans tenir compte des accents ni des majuscules.
 - [ ] Le tri ne change que l'affichage : l'ordre de la collection (US-10) n'est pas modifié ; le mode édition l'affiche toujours.
 - [ ] Le choix est mémorisé sur l'appareil, pour toutes les collections.
+
+### US-16 — Thème sombre (S)
+*En tant que collectionneur, je consulte mes collections le soir sans être ébloui.*
+- [ ] Le site suit le réglage **Apparence** de l'iPhone (clair, sombre ou automatique), sans bouton à toucher.
+- [ ] En sombre : fond et cartes sombres, texte clair ; le vert « possédé », le bleu des actions et le rouge des suppressions restent reconnaissables.
+- [ ] Texte lisible : contraste d'au moins 4,5:1.
+- [ ] La barre de Safari et les champs de saisie suivent aussi le thème.
 
 ## 4. Exigences non fonctionnelles
 

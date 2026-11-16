@@ -28,17 +28,17 @@ export function ScrapePreview({ candidats, exclus, onBasculer, dejaPresents }: P
               onClick={() => onBasculer(index)}
               className={`flex w-full flex-col gap-1 text-left text-texte transition-opacity ${retenu ? "" : "opacity-45"}`}
             >
-              <span className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[10px] bg-[#e9ecf1] text-[#8a909a]">
+              <span className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-[10px] bg-neutre text-icone">
                 <Vignette src={candidat.imageUrl} />
                 {dejaPresents?.has(candidat.imageUrl) && (
-                  <span className="absolute inset-x-1 bottom-1 rounded-md bg-white/90 px-1 py-0.5 text-center text-[10px] leading-tight font-semibold text-texte-doux">
+                  <span className="absolute inset-x-1 bottom-1 rounded-md bg-surface/90 px-1 py-0.5 text-center text-[10px] leading-tight font-semibold text-texte-doux">
                     Déjà dans la collection
                   </span>
                 )}
                 <span
                   aria-hidden="true"
                   className={`absolute top-1.5 left-1.5 flex size-[22px] items-center justify-center rounded-md border-2 text-white ${
-                    retenu ? "border-action bg-action" : "border-[#8a909a] bg-white"
+                    retenu ? "border-action bg-action" : "border-icone bg-surface"
                   }`}
                 >
                   {retenu && (

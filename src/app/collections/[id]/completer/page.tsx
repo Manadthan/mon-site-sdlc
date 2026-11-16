@@ -39,7 +39,7 @@ export default async function CompleterPage({ params }: Props) {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
-      <header className="flex items-center gap-1 border-b border-bordure bg-white pt-[max(env(safe-area-inset-top),8px)] pr-2 pb-2.5 pl-2">
+      <header className="flex items-center gap-1 border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),8px)] pr-2 pb-2.5 pl-2">
         <Link href={`/collections/${id}`} aria-label="Annuler et revenir" className="flex size-11 shrink-0 items-center justify-center text-texte">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />

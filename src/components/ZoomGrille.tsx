@@ -7,7 +7,7 @@ type Props = { colonnes: Colonnes; onChange: (sens: "plus" | "moins") => void };
 // Dans la barre du haut, toujours visible au défilement : même gabarit que « Modifier ».
 // Zone de toucher agrandie (after:) à 44 px pour le pouce, bouton dessiné à 36 px.
 const BOUTON =
-  "relative flex size-9 shrink-0 items-center justify-center rounded-full border border-[#d3d6dc] bg-white text-texte after:absolute after:-inset-1 disabled:opacity-35";
+  "relative flex size-9 shrink-0 items-center justify-center rounded-full border border-champ bg-surface text-texte after:absolute after:-inset-1 disabled:opacity-35";
 
 // Zoomer / dézoomer la grille (US-14) : moins ou plus d'items par ligne.
 export function ZoomGrille({ colonnes, onChange }: Props) {

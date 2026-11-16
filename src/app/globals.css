@@ -1,15 +1,58 @@
 @import "tailwindcss";
 
-/* Couleurs de docs/MAQUETTES.md, utilisables en classes Tailwind (bg-fond, text-action…). */
+/* Couleurs de docs/MAQUETTES.md, utilisables en classes Tailwind (bg-fond, text-action…).
+   Chaque couleur est un « jeton » : le thème sombre (US-16) en change la valeur, pas les composants. */
 @theme {
   --color-fond: #f6f7f9;
+  --color-surface: #ffffff; /* cartes, panneaux, champs */
   --color-texte: #15171a;
   --color-texte-doux: #4b5059;
   --color-bordure: #e4e6ea;
-  --color-action: #1d4ed8;
+  --color-champ: #d3d6dc; /* bord des champs et boutons secondaires */
+  --color-neutre: #e9ecf1; /* vignette sans image, barres vides */
+  --color-icone: #8a909a;
+  --color-pointille: #b9bec7;
+  --color-action: #1d4ed8; /* fond des boutons principaux (texte blanc) */
+  --color-lien: #1d4ed8; /* texte d'action sur fond clair ou sombre */
   --color-possede: #16a34a;
-  --color-danger: #b42318;
+  --color-danger: #b42318; /* fond du bouton Supprimer (texte blanc) */
+  --color-alarme: #b42318; /* texte d'erreur */
+  --color-alerte: #fff7e6;
+  --color-alerte-bord: #f3d9a4;
+  --color-alerte-texte: #7a4b00;
+  --color-erreur: #fff5f5;
+  --color-erreur-bord: #f1c4c4;
   --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+:root {
+  /* Champs, cases et barres de défilement natifs suivent le thème. */
+  color-scheme: light dark;
+}
+
+/* Thème sombre (US-16) : suit le réglage Apparence de l'iPhone. Contrastes ≥ 4,5:1 pour le texte. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fond: #0f1115;
+    --color-surface: #1a1d23;
+    --color-texte: #eceef1;
+    --color-texte-doux: #a3a9b4;
+    --color-bordure: #2b2f37;
+    --color-champ: #3b404a;
+    --color-neutre: #252930;
+    --color-icone: #7e8591;
+    --color-pointille: #4a505b;
+    --color-action: #2563eb; /* blanc dessus : 5,2:1 */
+    --color-lien: #6ea8ff; /* sur la surface sombre : 7:1 */
+    --color-possede: #16a34a; /* « Possédé » sur la surface sombre : 5:1 */
+    --color-danger: #dc2626; /* blanc dessus : 4,8:1 */
+    --color-alarme: #f87171; /* sur la surface sombre : 6:1 */
+    --color-alerte: #2b2212;
+    --color-alerte-bord: #5c4720;
+    --color-alerte-texte: #f2c97d;
+    --color-erreur: #2a1617;
+    --color-erreur-bord: #5c2a2b;
+  }
 }
 
 body {

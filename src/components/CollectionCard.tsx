@@ -10,9 +10,9 @@ import type { CollectionCard as Carte } from "@/lib/collections/cards";
 export function CollectionCard({ carte }: { carte: Carte }) {
   const { id, name, coverPath, progress } = carte;
   return (
-    <li className="flex items-center gap-3 rounded-[14px] border border-bordure bg-white py-2.5 pr-1.5 pl-2.5">
+    <li className="flex items-center gap-3 rounded-[14px] border border-bordure bg-surface py-2.5 pr-1.5 pl-2.5">
       <Link href={`/collections/${id}`} className="flex min-w-0 flex-1 items-center gap-3 text-texte">
-        <div className="relative flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-[#e9ecf1] text-[#8a909a]" aria-hidden="true">
+        <div className="relative flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-neutre text-icone" aria-hidden="true">
           <ItemImage chemin={coverPath} taille={24} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -22,7 +22,7 @@ export function CollectionCard({ carte }: { carte: Carte }) {
             {formatProgress(progress)}
           </p>
           <div
-            className="h-1.5 overflow-hidden rounded-full bg-[#e9ecf1]"
+            className="h-1.5 overflow-hidden rounded-full bg-neutre"
             role="progressbar"
             aria-label={`${name} : ${progress.percent} % complété`}
             aria-valuemin={0}

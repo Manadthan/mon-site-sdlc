@@ -19,9 +19,9 @@ export function RenameItemSheet({ dialogRef, item }: Props) {
     <dialog
       ref={dialogRef}
       aria-labelledby="renommer-titre"
-      className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[20px] bg-white px-5 pt-2.5 pb-[max(env(safe-area-inset-bottom),24px)] text-texte backdrop:bg-[rgba(21,23,26,0.45)]"
+      className="mx-auto mt-auto mb-0 w-full max-w-md rounded-t-[20px] bg-surface px-5 pt-2.5 pb-[max(env(safe-area-inset-bottom),24px)] text-texte backdrop:bg-[rgba(21,23,26,0.45)]"
     >
-      <div className="mx-auto h-[5px] w-10 rounded-full bg-[#d3d6dc]" aria-hidden="true" />
+      <div className="mx-auto h-[5px] w-10 rounded-full bg-champ" aria-hidden="true" />
       <div className="mt-2 flex items-center justify-between">
         <h2 id="renommer-titre" className="text-lg font-bold">
           Modifier l’item
@@ -62,11 +62,11 @@ function RenameForm({ item, state, action, pending }: FormProps) {
           defaultValue={erreur ? state.title : item.title}
           aria-invalid={erreur ? true : undefined}
           aria-describedby={erreur ? "renommer-erreur" : undefined}
-          className="h-12 rounded-[10px] border border-[#d3d6dc] bg-white px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
+          className="h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
         />
       </label>
       {erreur && (
-        <p id="renommer-erreur" role="alert" className="text-sm text-danger">
+        <p id="renommer-erreur" role="alert" className="text-sm text-alarme">
           {erreur}
         </p>
       )}

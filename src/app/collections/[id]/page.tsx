@@ -50,10 +50,10 @@ export default async function CollectionPage({ params }: Props) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-3 px-8 text-center">
         <h1 className="text-xl font-bold">{collection.name}</h1>
-        <p role="alert" className="text-[15px] text-danger">
+        <p role="alert" className="text-[15px] text-alarme">
           Impossible de charger les items. Rechargez la page dans un instant.
         </p>
-        <Link href="/" className="mt-2 font-semibold text-action">
+        <Link href="/" className="mt-2 font-semibold text-lien">
           Retour à mes collections
         </Link>
       </main>
