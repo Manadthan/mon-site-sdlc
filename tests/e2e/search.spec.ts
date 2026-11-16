@@ -113,6 +113,8 @@ test("trier les items par nom ou par ordre, et garder − / + au défilement", a
   await page.getByRole("button", { name: "Terminé" }).click();
 
   // Après un long défilement, − / + restent visibles (barre du haut).
-  await page.mouse.wheel(0, 3000);
+  // Défilement par script : la molette n'existe pas dans le WebKit mobile de Playwright.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
   await expect(page.getByRole("button", { name: "Plus d’items par ligne" })).toBeInViewport();
 });
