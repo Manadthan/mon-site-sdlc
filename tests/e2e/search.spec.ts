@@ -85,3 +85,36 @@ test("changer le nombre d'items par ligne", async ({ page }, testInfo) => {
   await page.getByRole("button", { name: "Modifier" }).click();
   await expect.poll(parLigne).toBe(2);
 });
+
+// US-15 — Trier les items d'une collection (affichage seulement) ; US-14 : − / + toujours accessibles.
+test("trier les items par nom ou par ordre, et garder − / + au défilement", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("tri-items", testInfo);
+  // « Item 1 » à « Item 12 » : l'ordre naturel met « Item 2 » avant « Item 10 ».
+  const id = await creerCollection(utilisateur.id, "Cartes", 12, 0);
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  const intitules = page.getByRole("list", { name: "Items" }).getByTestId("intitule");
+
+  const tri = page.getByRole("group", { name: "Trier les items" });
+  await expect(tri.getByRole("button", { name: /ordre de la collection/ })).toHaveAttribute("aria-pressed", "true");
+
+  // Nom décroissant puis croissant (toucher à nouveau inverse le sens).
+  await tri.getByRole("button", { name: "Trier par nom" }).click();
+  await expect(intitules.first()).toHaveText("Item 1");
+  await expect(intitules.nth(1)).toHaveText("Item 2");
+  await tri.getByRole("button", { name: /Trier par nom, ordre croissant/ }).click();
+  await expect(intitules.first()).toHaveText("Item 12");
+
+  // Mémorisé ; le mode édition reste dans l'ordre de la collection.
+  await page.reload();
+  await expect(intitules.first()).toHaveText("Item 12");
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await expect(intitules.first()).toHaveText("Item 1");
+  await page.getByRole("button", { name: "Terminé" }).click();
+
+  // Après un long défilement, − / + restent visibles (barre du haut).
+  // Défilement par script : la molette n'existe pas dans le WebKit mobile de Playwright.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await expect(page.getByRole("button", { name: "Plus d’items par ligne" })).toBeInViewport();
+});

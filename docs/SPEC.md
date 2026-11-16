@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.4 — 15/11/2026 — statut : **validé**
+> Version 1.5 — 16/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.5 | 16/11/2026 | Ajout d'US-15 : trier les items ; US-14 : boutons − / + dans la barre du haut |
 > | 1.4 | 15/11/2026 | Ajout d'US-14 : nombre d'items par ligne |
 > | 1.3 | 15/11/2026 | Ajout d'US-13 : compléter une collection depuis une URL |
 > | 1.2 | 15/11/2026 | Ajout d'US-12 : renommer une collection |
@@ -123,10 +124,17 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 
 ### US-14 — Choisir le nombre d'items par ligne (S)
 *En tant que collectionneur, je zoome ou dézoome la grille pour voir plus ou moins d'items à la fois.*
-- [ ] En mode cocher, deux boutons « − » et « + » à côté de la recherche changent le nombre d'items par ligne : 2, 3 ou 4 sur iPhone (plus sur grand écran).
+- [ ] En mode cocher, deux boutons « − » et « + » dans la barre du haut (toujours visible au défilement) changent le nombre d'items par ligne : 2, 3 ou 4 sur iPhone (plus sur grand écran).
 - [ ] Plus il y a d'items par ligne, plus la carte est simple : 3 → intitulé seul, 4 → image seule (la coche « possédé » reste visible).
 - [ ] Le choix est mémorisé sur l'appareil et vaut pour toutes les collections.
 - [ ] Le mode édition garde 2 items par ligne (boutons utilisables).
+
+### US-15 — Trier les items d'une collection (S)
+*En tant que collectionneur, je trie l'affichage d'une collection pour retrouver un item plus vite.*
+- [ ] Sous les filtres : « Trier : Ordre · Nom ». Toucher le critère actif inverse le sens (↑ / ↓).
+- [ ] « Nom » trie dans l'ordre naturel (« N°2 » avant « N°10 »), sans tenir compte des accents ni des majuscules.
+- [ ] Le tri ne change que l'affichage : l'ordre de la collection (US-10) n'est pas modifié ; le mode édition l'affiche toujours.
+- [ ] Le choix est mémorisé sur l'appareil, pour toutes les collections.
 
 ## 4. Exigences non fonctionnelles
 

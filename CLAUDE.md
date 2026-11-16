@@ -21,7 +21,7 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-14 + critères d'acceptation | v1.4 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-15 + critères d'acceptation | v1.5 validée |
 | `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.9 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
@@ -136,7 +136,8 @@ mon-site-sdlc/
 │   │   ├── ItemTile.tsx               ✅   carte : image, intitulé, état ; coche et bordure vertes si possédé (US-06, US-07)
 │   │   ├── FilterTabs.tsx             ✅   Tous / Possédés / Manquants (US-09)
 │   │   ├── SearchField.tsx            ✅   recherche sur l'intitulé (US-09)
-│   │   ├── ZoomGrille.tsx             ✅   − / + : items par ligne (US-14)
+│   │   ├── ZoomGrille.tsx             ✅   − / + : items par ligne, dans la barre du haut (US-14)
+│   │   ├── ItemSortBar.tsx            ✅   « Trier : Ordre · Nom » (US-15)
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
 │   │   ├── RenameCollectionSheet.tsx  ✅   US-12, en mode édition
@@ -154,6 +155,7 @@ mon-site-sdlc/
 │   │   ├── items/order.ts             ✅   échange avec le voisin à l'affichage (+ order.test.ts)
 │   │   ├── items/filter.ts            ✅   filtre et recherche sans accents (+ filter.test.ts)
 │   │   ├── items/grille.ts            ✅   items par ligne, cookie, classes de la grille (+ grille.test.ts)
+│   │   ├── items/sort.ts              ✅   tri à l'affichage, ordre naturel, cookie (+ sort.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
@@ -196,7 +198,7 @@ mon-site-sdlc/
         ├── supabase-admin.ts          ✅   utilisateurs et données de test (base locale)
         ├── owned.spec.ts              ✅   US-07
         ├── edit.spec.ts               ✅   US-08 : modes, renommer, supprimer, photo, adresse refusée ; US-10 ; reprise (#51) ; US-12 ; US-13
-        ├── search.spec.ts             ✅   US-09, US-14
+        ├── search.spec.ts             ✅   US-09, US-14, US-15
         ├── export.spec.ts             ✅   sauvegarde (#53)
         └── sauvegarde.spec.ts         ✅   import d'une sauvegarde (US-11)
 ```
