@@ -27,7 +27,12 @@ export default async function Home() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
       <header className="flex items-center justify-between border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),12px)] pr-4 pb-3 pl-5">
-        <h1 className="text-[26px] font-bold tracking-tight">Mes collections</h1>
+        <div className="flex items-center gap-2.5">
+          {/* Logo de l'application (même dessin que l'icône de l'écran d'accueil). */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icons/icon.svg" alt="" width={32} height={32} className="size-8 rounded-lg" />
+          <h1 className="text-[26px] font-bold tracking-tight">Mes collections</h1>
+        </div>
         <div className="flex items-center">
         <PartageSheet jeton={partage.data?.token ?? null} />
         <form action={logout}>

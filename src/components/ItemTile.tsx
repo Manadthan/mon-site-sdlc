@@ -6,10 +6,10 @@ export type Item = { id: string; title: string; image_path: string | null; owned
 type Props = { item: Item; onToggle?: () => void; densite?: Colonnes };
 
 // Vignette d'un item (US-06) : un tap bascule possédé / non possédé (US-07) — maquette n° 2.
-// Présentation en carte (#66) : image sur fond clair, puis intitulé en gras et état, sur fond blanc.
+// Présentation en carte (#66) : image sur fond clair, puis intitulé en gras, sur fond blanc.
 // Un item possédé a une bordure verte en plus de la coche.
-// Densité (US-14) : 2 par ligne → carte complète ; 3 → intitulé seul ; 4 → image seule
-// (l'intitulé et l'état restent lus par VoiceOver).
+// Densité (US-14) : 2 ou 3 par ligne → image et intitulé ; 4 → image seule.
+// L'état (possédé / manquant) n'est pas écrit, mais reste lu par VoiceOver (#79).
 // Sans onToggle (collection partagée, US-17) : simple carte, rien à toucher.
 export function ItemTile({ item, onToggle, densite = 2 }: Props) {
   const etat = item.owned ? "Possédé" : "Manquant";
@@ -56,11 +56,8 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
             >
               {item.title}
             </span>
-            {densite === 2 ? (
-              <span className={`text-[13px] ${item.owned ? "font-medium text-possede" : "text-texte-doux"}`}>{etat}</span>
-            ) : (
-              <span className="sr-only">{etat}</span>
-            )}
+            {/* L'état n'est pas écrit : la coche et la bordure vertes suffisent à l'œil ; il reste lu par VoiceOver. */}
+            <span className="sr-only">{etat}</span>
           </span>
         )}
       </Carte>

@@ -11,6 +11,10 @@ test("un état vide explique comment créer la première collection", async ({ p
 
   await expect(page.getByRole("heading", { name: "Aucune collection pour l’instant" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Créer ma première collection" })).toBeVisible();
+  // Logo en haut à gauche, devant le titre (#79).
+  const logo = page.locator("header img[src='/icons/icon.svg']");
+  await expect(logo).toBeVisible();
+  expect(await logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
 });
 
 // US-03 (1/2) — Créer une collection vide
