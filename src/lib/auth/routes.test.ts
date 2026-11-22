@@ -24,4 +24,10 @@ describe("authRedirect", () => {
   it("renvoie vers l'accueil un utilisateur déjà connecté qui ouvre /login", () => {
     expect(authRedirect("/login", true)).toBe("/");
   });
+
+  it("laisse ouvrir une collection partagée, connecté ou non (US-17)", () => {
+    expect(authRedirect("/partage/abc", false)).toBeNull();
+    expect(authRedirect("/partage/abc", true)).toBeNull();
+    expect(authRedirect("/partages", false)).toBe("/login");
+  });
 });
