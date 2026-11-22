@@ -3,22 +3,22 @@ import type { Colonnes } from "@/lib/items/grille";
 
 export type Item = { id: string; title: string; image_path: string | null; owned: boolean };
 
-type Props = { item: Item; onToggle: () => void; densite?: Colonnes };
+type Props = { item: Item; onToggle?: () => void; densite?: Colonnes };
 
 // Vignette d'un item (US-06) : un tap bascule possédé / non possédé (US-07) — maquette n° 2.
 // Présentation en carte (#66) : image sur fond clair, puis intitulé en gras et état, sur fond blanc.
 // Un item possédé a une bordure verte en plus de la coche.
 // Densité (US-14) : 2 par ligne → carte complète ; 3 → intitulé seul ; 4 → image seule
 // (l'intitulé et l'état restent lus par VoiceOver).
+// Sans onToggle (collection partagée, US-17) : simple carte, rien à toucher.
 export function ItemTile({ item, onToggle, densite = 2 }: Props) {
   const etat = item.owned ? "Possédé" : "Manquant";
+  const Carte = onToggle ? "button" : "div";
   return (
     // content-visibility : le navigateur ne dessine que les vignettes visibles (fluide avec 300+ items).
     <li className="[contain-intrinsic-size:auto_260px] [content-visibility:auto]">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-pressed={item.owned}
+      <Carte
+        {...(onToggle ? { type: "button" as const, onClick: onToggle, "aria-pressed": item.owned } : {})}
         className={`flex h-full w-full flex-col overflow-hidden border bg-surface text-left text-texte transition-colors ${
           densite === 4 ? "rounded-md" : "rounded-[10px]"
         } ${item.owned ? "border-possede" : "border-bordure"}`}
@@ -62,7 +62,7 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
             )}
           </span>
         )}
-      </button>
+      </Carte>
     </li>
   );
 }

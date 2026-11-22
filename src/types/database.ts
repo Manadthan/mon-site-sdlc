@@ -15,6 +15,7 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          share_token: string | null;
           source_url: string | null;
           user_id: string;
         };
@@ -24,6 +25,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           name: string;
+          share_token?: string | null;
           source_url?: string | null;
           user_id?: string;
         };
@@ -32,6 +34,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           name?: string;
+          share_token?: string | null;
           source_url?: string | null;
           user_id?: string;
         };
@@ -105,6 +108,7 @@ export type Database = {
         Args: { p_direction: string; p_item_id: string };
         Returns: undefined;
       };
+      shared_collection: { Args: { p_token: string }; Returns: Json };
     };
     Enums: {
       [_ in never]: never;

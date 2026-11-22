@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.9 — 15/11/2026 — statut : **validé**
+> Version 1.10 — 22/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.10 | 22/11/2026 | ADR-06, §3, §4, §5, §9 : partage d'une collection en lecture seule par lien secret (US-17) |
 > | 1.9 | 15/11/2026 | §4, §5 : compléter une collection depuis une URL (US-13) |
 > | 1.8 | 15/11/2026 | §3 : couverture d'une collection calculée par `collection_stats` (migration 0005, issue #59) |
 > | 1.7 | 15/11/2026 | §5 : import d'une sauvegarde (US-11) |
@@ -42,6 +43,8 @@
   Le client Supabase ne sait pas enchaîner plusieurs requêtes dans une transaction : l'échange est donc fait par une **fonction SQL `move_item(item_id, direction)`** appelée en RPC (une fonction Postgres s'exécute d'un seul bloc).
 - **ADR-05 — Bucket d'images public.** Les vignettes sont servies par URL publique, avec des chemins impossibles à deviner (identifiants UUID) : `{user_id}/{collection_id}/{item_id}.webp`. Seule l'écriture est protégée. Pourquoi : chargement rapide de 300+ vignettes sans générer de liens signés, et ces images sont déjà publiques sur les sites sources. Supprimer une collection = supprimer le dossier `{user_id}/{collection_id}/`.
 
+- **ADR-06 — Partage en lecture seule par lien secret (US-17).** Une collection partagée porte un jeton aléatoire (`share_token`, 32 octets, impossible à deviner) ; le lien est `/partage/{share_token}`. La lecture passe par une **fonction SQL** `shared_collection(token)` (`security definer`) qui renvoie la collection et ses items si le jeton existe, rien sinon. On n'ouvre **aucune** politique RLS au visiteur anonyme : il ne peut ni lister les collections ni lire une collection non partagée. ADR-01 reste valable : toujours un seul compte, le visiteur n'en a pas. Les images sont déjà publiques (ADR-05). Arrêter le partage = remettre `share_token` à NULL ; partager à nouveau = nouveau jeton.
+
 ## 2. Architecture
 
 ```
@@ -73,8 +76,8 @@ user_id      uuid  → auth.users     collection_id uuid  → collections (ON DE
 name         text  NOT NULL         title         text  NOT NULL
 source_url   text                   image_path    text        -- chemin dans Storage, NULL si pas d'image
 cover_path   text                   source_image  text        -- URL d'origine (info)
-created_at   timestamptz            position      integer NOT NULL
-                                    owned         boolean NOT NULL DEFAULT false
+share_token  text  UNIQUE           position      integer NOT NULL
+created_at   timestamptz            owned         boolean NOT NULL DEFAULT false
                                     created_at    timestamptz
 ```
 
@@ -85,6 +88,7 @@ created_at   timestamptz            position      integer NOT NULL
   - `collections` : une ligne n'est visible et modifiable que si `user_id = auth.uid()` ;
   - `items` (pas de colonne `user_id`) : une ligne n'est visible et modifiable que si sa collection appartient à `auth.uid()` (`exists (select 1 from collections c where c.id = collection_id and c.user_id = auth.uid())`) ;
   - Storage : lecture publique (ADR-05) ; écriture et suppression réservées à l'utilisateur connecté, dans son dossier `{user_id}/`.
+- `share_token` (migration 0006) : NULL = collection non partagée (ADR-06). Seule la fonction `shared_collection(token)` est exécutable par le rôle anonyme.
 - Le tri préféré de l'accueil (US-05) est mémorisé dans un cookie : inutile de créer une table pour ça.
 
 ## 4. Écrans et routes
@@ -96,6 +100,7 @@ created_at   timestamptz            position      integer NOT NULL
 | `/collections/new` | Création : URL → aperçu → import avec progression | US-03 |
 | `/collections/[id]` | Collection : grille de vignettes, mode cocher / mode édition | US-06 à US-10, US-12 |
 | `/collections/[id]/completer` | Compléter : URL → aperçu (doublons décochés) → ajout en fin de collection | US-13 |
+| `/partage/[token]` | Collection partagée, **sans connexion** : grille en lecture seule, recherche, filtre, tri, zoom ; `noindex` ; exclue de la redirection vers `/login` (`proxy.ts`) | US-17 |
 
 Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les états vides, confirmations, progression et erreurs.
 
@@ -113,6 +118,7 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut). Ou bien l'**adresse d'une image**, téléchargée côté serveur avec la protection SSRF (§6) *avant* de créer l'item : une adresse refusée n'enregistre rien |
 | `preparerExport()` | Sauvegarde (SPEC §4) : renvoie `donnees.json` et l'adresse publique des images ; le **navigateur** télécharge les images et fabrique le .zip (`fflate`), car une réponse serveur Vercel est limitée en taille |
 | `creerCollectionImportee` / `ajouterItemsImportes` / `enregistrerImagesImportees` | Import d'une sauvegarde (US-11), piloté par le navigateur qui ouvre le .zip : collections **ajoutées** (nom suffixé « (importée) » si déjà pris), items par paquets de 500, images par lots de 10 ré-encodées par sharp |
+| `partagerCollection(id)` / `arreterPartage(id)` | Crée un nouveau `share_token` et renvoie le lien / remet `share_token` à NULL (US-17, ADR-06) |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
@@ -163,6 +169,7 @@ supabase/        migrations SQL (le schéma est versionné dans Git)
 | Un site source bloque ou change de structure | Import raté | Création d'une collection vide + ajout manuel ; adaptateur dédié si besoin |
 | Import de centaines d'images trop long | Délai dépassé | Lots de 10 pilotés par le navigateur (ADR-03) |
 | Quota gratuit Supabase (1 Go de stockage) | Plus de place | Vignettes WebP ~30 Ko → ~30 000 images possibles |
+| Lien de partage transféré à un inconnu | La collection est visible par lui (lecture seule) | « Arrêter le partage » invalide le lien ; rien d'autre n'est exposé (ADR-06) |
 | Projet Supabase gratuit mis en pause après 7 jours sans activité | Site indisponible | Usage régulier, ou tâche planifiée de « ping » |
 
 ## 10. Plan de découpage (préparation de la phase 3)

@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.6 — 16/11/2026 — statut : **validé**
+> Version 1.7 — 22/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.7 | 22/11/2026 | Ajout d'US-17 : partager une collection en lecture seule ; §6 : seul le partage avec modification reste hors périmètre |
 > | 1.6 | 16/11/2026 | Ajout d'US-16 : thème sombre |
 > | 1.5 | 16/11/2026 | Ajout d'US-15 : trier les items ; US-14 : boutons − / + dans la barre du haut |
 > | 1.4 | 15/11/2026 | Ajout d'US-14 : nombre d'items par ligne |
@@ -29,7 +30,7 @@ Objectif secondaire : servir de projet d'apprentissage du travail avec Claude se
 
 | Élément | Décision |
 |---|---|
-| Utilisateurs | Un seul : le propriétaire du site |
+| Utilisateurs | Un seul : le propriétaire du site. Des proches peuvent **consulter** une collection par un lien de partage, sans compte (US-17) |
 | Appareil principal | iPhone 12 mini (écran 5,4", ~375 px de large), Safari |
 | Données | Stockées sur un serveur, accessibles depuis n'importe quel appareil |
 | Accès | Protégé par un compte simple (identifiant + mot de passe) |
@@ -144,6 +145,16 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 - [ ] Texte lisible : contraste d'au moins 4,5:1.
 - [ ] La barre de Safari et les champs de saisie suivent aussi le thème.
 
+### US-17 — Partager une collection en lecture seule (S)
+*En tant que collectionneur, je montre une collection à un proche (mon frère) sans lui donner mon mot de passe.*
+- [ ] En mode édition, un bouton « Partager » crée un **lien secret** propre à cette collection et ouvre la feuille de partage de l'iPhone (Messages, WhatsApp…) ; à défaut, le lien est copié.
+- [ ] Le lien s'ouvre **sans compte** et ne montre que cette collection : nom, compteur possédés / total / %, vignettes avec la coche verte des items possédés.
+- [ ] Recherche, filtre Tous / Possédés / Manquants, tri et nombre d'items par ligne fonctionnent sur la page partagée.
+- [ ] Aucune modification n'est possible : pas de coche au toucher, pas de mode édition, pas de lien vers mes autres collections.
+- [ ] Ce que je coche apparaît pour mon frère au prochain chargement de la page.
+- [ ] « Arrêter le partage » rend le lien invalide (message « Ce lien de partage n'est plus valide ») ; partager à nouveau crée un **nouveau** lien.
+- [ ] La page partagée n'est pas indexée par les moteurs de recherche.
+
 ## 4. Exigences non fonctionnelles
 
 - **Mobile d'abord** : conçu pour 375 px, cibles tactiles ≥ 44 px, testé sur Safari iOS.
@@ -171,7 +182,7 @@ Le scraping est la partie la plus risquée du projet.
 
 ## 6. Hors périmètre (pour l'instant)
 
-- Plusieurs utilisateurs, partage de collections.
+- Plusieurs utilisateurs, partage avec droit de modification (le partage en lecture seule est couvert par US-17).
 - Prix, valeur estimée, état des objets, doublons.
 - Mise à jour automatique d'une collection quand la page source change.
 - Application native iOS.
