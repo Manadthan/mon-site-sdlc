@@ -16,16 +16,17 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
   const Carte = onToggle ? "button" : "div";
   return (
     // content-visibility : le navigateur ne dessine que les vignettes visibles (fluide avec 300+ items).
-    <li className="[contain-intrinsic-size:auto_260px] [content-visibility:auto]">
+    <li className="[contain-intrinsic-size:auto_300px] [content-visibility:auto]">
       <Carte
         {...(onToggle ? { type: "button" as const, onClick: onToggle, "aria-pressed": item.owned } : {})}
         className={`flex h-full w-full flex-col overflow-hidden border bg-surface text-left text-texte transition-colors ${
           densite === 4 ? "rounded-md" : "rounded-[10px]"
         } ${item.owned ? "border-possede" : "border-bordure"}`}
       >
-        <span className="relative flex aspect-square w-full items-center justify-center bg-fond text-icone">
-          {/* Marge autour de l'image, comme sur une fiche produit. */}
-          <span className={`absolute flex items-center justify-center ${densite === 2 ? "inset-2.5" : "inset-1.5"}`}>
+        <span className="relative flex aspect-[3/4] w-full items-center justify-center bg-fond text-icone">
+          {/* Case en hauteur (3:4), comme la plupart des cartes, boîtes et mangas ; petite marge autour de l'image,
+              dont les bords vides ont été rognés à la création de la vignette (issue #79). */}
+          <span className={`absolute flex items-center justify-center ${densite === 2 ? "inset-1.5" : "inset-1"}`}>
             <ItemImage chemin={item.image_path} taille={densite === 4 ? 18 : 24} />
           </span>
           {item.owned && (

@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.11 — 22/11/2026 — statut : **validé**
+> Version 1.12 — 22/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.12 | 22/11/2026 | ADR-02 : bords vides des images rognés, cases 3:4 ; ADR-05 : version dans le nom des vignettes, retraitement des anciennes (issue #79) |
 > | 1.11 | 22/11/2026 | ADR-06 révisé : un jeton par compte (table `partages`, migration 0007) au lieu d'un par collection ; routes `/partage/[jeton]` et `/partage/[jeton]/[id]` |
 > | 1.10 | 22/11/2026 | ADR-06, §3, §4, §5, §9 : partage d'une collection en lecture seule par lien secret (US-17) |
 > | 1.9 | 15/11/2026 | §4, §5 : compléter une collection depuis une URL (US-13) |
@@ -38,11 +39,11 @@
 ### Décisions d'architecture (ADR)
 
 - **ADR-01 — Un seul utilisateur.** Le compte est créé à la main dans Supabase ; les inscriptions publiques sont désactivées.
-- **ADR-02 — Images copiées et redimensionnées.** Chaque image est téléchargée, convertie en WebP 400 px de large, puis stockée. L'URL d'origine est gardée pour information.
+- **ADR-02 — Images copiées et redimensionnées.** Chaque image est téléchargée, convertie en WebP 400 px de large, puis stockée. L'URL d'origine est gardée pour information. Les bords unis (blanc, transparent) sont rognés avant la réduction (sharp `trim`, tolérance 20) pour que l'objet remplisse sa case, affichée en 3:4 (issue #79).
 - **ADR-03 — Import en deux temps.** (1) *Aperçu* : on scrape et on montre les candidats, sans rien enregistrer. (2) *Import* : on enregistre les items retenus, puis on copie les images **par lots de 10**, pilotés par le navigateur, pour rester sous la limite de durée des fonctions Vercel gratuites et afficher une progression.
 - **ADR-04 — Ordre par entier `position`.** Monter/descendre un item = échanger sa `position` avec son voisin, dans une seule transaction.
   Le client Supabase ne sait pas enchaîner plusieurs requêtes dans une transaction : l'échange est donc fait par une **fonction SQL `move_item(item_id, direction)`** appelée en RPC (une fonction Postgres s'exécute d'un seul bloc).
-- **ADR-05 — Bucket d'images public.** Les vignettes sont servies par URL publique, avec des chemins impossibles à deviner (identifiants UUID) : `{user_id}/{collection_id}/{item_id}.webp`. Seule l'écriture est protégée. Pourquoi : chargement rapide de 300+ vignettes sans générer de liens signés, et ces images sont déjà publiques sur les sites sources. Supprimer une collection = supprimer le dossier `{user_id}/{collection_id}/`.
+- **ADR-05 — Bucket d'images public.** Les vignettes sont servies par URL publique, avec des chemins impossibles à deviner (identifiants UUID) : `{user_id}/{collection_id}/{item_id}-v2.webp` (`v2` = version de fabrication : un nouveau nom donne une nouvelle URL, malgré le cache d'un an ; les vignettes sans version, d'avant le rognage, se retraitent en mode édition avec `recadrerImages`, par lots de 10). Seule l'écriture est protégée. Pourquoi : chargement rapide de 300+ vignettes sans générer de liens signés, et ces images sont déjà publiques sur les sites sources. Supprimer une collection = supprimer le dossier `{user_id}/{collection_id}/`.
 
 - **ADR-06 — Partage en lecture seule par lien secret (US-17, révisé en v1.11).** Un **seul** jeton aléatoire par compte (table `partages`, 32 octets, impossible à deviner) donne accès à **toutes** les collections : lien `/partage/{jeton}`. La lecture passe par deux **fonctions SQL** `security definer` : `shared_collections(token)` (liste avec statistiques et couverture) et `shared_collection(token, collection_id)` (une collection et ses items, seulement si elle appartient au propriétaire du jeton). Elles renvoient NULL pour un jeton inconnu. On n'ouvre **aucune** politique RLS au visiteur anonyme. ADR-01 reste valable : toujours un seul compte, le visiteur n'en a pas. Les images sont déjà publiques (ADR-05). Arrêter le partage = supprimer la ligne de `partages` ; partager à nouveau = nouveau jeton. La v1.10 (un jeton par collection, `collections.share_token`) est retirée par la migration 0007.
 

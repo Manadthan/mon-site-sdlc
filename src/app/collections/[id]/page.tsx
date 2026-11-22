@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { CollectionBoard } from "@/components/CollectionBoard";
 import { isUuid } from "@/lib/ids";
+import { vignetteAncienne } from "@/lib/images/storage";
 import { COOKIE_GRILLE, parseColonnes } from "@/lib/items/grille";
 import { COOKIE_TRI_ITEMS, parseTriItems } from "@/lib/items/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -66,6 +67,7 @@ export default async function CollectionPage({ params }: Props) {
       name={collection.name}
       items={items}
       imagesACopier={(sansImage ?? []).map((item) => item.id)}
+      imagesARecadrer={items.filter((item) => vignetteAncienne(item.image_path)).map((item) => item.id)}
       colonnes={parseColonnes((await cookies()).get(COOKIE_GRILLE)?.value)}
       tri={parseTriItems((await cookies()).get(COOKIE_TRI_ITEMS)?.value)}
     />
