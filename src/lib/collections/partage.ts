@@ -1,4 +1,6 @@
 import type { Item } from "@/components/ItemTile";
+import type { CollectionCard } from "@/lib/collections/cards";
+import { computeProgress } from "@/lib/progress";
 
 /** Forme d'un jeton de partage (ADR-06) : 32 octets aléatoires en base64url = 43 caractères. */
 const JETON = /^[A-Za-z0-9_-]{43}$/;
@@ -15,9 +17,34 @@ export function nouveauJetonPartage(): string {
   return Buffer.from(octets).toString("base64url");
 }
 
-/** Adresse du lien à envoyer (US-17). */
+/** Adresse du lien à envoyer (US-17) : la liste de toutes les collections partagées. */
 export function lienPartage(origine: string, jeton: string): string {
   return `${origine.replace(/\/+$/, "")}/partage/${jeton}`;
+}
+
+function estCarte(v: Record<string, unknown>) {
+  return (
+    typeof v.id === "string" &&
+    typeof v.name === "string" &&
+    typeof v.created_at === "string" &&
+    (v.cover_path === null || typeof v.cover_path === "string") &&
+    typeof v.owned === "number" &&
+    typeof v.total === "number"
+  );
+}
+
+/** Lecture vérifiée de shared_collections(token) en cartes, comme l'accueil ; null si le lien n'est pas (ou plus) valide. */
+export function lireCollectionsPartagees(donnees: unknown): CollectionCard[] | null {
+  if (!Array.isArray(donnees)) return null;
+  const lignes = donnees.filter((d): d is Record<string, unknown> => typeof d === "object" && d !== null);
+  if (lignes.length !== donnees.length || !lignes.every(estCarte)) return null;
+  return lignes.map((c) => ({
+    id: c.id as string,
+    name: c.name as string,
+    coverPath: c.cover_path as string | null,
+    createdAt: c.created_at as string,
+    progress: computeProgress(c.owned as number, c.total as number),
+  }));
 }
 
 export type CollectionPartagee = { name: string; items: Item[] };

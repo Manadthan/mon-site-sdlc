@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { validateCollectionName } from "@/lib/collections/name";
-import { nouveauJetonPartage } from "@/lib/collections/partage";
 import { isUuid } from "@/lib/ids";
 import { BUCKET_IMAGES, dossierCollection } from "@/lib/images/storage";
 import { nextSort, parseSort, serializeSort, SORT_COOKIE, SORT_KEYS, type SortKey } from "@/lib/collections/sort";
@@ -77,30 +76,6 @@ export async function deleteCollection(id: string): Promise<{ error?: string }> 
   return {};
 }
 
-/**
- * Partage une collection en lecture seule (US-17, ADR-06) : nouveau jeton secret à chaque appel,
- * ce qui invalide l'ancien lien. Renvoie le jeton ; le navigateur construit l'adresse complète.
- */
-export async function partagerCollection(id: string): Promise<{ jeton?: string; error?: string }> {
-  if (!isUuid(id)) return { error: "Collection introuvable." };
-  const jeton = nouveauJetonPartage();
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("collections").update({ share_token: jeton }).eq("id", id).select("id");
-  if (error || data.length === 0) return { error: "Le lien n’a pas pu être créé. Réessayez dans un instant." };
-  revalidatePath(`/collections/${id}`);
-  return { jeton };
-}
-
-/** Arrête le partage (US-17) : l'ancien lien affiche « Ce lien de partage n'est plus valide ». */
-export async function arreterPartage(id: string): Promise<{ error?: string }> {
-  if (!isUuid(id)) return { error: "Collection introuvable." };
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.from("collections").update({ share_token: null }).eq("id", id).select("id");
-  if (error || data.length === 0) return { error: "Le partage n’a pas pu être arrêté. Réessayez dans un instant." };
-  revalidatePath(`/collections/${id}`);
-  return {};
-}
-
 /** Change le tri de l'accueil et le mémorise un an dans un cookie (US-05). */
 export async function changeSort(formData: FormData) {
   const choisi = formData.get("key");
@@ -119,4 +94,6 @@ export async function changeSort(formData: FormData) {
     secure: enHttps,
   });
   revalidatePath("/");
+  // Même tri sur la liste partagée (US-17) : le visiteur a son propre cookie.
+  revalidatePath("/partage", "layout");
 }

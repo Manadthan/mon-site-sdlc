@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { estJetonPartage, lienPartage, lireCollectionPartagee, nouveauJetonPartage } from "@/lib/collections/partage";
+import {
+  estJetonPartage,
+  lienPartage,
+  lireCollectionPartagee,
+  lireCollectionsPartagees,
+  nouveauJetonPartage,
+} from "@/lib/collections/partage";
 
 describe("jeton de partage", () => {
   it("fait 43 caractères base64url et change à chaque fois", () => {
@@ -41,5 +47,28 @@ describe("lireCollectionPartagee", () => {
     expect(lireCollectionPartagee(null)).toBeNull();
     expect(lireCollectionPartagee({ name: "C" })).toBeNull();
     expect(lireCollectionPartagee({ name: "C", items: [{ id: 1 }] })).toBeNull();
+  });
+});
+
+describe("lireCollectionsPartagees", () => {
+  const ligne = { id: "c1", name: "Cartes", created_at: "2026-01-01T00:00:00Z", cover_path: null, owned: 1, total: 4 };
+
+  it("transforme la liste en cartes, comme l'accueil", () => {
+    expect(lireCollectionsPartagees([ligne])).toEqual([
+      {
+        id: "c1",
+        name: "Cartes",
+        coverPath: null,
+        createdAt: "2026-01-01T00:00:00Z",
+        progress: { owned: 1, total: 4, percent: 25 },
+      },
+    ]);
+    expect(lireCollectionsPartagees([])).toEqual([]);
+  });
+
+  it("renvoie null pour un lien invalide ou une réponse mal formée", () => {
+    expect(lireCollectionsPartagees(null)).toBeNull();
+    expect(lireCollectionsPartagees([{ ...ligne, total: "4" }])).toBeNull();
+    expect(lireCollectionsPartagees([null])).toBeNull();
   });
 });

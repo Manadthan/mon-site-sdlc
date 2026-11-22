@@ -7,11 +7,12 @@ import type { CollectionCard as Carte } from "@/lib/collections/cards";
 // Carte d'une collection sur l'accueil (US-02), avec bouton de suppression (US-04) — maquette n° 1.
 // Couverture : image du premier item qui en a une (issue #59), sinon une vignette neutre.
 // Toute la carte (sauf la corbeille) mène à la page de la collection (US-06).
-export function CollectionCard({ carte }: { carte: Carte }) {
+// Liste partagée (US-17) : lien vers la page partagée, sans corbeille.
+export function CollectionCard({ carte, lien, lectureSeule = false }: { carte: Carte; lien?: string; lectureSeule?: boolean }) {
   const { id, name, coverPath, progress } = carte;
   return (
     <li className="flex items-center gap-3 rounded-[14px] border border-bordure bg-surface py-2.5 pr-1.5 pl-2.5">
-      <Link href={`/collections/${id}`} className="flex min-w-0 flex-1 items-center gap-3 text-texte">
+      <Link href={lien ?? `/collections/${id}`} className="flex min-w-0 flex-1 items-center gap-3 text-texte">
         <div className="relative flex size-16 shrink-0 items-center justify-center rounded-[10px] bg-neutre text-icone" aria-hidden="true">
           <ItemImage chemin={coverPath} taille={24} />
         </div>
@@ -33,7 +34,7 @@ export function CollectionCard({ carte }: { carte: Carte }) {
           </div>
         </div>
       </Link>
-      <DeleteCollectionButton id={id} name={name} total={progress.total} />
+      {lectureSeule ? <span className="w-1" /> : <DeleteCollectionButton id={id} name={name} total={progress.total} />}
     </li>
   );
 }

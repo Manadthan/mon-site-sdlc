@@ -19,7 +19,7 @@ const chargerCollection = cache(async (id: string) => {
   if (!isUuid(id)) return null;
   const supabase = await createSupabaseServerClient();
   // La RLS ne renvoie rien pour la collection d'un autre utilisateur : même réponse qu'une collection inexistante.
-  const { data } = await supabase.from("collections").select("id, name, share_token").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("collections").select("id, name").eq("id", id).maybeSingle();
   return data;
 });
 
@@ -68,7 +68,6 @@ export default async function CollectionPage({ params }: Props) {
       imagesACopier={(sansImage ?? []).map((item) => item.id)}
       colonnes={parseColonnes((await cookies()).get(COOKIE_GRILLE)?.value)}
       tri={parseTriItems((await cookies()).get(COOKIE_TRI_ITEMS)?.value)}
-      jetonPartage={collection.share_token}
     />
   );
 }

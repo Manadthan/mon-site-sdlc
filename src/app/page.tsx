@@ -4,6 +4,7 @@ import { logout } from "@/app/actions/auth";
 import { CollectionCard } from "@/components/CollectionCard";
 import { ExportButton } from "@/components/ExportButton";
 import { ImportSauvegarde } from "@/components/ImportSauvegarde";
+import { PartageSheet } from "@/components/PartageSheet";
 import { SortBar } from "@/components/SortBar";
 import { toCollectionCards } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
@@ -13,9 +14,11 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
   // La RLS ne renvoie que les collections de l'utilisateur connecté.
-  const [collections, stats] = await Promise.all([
+  const [collections, stats, partage] = await Promise.all([
     supabase.from("collections").select("id, name, cover_path, created_at"),
     supabase.from("collection_stats").select("collection_id, owned, total, cover_path"),
+    // Lien de partage en cours (US-17), s'il y en a un.
+    supabase.from("partages").select("token").maybeSingle(),
   ]);
   const erreur = collections.error ?? stats.error;
   const tri = parseSort((await cookies()).get(SORT_COOKIE)?.value);
@@ -25,6 +28,8 @@ export default async function Home() {
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
       <header className="flex items-center justify-between border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),12px)] pr-4 pb-3 pl-5">
         <h1 className="text-[26px] font-bold tracking-tight">Mes collections</h1>
+        <div className="flex items-center">
+        <PartageSheet jeton={partage.data?.token ?? null} />
         <form action={logout}>
           <button type="submit" aria-label="Se déconnecter" className="flex size-11 items-center justify-center rounded-full text-texte-doux">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -34,6 +39,7 @@ export default async function Home() {
             </svg>
           </button>
         </form>
+        </div>
       </header>
 
       {erreur ? (

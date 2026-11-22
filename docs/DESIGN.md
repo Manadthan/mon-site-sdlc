@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.10 — 22/11/2026 — statut : **validé**
+> Version 1.11 — 22/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.11 | 22/11/2026 | ADR-06 révisé : un jeton par compte (table `partages`, migration 0007) au lieu d'un par collection ; routes `/partage/[jeton]` et `/partage/[jeton]/[id]` |
 > | 1.10 | 22/11/2026 | ADR-06, §3, §4, §5, §9 : partage d'une collection en lecture seule par lien secret (US-17) |
 > | 1.9 | 15/11/2026 | §4, §5 : compléter une collection depuis une URL (US-13) |
 > | 1.8 | 15/11/2026 | §3 : couverture d'une collection calculée par `collection_stats` (migration 0005, issue #59) |
@@ -43,7 +44,7 @@
   Le client Supabase ne sait pas enchaîner plusieurs requêtes dans une transaction : l'échange est donc fait par une **fonction SQL `move_item(item_id, direction)`** appelée en RPC (une fonction Postgres s'exécute d'un seul bloc).
 - **ADR-05 — Bucket d'images public.** Les vignettes sont servies par URL publique, avec des chemins impossibles à deviner (identifiants UUID) : `{user_id}/{collection_id}/{item_id}.webp`. Seule l'écriture est protégée. Pourquoi : chargement rapide de 300+ vignettes sans générer de liens signés, et ces images sont déjà publiques sur les sites sources. Supprimer une collection = supprimer le dossier `{user_id}/{collection_id}/`.
 
-- **ADR-06 — Partage en lecture seule par lien secret (US-17).** Une collection partagée porte un jeton aléatoire (`share_token`, 32 octets, impossible à deviner) ; le lien est `/partage/{share_token}`. La lecture passe par une **fonction SQL** `shared_collection(token)` (`security definer`) qui renvoie la collection et ses items si le jeton existe, rien sinon. On n'ouvre **aucune** politique RLS au visiteur anonyme : il ne peut ni lister les collections ni lire une collection non partagée. ADR-01 reste valable : toujours un seul compte, le visiteur n'en a pas. Les images sont déjà publiques (ADR-05). Arrêter le partage = remettre `share_token` à NULL ; partager à nouveau = nouveau jeton.
+- **ADR-06 — Partage en lecture seule par lien secret (US-17, révisé en v1.11).** Un **seul** jeton aléatoire par compte (table `partages`, 32 octets, impossible à deviner) donne accès à **toutes** les collections : lien `/partage/{jeton}`. La lecture passe par deux **fonctions SQL** `security definer` : `shared_collections(token)` (liste avec statistiques et couverture) et `shared_collection(token, collection_id)` (une collection et ses items, seulement si elle appartient au propriétaire du jeton). Elles renvoient NULL pour un jeton inconnu. On n'ouvre **aucune** politique RLS au visiteur anonyme. ADR-01 reste valable : toujours un seul compte, le visiteur n'en a pas. Les images sont déjà publiques (ADR-05). Arrêter le partage = supprimer la ligne de `partages` ; partager à nouveau = nouveau jeton. La v1.10 (un jeton par collection, `collections.share_token`) est retirée par la migration 0007.
 
 ## 2. Architecture
 
@@ -76,9 +77,15 @@ user_id      uuid  → auth.users     collection_id uuid  → collections (ON DE
 name         text  NOT NULL         title         text  NOT NULL
 source_url   text                   image_path    text        -- chemin dans Storage, NULL si pas d'image
 cover_path   text                   source_image  text        -- URL d'origine (info)
-share_token  text  UNIQUE           position      integer NOT NULL
-created_at   timestamptz            owned         boolean NOT NULL DEFAULT false
+created_at   timestamptz            position      integer NOT NULL
+                                    owned         boolean NOT NULL DEFAULT false
                                     created_at    timestamptz
+
+partages (US-17)
+────────
+user_id      uuid  PK → auth.users (ON DELETE CASCADE)
+token        text  NOT NULL UNIQUE  -- 43 caractères base64url
+created_at   timestamptz
 ```
 
 - Le compteur « possédés / total » et le % sont **calculés** par une vue SQL `collection_stats` (pas stockés → jamais désynchronisés).
@@ -88,7 +95,7 @@ created_at   timestamptz            owned         boolean NOT NULL DEFAULT false
   - `collections` : une ligne n'est visible et modifiable que si `user_id = auth.uid()` ;
   - `items` (pas de colonne `user_id`) : une ligne n'est visible et modifiable que si sa collection appartient à `auth.uid()` (`exists (select 1 from collections c where c.id = collection_id and c.user_id = auth.uid())`) ;
   - Storage : lecture publique (ADR-05) ; écriture et suppression réservées à l'utilisateur connecté, dans son dossier `{user_id}/`.
-- `share_token` (migration 0006) : NULL = collection non partagée (ADR-06). Seule la fonction `shared_collection(token)` est exécutable par le rôle anonyme.
+- `partages` (migration 0007) : pas de ligne = rien n'est partagé (ADR-06). RLS : chacun ne voit et ne modifie que sa ligne. Seules `shared_collections` et `shared_collection` sont exécutables par le rôle anonyme.
 - Le tri préféré de l'accueil (US-05) est mémorisé dans un cookie : inutile de créer une table pour ça.
 
 ## 4. Écrans et routes
@@ -100,7 +107,8 @@ created_at   timestamptz            owned         boolean NOT NULL DEFAULT false
 | `/collections/new` | Création : URL → aperçu → import avec progression | US-03 |
 | `/collections/[id]` | Collection : grille de vignettes, mode cocher / mode édition | US-06 à US-10, US-12 |
 | `/collections/[id]/completer` | Compléter : URL → aperçu (doublons décochés) → ajout en fin de collection | US-13 |
-| `/partage/[token]` | Collection partagée, **sans connexion** : grille en lecture seule, recherche, filtre, tri, zoom ; `noindex` ; exclue de la redirection vers `/login` (`proxy.ts`) | US-17 |
+| `/partage/[jeton]` | Collections partagées, **sans connexion** : liste comme l'accueil (couverture, compteur, tri), sans création ni suppression ; `noindex` ; exclue de la redirection vers `/login` (`proxy.ts`) | US-17 |
+| `/partage/[jeton]/[id]` | Une collection partagée : grille en lecture seule, recherche, filtre, tri, zoom ; retour à la liste partagée | US-17 |
 
 Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les états vides, confirmations, progression et erreurs.
 
@@ -118,7 +126,7 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `addItem(collectionId, title, image?)` | Ajoute en fin de liste. Une photo de l'iPhone est d'abord **réduite dans le navigateur** (≈ 1200 px, JPEG) : une photo brute fait 3 à 5 Mo, au-delà de la limite d'envoi des server actions (1 Mo par défaut). Ou bien l'**adresse d'une image**, téléchargée côté serveur avec la protection SSRF (§6) *avant* de créer l'item : une adresse refusée n'enregistre rien |
 | `preparerExport()` | Sauvegarde (SPEC §4) : renvoie `donnees.json` et l'adresse publique des images ; le **navigateur** télécharge les images et fabrique le .zip (`fflate`), car une réponse serveur Vercel est limitée en taille |
 | `creerCollectionImportee` / `ajouterItemsImportes` / `enregistrerImagesImportees` | Import d'une sauvegarde (US-11), piloté par le navigateur qui ouvre le .zip : collections **ajoutées** (nom suffixé « (importée) » si déjà pris), items par paquets de 500, images par lots de 10 ré-encodées par sharp |
-| `partagerCollection(id)` / `arreterPartage(id)` | Crée un nouveau `share_token` et renvoie le lien / remet `share_token` à NULL (US-17, ADR-06) |
+| `partagerCollections()` / `arreterPartage()` | Crée (ou remplace) le jeton de `partages` et le renvoie / supprime la ligne (US-17, ADR-06). Bouton « Partager » de l'accueil |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
