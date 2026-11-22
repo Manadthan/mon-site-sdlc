@@ -6,6 +6,7 @@ import { deleteItem, moveItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { CopieImagesManquantes } from "@/components/CopieImagesManquantes";
+import { RecadrageImages } from "@/components/RecadrageImages";
 import { FilterTabs } from "@/components/FilterTabs";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
@@ -26,6 +27,8 @@ type Props = {
   name: string;
   items: Item[];
   imagesACopier?: string[];
+  /** Items dont la vignette date d'avant le rognage des bords (issue #79). */
+  imagesARecadrer?: string[];
   colonnes?: Colonnes;
   tri?: TriItems;
   /** Collection partagée vue par un proche (US-17) : ni coche, ni mode édition. */
@@ -44,6 +47,7 @@ export function CollectionBoard({
   name,
   items,
   imagesACopier = [],
+  imagesARecadrer = [],
   colonnes: colonnesInitiales = 2,
   tri: triInitial = TRI_PAR_DEFAUT,
   lectureSeule = false,
@@ -227,8 +231,9 @@ export function CollectionBoard({
 
       <main className="flex-1 px-4 pt-3 pb-8">
         {edition && (
-          <div className="mb-3 empty:hidden">
+          <div className="mb-3 flex flex-col gap-2 empty:hidden">
             <CopieImagesManquantes collectionId={collectionId} itemIds={imagesACopier} />
+            <RecadrageImages collectionId={collectionId} itemIds={imagesARecadrer} />
           </div>
         )}
         {!edition && affiches.length > 0 && (

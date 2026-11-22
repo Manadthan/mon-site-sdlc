@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-17 + critères d'acceptation | v1.8 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.11 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.12 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
@@ -53,11 +53,11 @@ Modèle de données :
 
 Décisions clés (détail dans DESIGN.md) :
 - **ADR-01** un seul utilisateur, compte créé à la main.
-- **ADR-02** images copiées dans Supabase Storage, converties en WebP 400 px.
+- **ADR-02** images copiées dans Supabase Storage, bords vides rognés, converties en WebP 400 px.
 - **ADR-03** import en deux temps : `scrapePreview` (n'écrit rien) puis import des images **par lots de 10** pilotés par le navigateur.
 - **ADR-04** ordre des items = entier `position` ; monter/descendre = fonction SQL `move_item` (échange avec le voisin en une transaction).
 - **ADR-06** partage en lecture seule de **toutes** les collections : un jeton secret par compte (table `partages`), lecture anonyme uniquement par les fonctions SQL `shared_collections(token)` et `shared_collection(token, id)` (aucune politique RLS pour `anon`).
-- **ADR-05** bucket d'images public, chemins `{user_id}/{collection_id}/{item_id}.webp` ; écriture protégée.
+- **ADR-05** bucket d'images public, chemins `{user_id}/{collection_id}/{item_id}-v2.webp` (version de fabrication) ; écriture protégée.
 - RLS des `items` via la propriété de leur collection (pas de `user_id` sur `items`).
 
 ## Arborescence cible
@@ -129,6 +129,7 @@ mon-site-sdlc/
 │   │       ├── partage.ts             ✅   partagerCollections, arreterPartage (US-17)
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
 │   │       ├── sauvegarde.ts          ✅   import d'une sauvegarde : collection, items, images (US-11)
+│   │       ├── recadrage.ts           ✅   recadrerImages : rognage des anciennes vignettes, lot de 10 (#79)
 │   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, completerCollection (US-13), importerImages (lot de 10)
 │   ├── components/
 │   │   ├── LoginForm.tsx              ✅   US-01
@@ -155,7 +156,8 @@ mon-site-sdlc/
 │   │   ├── PartageSheet.tsx           ✅   US-17 : bouton de l'accueil + panneau (créer, envoyer, arrêter)
 │   │   ├── LienInvalide.tsx           ✅   US-17 : lien de partage inconnu ou arrêté
 │   │   ├── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
-│   │   └── CopieImagesManquantes.tsx  ✅   reprise d'un import interrompu, en mode édition (#51)
+│   │   ├── CopieImagesManquantes.tsx  ✅   reprise d'un import interrompu, en mode édition (#51)
+│   │   └── RecadrageImages.tsx        ✅   recadrage des anciennes vignettes, en mode édition (#79)
 │   ├── lib/
 │   │   ├── auth/routes.ts             ✅   règles de redirection (+ routes.test.ts)
 │   │   ├── ids.ts                     ✅   vérification des identifiants (+ ids.test.ts)
@@ -179,8 +181,8 @@ mon-site-sdlc/
 │   │   │   ├── env.ts                 ✅   lecture vérifiée des variables (+ env.test.ts)
 │   │   │   ├── server.ts              ✅
 │   │   │   └── client.ts              ✅
-│   │   ├── images/storage.ts          ✅   bucket, chemins (ADR-05), URL publique
-│   │   ├── images/thumbnail.ts        ✅   sharp → WebP 400 px (+ thumbnail.test.ts)
+│   │   ├── images/storage.ts          ✅   bucket, chemins versionnés (ADR-05), URL publique (+ storage.test.ts)
+│   │   ├── images/thumbnail.ts        ✅   sharp → bords rognés, WebP 400 px (+ thumbnail.test.ts)
 │   │   ├── images/resize.ts           ✅   réduction de la photo dans le navigateur (+ resize.test.ts)
 │   │   ├── images/download.ts         ✅   téléchargement d'une image par URL (SSRF)
 │   │   ├── images/enregistrer.ts      ✅   vignette → Storage → lien avec l'item (ajout et import)
@@ -253,7 +255,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
-  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77)
+  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77), vignettes rognées (#79)
 - [x] Phase finale — Bilan : `docs/BILAN.md` v1.0
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.

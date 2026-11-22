@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import sharp from "sharp";
 import { adminSupabase, creerCollection, nouvelUtilisateur } from "./supabase-admin";
 import { seConnecter } from "./utilisateur";
 
@@ -105,7 +106,7 @@ test("ajouter un item avec une photo, puis le supprimer avec son image", async (
   // La vignette affiche l'image stockée dans le dossier de l'utilisateur, en WebP 400 px.
   await page.getByRole("button", { name: "Terminé" }).click();
   const image = page.getByRole("button", { name: /Carte avec photo/ }).locator("img");
-  await expect(image).toHaveAttribute("src", new RegExp(`/storage/v1/object/public/items/${dossier}/[0-9a-f-]+\\.webp$`));
+  await expect(image).toHaveAttribute("src", new RegExp(`/storage/v1/object/public/items/${dossier}/[0-9a-f-]+-v2\\.webp$`));
   await expect(image).toHaveJSProperty("complete", true);
   expect(await image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(400);
   // L'image entière est visible dans la vignette, sans être recadrée (issue #57).
@@ -239,6 +240,43 @@ test("les images restées à copier sont signalées en mode édition et peuvent 
   await expect(page.getByText("2 images n’ont pas pu être copiées. Réessayez plus tard, ou ajoutez-les à la main.")).toBeVisible();
   // On peut réessayer.
   await expect(page.getByRole("button", { name: "Copier les images" })).toBeVisible();
+});
+
+// Issue #79 — Les vignettes importées avant le rognage des bords peuvent être recadrées en mode édition.
+test("recadrer les images importées avant le rognage des bords", async ({ page }, testInfo) => {
+  const utilisateur = await nouvelUtilisateur("recadrage", testInfo);
+  const id = await creerCollection(utilisateur.id, "Anciennes vignettes", 2, 0);
+  const admin = adminSupabase();
+  const stockage = admin.storage.from("items");
+  const { data: item1 } = await admin.from("items").select("id").eq("collection_id", id).eq("title", "Item 1").single();
+  // Ancienne vignette (nom sans version) : un objet rouge de 100 × 200 au milieu d'un fond blanc de 400 × 400.
+  const objet = await sharp({ create: { width: 100, height: 200, channels: 3, background: "#c0392b" } }).png().toBuffer();
+  const vignette = await sharp({ create: { width: 400, height: 400, channels: 3, background: "#ffffff" } })
+    .composite([{ input: objet, left: 150, top: 100 }])
+    .webp()
+    .toBuffer();
+  const ancien = `${utilisateur.id}/${id}/${item1!.id}.webp`;
+  await stockage.upload(ancien, vignette, { contentType: "image/webp" });
+  await admin.from("items").update({ image_path: ancien }).eq("id", item1!.id);
+
+  await seConnecter(page, utilisateur);
+  await page.goto(`/collections/${id}`);
+  await expect(page.getByText(/bords vides/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Modifier" }).click();
+  await expect(page.getByText("1 image a peut-être des bords vides.")).toBeVisible();
+  await page.getByRole("button", { name: "Recadrer" }).click();
+  await expect(page.getByText("Images recadrées.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Recadrer" })).toHaveCount(0);
+
+  // Nouvelle vignette, sans les bords blancs ; l'ancienne est supprimée.
+  const { data: apres } = await admin.from("items").select("image_path").eq("id", item1!.id).single();
+  expect(apres!.image_path).toBe(`${utilisateur.id}/${id}/${item1!.id}-v2.webp`);
+  const { data: fichier } = await stockage.download(apres!.image_path!);
+  const { width, height } = await sharp(Buffer.from(await fichier!.arrayBuffer())).metadata();
+  expect(width).toBeLessThanOrEqual(104);
+  expect(height).toBeLessThanOrEqual(204);
+  const { data: fichiers } = await stockage.list(`${utilisateur.id}/${id}`);
+  expect(fichiers!.map((f) => f.name)).toEqual([`${item1!.id}-v2.webp`]);
 });
 
 // US-12 — Renommer une collection (mode édition seulement).
