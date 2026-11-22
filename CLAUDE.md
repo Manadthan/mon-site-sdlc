@@ -22,7 +22,7 @@ sur son ordinateur.
 | Fichier | Contenu | Statut |
 |---|---|---|
 | `docs/SPEC.md` | Besoins : user stories US-01 à US-17 + critères d'acceptation | v1.8 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.12 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.13 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
@@ -191,9 +191,10 @@ mon-site-sdlc/
 │   │       ├── fetchPage.ts           ✅   délai, taille max, encodage, HTTP accepté
 │   │       ├── ssrf.ts                ✅   blocage des adresses privées, redirections, délai, taille
 │   │       ├── extract.ts             ✅   <img> + recherche d'intitulé
+│   │       ├── donnees.ts             ✅   éléments lus dans les données JSON (sites en JavaScript, #82)
 │   │       ├── apercu.ts              ✅   adresses à essayer pour une image de l'aperçu (+ apercu.test.ts)
 │   │       ├── messages.ts            ✅   messages d'échec de l'analyse (+ messages.test.ts)
-│   │       ├── filters.ts             ✅   doublons retirés ; décor (logos, bannières, hors dossier principal) décoché
+│   │       ├── filters.ts             ✅   doublons retirés ; décor (logos, bannières, images répétées, hors dossier principal) décoché
 │   │       └── __tests__/
 │   │           ├── extract.test.ts    ✅
 │   │           ├── ssrf.test.ts       ✅
@@ -255,7 +256,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
-  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77), vignettes rognées (#79)
+  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77), vignettes rognées (#79), données JSON des sites en JavaScript (#82)
 - [x] Phase finale — Bilan : `docs/BILAN.md` v1.0
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.

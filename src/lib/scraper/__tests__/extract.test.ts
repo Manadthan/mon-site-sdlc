@@ -4,7 +4,7 @@ import type { AddressInfo } from "node:net";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { extraireImages } from "@/lib/scraper/extract";
-import { filtrerImages } from "@/lib/scraper/filters";
+import { candidatsDeLaPage, filtrerImages } from "@/lib/scraper/filters";
 
 vi.mock("server-only", () => ({}));
 const { decoderHtml } = await import("@/lib/scraper/fetchPage");
@@ -57,6 +57,39 @@ describe("kanzenshuu.com — Film Animation Comics (page de référence)", () =>
   it("retire les doublons d'adresse", () => {
     const adresses = candidats.map((c) => c.imageUrl);
     expect(new Set(adresses).size).toBe(adresses.length);
+  });
+});
+
+describe("glenat.com — Dragon Ball Z (site construit en JavaScript, #82)", () => {
+  const page = extraireImages(
+    decoderHtml(fixture("glenat-dragon-ball-z.html"), "text/html"),
+    new URL("https://www.glenat.com/glenat-manga/series-dragon-ball-z/"),
+  );
+  const candidats = candidatsDeLaPage(page);
+  const items = candidats.filter((c) => !c.decor);
+
+  it("les balises <img> ne donnent que du décor et des images de remplacement", () => {
+    expect(filtrerImages(page.images).every((c) => c.decor)).toBe(true);
+  });
+
+  it("retient les 24 tomes de la première page, trouvés dans les données de la page", () => {
+    expect(items).toHaveLength(24);
+    expect(items[0]).toEqual({
+      imageUrl:
+        "https://www.images.hachette-livre.fr/media/imgArticle/GLENAT/2019/9782344033685-001-X.jpeg?v=584d211df70b723c5843673583f6674f",
+      title: "Dragon Ball Z - 8e partie - Tome 06",
+      decor: false,
+    });
+    expect(items.map((c) => c.title)).toContain("Dragon Ball Z - La résurrection de F");
+    expect(items.at(-1)?.title).toBe("Dragon Ball Z - Film 06");
+    expect(items.every((c) => c.title.startsWith("Dragon Ball Z - "))).toBe(true);
+  });
+
+  it("décoche le logo, les menus, les univers et l'image de remplacement", () => {
+    const decor = candidats.filter((c) => c.decor).map((c) => c.title);
+    expect(decor).toEqual(
+      expect.arrayContaining(["Berserk Prestige - Tome 07", "Manga", "Couverture de produit indisponible"]),
+    );
   });
 });
 
@@ -133,6 +166,57 @@ describe("extraireImages — cas particuliers", () => {
       new URL("https://site.fr/"),
     );
     expect(pageTitle).toBe("Mes cartes");
+  });
+});
+
+describe("données JSON de la page (#82)", () => {
+  const donnees = (json: unknown, type = "application/json") =>
+    extraireImages(
+      `<html><body><script type="${type}">${JSON.stringify(json)}</script></body></html>`,
+      new URL("https://site.fr/a/"),
+    ).donnees;
+
+  it("trouve image et intitulé, même dans un tableau ou un objet { src }", () => {
+    const trouves = donnees({
+      liste: [
+        { nom: "Carte 1", image: ["/img/1.jpg"] },
+        { title: "Carte 2", cover: { src: "https://cdn.site.fr/2.webp?v=3" } },
+      ],
+    });
+    expect(trouves.map((d) => [d.title, d.imageUrl])).toEqual([
+      ["Carte 1", "https://site.fr/img/1.jpg"],
+      ["Carte 2", "https://cdn.site.fr/2.webp?v=3"],
+    ]);
+  });
+
+  it("préfère le titre au nom, ignore les objets sans intitulé ou sans image", () => {
+    const trouves = donnees(
+      [{ name: "Auteur", titre: "Tome 1", url: "/t1.png" }, { url: "/sans-titre.png" }, { titre: "Sans image", url: "/page" }],
+      "application/ld+json",
+    );
+    expect(trouves.map((d) => d.title)).toEqual(["Tome 1"]);
+  });
+
+  it("marque ce qui est sous l'en-tête ou un menu", () => {
+    const [entete, contenu] = donnees({ header: { cartes: [{ titre: "Pub", image: "/p.jpg" }] }, livres: [{ titre: "Livre", image: "/l.jpg" }] });
+    expect([entete?.horsContenu, contenu?.horsContenu]).toEqual([true, false]);
+  });
+
+  it("ignore un JSON illisible", () => {
+    expect(extraireImages(`<script type="application/json">{oups</script>`, new URL("https://site.fr/")).donnees).toEqual([]);
+  });
+
+  it("n'est utilisé que si les balises <img> ne donnent rien", () => {
+    const image = (imageUrl: string, title: string) => ({ imageUrl, title, largeur: 0, hauteur: 0, horsContenu: false });
+    const donneesJson = [image("https://site.fr/d/1.jpg", "Données")];
+    expect(candidatsDeLaPage({ images: [image("https://site.fr/i/1.jpg", "Balise")], donnees: donneesJson })[0]?.title).toBe(
+      "Balise",
+    );
+    const remplacement = Array.from({ length: 3 }, () => image("https://site.fr/attente.png", "Indisponible"));
+    expect(candidatsDeLaPage({ images: remplacement, donnees: donneesJson })).toEqual([
+      { imageUrl: "https://site.fr/d/1.jpg", title: "Données", decor: false },
+      { imageUrl: "https://site.fr/attente.png", title: "Indisponible", decor: true },
+    ]);
   });
 });
 
