@@ -15,7 +15,6 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
-          share_token: string | null;
           source_url: string | null;
           user_id: string;
         };
@@ -25,7 +24,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           name: string;
-          share_token?: string | null;
           source_url?: string | null;
           user_id?: string;
         };
@@ -34,7 +32,6 @@ export type Database = {
           created_at?: string;
           id?: string;
           name?: string;
-          share_token?: string | null;
           source_url?: string | null;
           user_id?: string;
         };
@@ -89,6 +86,25 @@ export type Database = {
           },
         ];
       };
+      partages: {
+        Row: {
+          created_at: string;
+          token: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          token: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          token?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       collection_stats: {
@@ -108,7 +124,11 @@ export type Database = {
         Args: { p_direction: string; p_item_id: string };
         Returns: undefined;
       };
-      shared_collection: { Args: { p_token: string }; Returns: Json };
+      shared_collection: {
+        Args: { p_collection_id: string; p_token: string };
+        Returns: Json;
+      };
+      shared_collections: { Args: { p_token: string }; Returns: Json };
     };
     Enums: {
       [_ in never]: never;

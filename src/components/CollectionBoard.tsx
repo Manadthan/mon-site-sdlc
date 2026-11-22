@@ -9,7 +9,6 @@ import { CopieImagesManquantes } from "@/components/CopieImagesManquantes";
 import { FilterTabs } from "@/components/FilterTabs";
 import { ItemEditTile } from "@/components/ItemEditTile";
 import { ItemTile, type Item } from "@/components/ItemTile";
-import { PartageCollection } from "@/components/PartageCollection";
 import { RenameCollectionSheet } from "@/components/RenameCollectionSheet";
 import { RenameItemSheet } from "@/components/RenameItemSheet";
 import { SearchField } from "@/components/SearchField";
@@ -29,10 +28,10 @@ type Props = {
   imagesACopier?: string[];
   colonnes?: Colonnes;
   tri?: TriItems;
-  /** Jeton du lien de partage en cours, null si la collection n'est pas partagée (US-17). */
-  jetonPartage?: string | null;
-  /** Collection partagée vue par un proche (US-17) : ni coche, ni mode édition, ni lien vers l'accueil. */
+  /** Collection partagée vue par un proche (US-17) : ni coche, ni mode édition. */
   lectureSeule?: boolean;
+  /** Page du bouton retour : l'accueil, ou la liste partagée (US-17). */
+  retour?: string;
 };
 type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre"; id: string; direction: Direction };
 
@@ -47,8 +46,8 @@ export function CollectionBoard({
   imagesACopier = [],
   colonnes: colonnesInitiales = 2,
   tri: triInitial = TRI_PAR_DEFAUT,
-  jetonPartage = null,
   lectureSeule = false,
+  retour = "/",
 }: Props) {
   // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
@@ -140,15 +139,14 @@ export function CollectionBoard({
     <div className="mx-auto flex min-h-dvh max-w-5xl flex-col">
       <header className="sticky top-0 z-10 flex flex-col gap-2.5 border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),8px)] pr-2 pb-3 pl-2">
         <div className="flex items-center justify-between">
-          {lectureSeule ? (
-            <p className="ml-3 text-[13px] text-texte-doux">Collection partagée · lecture seule</p>
-          ) : (
-            <Link href="/" aria-label="Retour aux collections" className="flex size-11 items-center justify-center text-texte">
+          <div className="flex items-center">
+            <Link href={retour} aria-label="Retour aux collections" className="flex size-11 items-center justify-center text-texte">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </Link>
-          )}
+            {lectureSeule && <p className="text-[13px] text-texte-doux">Lecture seule</p>}
+          </div>
           {lectureSeule ? (
             <div className="mr-2 flex h-11 items-center">
               <ZoomGrille colonnes={colonnes} onChange={zoomer} />
@@ -229,8 +227,7 @@ export function CollectionBoard({
 
       <main className="flex-1 px-4 pt-3 pb-8">
         {edition && (
-          <div className="mb-3 flex flex-col gap-2.5">
-            <PartageCollection collectionId={collectionId} name={name} jeton={jetonPartage} />
+          <div className="mb-3 empty:hidden">
             <CopieImagesManquantes collectionId={collectionId} itemIds={imagesACopier} />
           </div>
         )}

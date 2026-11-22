@@ -21,8 +21,8 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-17 + critères d'acceptation | v1.7 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.10 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-17 + critères d'acceptation | v1.8 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.11 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
@@ -46,7 +46,8 @@ iPhone ──HTTPS──▶ Vercel / Next.js ──▶ Supabase (Auth, Postgres,
 ```
 
 Modèle de données :
-- `collections(id, user_id, name, source_url, cover_path, share_token, created_at)`
+- `collections(id, user_id, name, source_url, cover_path, created_at)`
+- `partages(user_id, token, created_at)` : lien de partage (US-17), une ligne au plus par compte
 - `items(id, collection_id, title, image_path, source_image, position, owned, created_at)`
 - vue `collection_stats` : possédés / total / % et couverture (calculés, jamais stockés)
 
@@ -55,7 +56,7 @@ Décisions clés (détail dans DESIGN.md) :
 - **ADR-02** images copiées dans Supabase Storage, converties en WebP 400 px.
 - **ADR-03** import en deux temps : `scrapePreview` (n'écrit rien) puis import des images **par lots de 10** pilotés par le navigateur.
 - **ADR-04** ordre des items = entier `position` ; monter/descendre = fonction SQL `move_item` (échange avec le voisin en une transaction).
-- **ADR-06** partage en lecture seule : jeton secret `share_token`, lecture anonyme uniquement par la fonction SQL `shared_collection(token)` (aucune politique RLS pour `anon`).
+- **ADR-06** partage en lecture seule de **toutes** les collections : un jeton secret par compte (table `partages`), lecture anonyme uniquement par les fonctions SQL `shared_collections(token)` et `shared_collection(token, id)` (aucune politique RLS pour `anon`).
 - **ADR-05** bucket d'images public, chemins `{user_id}/{collection_id}/{item_id}.webp` ; écriture protégée.
 - RLS des `items` via la propriété de leur collection (pas de `user_id` sur `items`).
 
@@ -101,7 +102,8 @@ mon-site-sdlc/
 │   │   ├── 0003_images.sql            ✅   bucket public « items », écriture dans son dossier
 │   │   ├── 0004_move_item.sql         ✅   fonction move_item (ADR-04)
 │   │   ├── 0005_collection_cover.sql  ✅   couverture calculée dans collection_stats (#59)
-│   │   └── 0006_partage.sql           ✅   share_token + fonction shared_collection (US-17)
+│   │   ├── 0006_partage.sql           ✅   partage par collection (#75), remplacé par 0007
+│   │   └── 0007_partage_global.sql    ✅   table partages + shared_collections / shared_collection (US-17, #77)
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   ├── tests/database/storage.test.sql ✅  tests pgTAP du stockage des images
 │   ├── tests/database/move_item.test.sql ✅ tests pgTAP de move_item
@@ -114,7 +116,7 @@ mon-site-sdlc/
 │   │   ├── globals.css                ✅   jetons de couleur, valeurs claires et sombres (US-16)
 │   │   ├── page.tsx                   ✅   accueil : liste (US-02), suppression (US-04), tri (US-05)
 │   │   ├── login/page.tsx             ✅   US-01
-│   │   ├── partage/[jeton]/page.tsx   ✅   collection partagée, sans compte, lecture seule (US-17)
+│   │   ├── partage/[jeton]/           ✅   sans compte, lecture seule, noindex (US-17) : page.tsx liste, [id]/page.tsx collection
 │   │   ├── apercu-image/route.ts      ✅   relais des images de l'aperçu (HTTP, SSRF, connecté seulement — #49)
 │   │   ├── collections/
 │   │   │   ├── new/page.tsx           ✅   création : adresse → aperçu → import, ou collection vide (US-03)
@@ -122,8 +124,9 @@ mon-site-sdlc/
 │   │   │   └── [id]/completer/page.tsx ✅  compléter depuis une URL (US-13)
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
-│   │       ├── collections.ts         ✅   createCollection, renameCollection (US-12), deleteCollection, changeSort, partagerCollection / arreterPartage (US-17)
+│   │       ├── collections.ts         ✅   createCollection, renameCollection (US-12), deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
+│   │       ├── partage.ts             ✅   partagerCollections, arreterPartage (US-17)
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
 │   │       ├── sauvegarde.ts          ✅   import d'une sauvegarde : collection, items, images (US-11)
 │   │       └── import.ts              ✅   analyserPage (aperçu), importerCollection, completerCollection (US-13), importerImages (lot de 10)
@@ -149,7 +152,8 @@ mon-site-sdlc/
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché, « déjà dans la collection »
 │   │   ├── CompleterCollectionForm.tsx ✅  aperçu + ajout en fin de collection (US-13)
-│   │   ├── PartageCollection.tsx      ✅   US-17 : partager, envoyer le lien, arrêter le partage (mode édition)
+│   │   ├── PartageSheet.tsx           ✅   US-17 : bouton de l'accueil + panneau (créer, envoyer, arrêter)
+│   │   ├── LienInvalide.tsx           ✅   US-17 : lien de partage inconnu ou arrêté
 │   │   ├── ImportProgress.tsx         ✅   progression de la copie des images, lot par lot
 │   │   └── CopieImagesManquantes.tsx  ✅   reprise d'un import interrompu, en mode édition (#51)
 │   ├── lib/
@@ -249,7 +253,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
-  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75)
+  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77)
 - [x] Phase finale — Bilan : `docs/BILAN.md` v1.0
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.
