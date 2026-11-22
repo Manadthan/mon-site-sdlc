@@ -1,5 +1,6 @@
 import { load } from "cheerio";
 import { INTITULE_MAX } from "@/lib/items/title";
+import { extraireDonnees } from "@/lib/scraper/donnees";
 
 /** Une image trouvée dans la page, avant filtrage (DESIGN.md §6, étapes 2 et 4). */
 export type ImageBrute = {
@@ -12,7 +13,8 @@ export type ImageBrute = {
   horsContenu: boolean;
 };
 
-export type PageAnalysee = { pageTitle: string; images: ImageBrute[] };
+/** `donnees` : éléments trouvés dans les données JSON de la page (sites construits en JavaScript, #82). */
+export type PageAnalysee = { pageTitle: string; images: ImageBrute[]; donnees: ImageBrute[] };
 
 const ATTRIBUTS_PARESSEUX = ["data-src", "data-lazy-src", "data-original", "data-url"];
 
@@ -69,7 +71,7 @@ export function extraireImages(html: string, urlPage: URL): PageAnalysee {
     }
   });
 
-  return { pageTitle: titreDeLaPage($), images };
+  return { pageTitle: titreDeLaPage($), images, donnees: extraireDonnees($, base) };
 }
 
 /** Nom proposé pour la collection : og:title, sinon <title>, sans le nom du site. */

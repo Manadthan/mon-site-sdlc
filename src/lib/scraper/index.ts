@@ -1,7 +1,7 @@
 import "server-only";
 import { extraireImages } from "@/lib/scraper/extract";
 import { recupererPage } from "@/lib/scraper/fetchPage";
-import { filtrerImages, type Candidat } from "@/lib/scraper/filters";
+import { candidatsDeLaPage, type Candidat } from "@/lib/scraper/filters";
 import { ErreurRecuperation, type OptionsRecuperation } from "@/lib/scraper/ssrf";
 
 export type Apercu = { url: string; pageTitle: string; candidates: Candidat[] };
@@ -15,8 +15,8 @@ export const CANDIDATS_MAX = 1000;
  */
 export async function scrapePreview(adresse: string, filtre?: OptionsRecuperation["filtre"]): Promise<Apercu> {
   const { url, html } = await recupererPage(adresse, filtre);
-  const { pageTitle, images } = extraireImages(html, url);
-  const candidates = filtrerImages(images).slice(0, CANDIDATS_MAX);
+  const page = extraireImages(html, url);
+  const candidates = candidatsDeLaPage(page).slice(0, CANDIDATS_MAX);
   if (candidates.length === 0) throw new ErreurRecuperation("aucun-element");
-  return { url: url.href, pageTitle, candidates };
+  return { url: url.href, pageTitle: page.pageTitle, candidates };
 }

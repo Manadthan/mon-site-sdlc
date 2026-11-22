@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.12 — 22/11/2026 — statut : **validé**
+> Version 1.13 — 22/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.13 | 22/11/2026 | §6 : éléments lus dans les données JSON de la page quand ses `<img>` ne donnent rien (sites construits en JavaScript, ex. Glénat, issue #82) ; images répétées décochées ; dossier principal sans les morceaux chiffrés |
 > | 1.12 | 22/11/2026 | ADR-02 : bords vides des images rognés, cases 3:4 ; ADR-05 : version dans le nom des vignettes, retraitement des anciennes (issue #79) |
 > | 1.11 | 22/11/2026 | ADR-06 révisé : un jeton par compte (table `partages`, migration 0007) au lieu d'un par collection ; routes `/partage/[jeton]` et `/partage/[jeton]/[id]` |
 > | 1.10 | 22/11/2026 | ADR-06, §3, §4, §5, §9 : partage d'une collection en lecture seule par lien secret (US-17) |
@@ -134,9 +135,10 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 
 1. **Récupérer** la page : délai max 10 s, taille max 5 Mo, HTTP accepté (cas dbzcollection), encodage détecté (beaucoup de vieux sites sont en ISO-8859-1).
 2. **Extraire** chaque `<img>` (attributs `src`, `data-src`, `srcset`), convertir en URL absolue.
-3. **Filtrer** le bruit : SVG, GIF d'1 px, images dont le nom évoque `logo`, `banner`, `icon`, `pub` ; doublons d'URL.
+3. **Filtrer** le bruit : SVG, GIF d'1 px, images dont le nom évoque `logo`, `banner`, `icon`, `pub` ; doublons d'URL. Décochés aussi : une image répétée 3 fois ou plus (image de remplacement), une image hors du « dossier principal » (dossier qui regroupe le plus d'images, sans ses morceaux chiffrés comme `/2019/` ou `/72x72/`).
 4. **Trouver un intitulé**, dans cet ordre : `alt` → `title` → `<figcaption>` → texte du lien parent → texte le plus proche dans le même bloc → nom du fichier.
-5. **Retourner** les candidats dans l'ordre de la page ; l'utilisateur décoche le bruit restant dans l'aperçu.
+5. **Sites construits en JavaScript** (ex. Glénat, Next.js) : si aucune `<img>` n'est retenue, on lit les données JSON de la page (`<script type="application/json">`, dont `__NEXT_DATA__`, et `application/ld+json`) ; chaque objet qui a une adresse d'image et un intitulé (`titre`/`title`, sinon `nom`/`name`, sinon `label`) devient un candidat. Limite : ce que la page charge ensuite (pages 2, 3… d'une liste) n'est pas lu.
+6. **Retourner** les candidats dans l'ordre de la page ; l'utilisateur décoche le bruit restant dans l'aperçu.
 
 Les adaptateurs spécifiques à un site viendront plus tard, seulement si l'extracteur générique ne suffit pas.
 
