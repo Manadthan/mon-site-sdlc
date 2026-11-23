@@ -14,6 +14,8 @@ test("un tap coche l'item (coche verte), le compteur suit, et c'est enregistré"
   const compteur = page.getByRole("banner");
   await expect(item2).toHaveAttribute("aria-pressed", "false");
   await expect(item2.getByTestId("coche-possede")).toHaveCount(0);
+  // Manquant : image grisée (US-07, v1.9).
+  await expect(item2.getByTestId("image-manquant")).toHaveCSS("filter", /grayscale/);
   await expect(compteur).toContainText(/0\s\/\s3 · 0\s%/);
 
   // Tap : coche verte en haut à droite et compteur immédiats.
@@ -21,12 +23,14 @@ test("un tap coche l'item (coche verte), le compteur suit, et c'est enregistré"
   await expect(item2).toHaveAttribute("aria-pressed", "true");
   const coche = item2.getByTestId("coche-possede");
   await expect(coche).toBeVisible();
+  await expect(item2.getByTestId("image-manquant")).toHaveCount(0);
   await expect(compteur).toContainText(/1\s\/\s3 · 33\s%/);
 
-  // La coche est dans l'angle haut droit de la vignette.
+  // Le fanion est collé à l'angle haut droit de la vignette.
   const [vignette, boite] = await Promise.all([item2.boundingBox(), coche.boundingBox()]);
   expect(boite!.x + boite!.width).toBeGreaterThan(vignette!.x + vignette!.width * 0.75);
   expect(boite!.y).toBeLessThan(vignette!.y + vignette!.height * 0.25);
+  expect(Math.abs(boite!.x + boite!.width - (vignette!.x + vignette!.width))).toBeLessThan(3);
 
   // Enregistré : persiste après rechargement, en base, et sur l'accueil.
   await page.reload();
