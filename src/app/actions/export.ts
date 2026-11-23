@@ -16,7 +16,7 @@ export type ExportPrepare = { donnees: Export["donnees"]; images: { cheminZip: s
  */
 export async function preparerExport(): Promise<ExportPrepare> {
   const supabase = await createSupabaseServerClient();
-  const { data: collections, error } = await supabase.from("collections").select("id, name, source_url, created_at");
+  const { data: collections, error } = await supabase.from("collections").select("id, name, category, source_url, created_at");
   if (error) return { error: "L’export n’a pas pu être préparé. Réessayez dans un instant." };
 
   const items = [];

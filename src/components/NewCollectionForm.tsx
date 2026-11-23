@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { createCollection, type CreateCollectionState } from "@/app/actions/collections";
 import { analyserPage, importerCollection, type AnalyseState, type ImportState } from "@/app/actions/import";
+import { ChampCategorie } from "@/components/ChampCategorie";
 import { ImportProgress } from "@/components/ImportProgress";
 import { ScrapePreview } from "@/components/ScrapePreview";
 import { NOM_MAX } from "@/lib/collections/name";
@@ -15,8 +16,10 @@ const CHAMP =
 // 2. Le nom est pré-rempli avec le titre de la page ; un tap sur une vignette l'exclut.
 // 3. « Importer » crée la collection et ses items, puis copie leurs images par lots (maquette n° 10).
 // Sans adresse, ou si la page échoue : collection vide.
-export function NewCollectionForm() {
+export function NewCollectionForm({ categories = [] }: { categories?: (string | null)[] }) {
   const [nom, setNom] = useState("");
+  // Catégorie facultative (US-19), gardée si la création échoue.
+  const [categorie, setCategorie] = useState("");
   const [exclus, setExclus] = useState<ReadonlySet<number>>(new Set());
 
   const [analyse, analyser, analyseEnCours] = useActionState<AnalyseState, FormData>(async (precedent, formData) => {
@@ -113,6 +116,7 @@ export function NewCollectionForm() {
             className={CHAMP}
           />
         </label>
+        <ChampCategorie valeur={categorie} onChange={setCategorie} suggestions={categories} className={CHAMP} />
         {erreurNom && (
           <p id="erreur-nom" role="alert" className="text-sm text-alarme">
             {erreurNom}

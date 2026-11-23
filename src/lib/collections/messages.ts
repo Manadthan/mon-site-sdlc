@@ -9,3 +9,10 @@ export function confirmationSuppression(nom: string, total: number): string {
   if (total === 1) return `Supprimer « ${nom} » et son item ?`;
   return `Supprimer « ${nom} » et ses ${nombreItems(total)} ?`;
 }
+
+/** Question de confirmation avant duplication (US-18) : « Dupliquer « Cartes DBZ » et ses 48 items ? » */
+export function confirmationDuplication(nom: string, total: number): string {
+  if (total === 0) return `Dupliquer « ${nom} » ?`;
+  if (total === 1) return `Dupliquer « ${nom} » et son item ?`;
+  return `Dupliquer « ${nom} » et ses ${nombreItems(total)} ?`;
+}

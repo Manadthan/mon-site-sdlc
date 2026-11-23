@@ -33,7 +33,7 @@ export function ImportSauvegarde() {
     for (const [rang, collection] of collections.entries()) {
       const etape = `Collection ${rang + 1} / ${collections.length} : ${collection.nom}`;
       setEtat({ type: "en-cours", texte: etape });
-      const creee = await creerCollectionImportee(collection.nom, collection.page_source).catch(() => ({ error: "" }));
+      const creee = await creerCollectionImportee(collection.nom, collection.page_source, collection.categorie).catch(() => ({ error: "" }));
       if ("error" in creee) {
         router.refresh();
         return setEtat({ type: "erreur", texte: `L’import s’est arrêté à « ${collection.nom} ». Les collections précédentes ont été ajoutées.` });

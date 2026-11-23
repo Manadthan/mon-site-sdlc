@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { lireCategorie } from "@/lib/collections/categorieServeur";
 import { validateCollectionName } from "@/lib/collections/name";
 import { isUuid } from "@/lib/ids";
 import { enregistrerImage } from "@/lib/images/enregistrer";
@@ -15,17 +16,22 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const ERREUR = "L’import a échoué. Réessayez dans un instant.";
 const IMAGES_PAR_APPEL = 10;
 
-/** Ajoute une collection, renommée « Nom (importée) » si le nom est déjà pris. */
-export async function creerCollectionImportee(nom: string, pageSource: string | null): Promise<{ id: string; nom: string } | { error: string }> {
+/** Ajoute une collection, renommée « Nom (importée) » si le nom est déjà pris, avec sa catégorie (US-19). */
+export async function creerCollectionImportee(
+  nom: string,
+  pageSource: string | null,
+  categorie: string | null = null,
+): Promise<{ id: string; nom: string } | { error: string }> {
   const supabase = await createSupabaseServerClient();
   const { data: existantes, error: erreurLecture } = await supabase.from("collections").select("name");
   if (erreurLecture) return { error: ERREUR };
 
   const valide = validateCollectionName(nom);
   const libre = nomSansDoublon(valide.ok ? valide.name : "Collection importée", existantes.map((c) => c.name));
+  const category = await lireCategorie(supabase, categorie);
   const { data, error } = await supabase
     .from("collections")
-    .insert({ name: libre, source_url: adresse(pageSource) })
+    .insert({ name: libre, source_url: adresse(pageSource), category: category.ok ? category.category : null })
     .select("id")
     .single();
   if (error) return { error: ERREUR };

@@ -58,6 +58,7 @@ describe("lireCollectionsPartagees", () => {
       {
         id: "c1",
         name: "Cartes",
+        category: null,
         coverPath: null,
         createdAt: "2026-01-01T00:00:00Z",
         progress: { owned: 1, total: 4, percent: 25 },
@@ -70,5 +71,18 @@ describe("lireCollectionsPartagees", () => {
     expect(lireCollectionsPartagees(null)).toBeNull();
     expect(lireCollectionsPartagees([{ ...ligne, total: "4" }])).toBeNull();
     expect(lireCollectionsPartagees([null])).toBeNull();
+  });
+});
+
+describe("lireCollectionsPartagees — catégorie (US-19)", () => {
+  const ligne = { id: "c1", name: "Cartes", created_at: "2026-01-01T00:00:00Z", cover_path: null, owned: 1, total: 4 };
+
+  it("reprend la catégorie de la collection", () => {
+    expect(lireCollectionsPartagees([{ ...ligne, category: "Mangas" }])?.[0]?.category).toBe("Mangas");
+    expect(lireCollectionsPartagees([{ ...ligne, category: null }])?.[0]?.category).toBeNull();
+  });
+
+  it("refuse une catégorie mal formée", () => {
+    expect(lireCollectionsPartagees([{ ...ligne, category: 3 }])).toBeNull();
   });
 });

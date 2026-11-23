@@ -5,6 +5,7 @@ import { DEFAULT_SORT, nextSort, parseSort, serializeSort, sortCards } from "@/l
 const carte = (name: string, createdAt: string, percent: number): CollectionCard => ({
   id: name,
   name,
+  category: null,
   coverPath: null,
   createdAt,
   progress: { owned: percent, total: 100, percent },

@@ -26,6 +26,7 @@ function estCarte(v: Record<string, unknown>) {
   return (
     typeof v.id === "string" &&
     typeof v.name === "string" &&
+    (v.category === undefined || v.category === null || typeof v.category === "string") &&
     typeof v.created_at === "string" &&
     (v.cover_path === null || typeof v.cover_path === "string") &&
     typeof v.owned === "number" &&
@@ -41,6 +42,7 @@ export function lireCollectionsPartagees(donnees: unknown): CollectionCard[] | n
   return lignes.map((c) => ({
     id: c.id as string,
     name: c.name as string,
+    category: (c.category as string | null | undefined) ?? null,
     coverPath: c.cover_path as string | null,
     createdAt: c.created_at as string,
     progress: computeProgress(c.owned as number, c.total as number),

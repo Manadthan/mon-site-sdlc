@@ -279,7 +279,7 @@ test("recadrer les images importées avant le rognage des bords", async ({ page 
   expect(fichiers!.map((f) => f.name)).toEqual([`${item1!.id}-v2.webp`]);
 });
 
-// US-12 — Renommer une collection (mode édition seulement).
+// US-12 — Renommer une collection (mode édition seulement), panneau « Nom et catégorie » (US-19).
 test("renommer une collection", async ({ page }, testInfo) => {
   const utilisateur = await nouvelUtilisateur("renommer-collection", testInfo);
   const id = await creerCollection(utilisateur.id, "Cartes", 1, 0);
@@ -287,11 +287,11 @@ test("renommer une collection", async ({ page }, testInfo) => {
   await page.goto(`/collections/${id}`);
 
   // Pas de bouton en mode cocher.
-  await expect(page.getByRole("button", { name: "Renommer la collection" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Modifier le nom et la catégorie" })).toHaveCount(0);
   await page.getByRole("button", { name: "Modifier" }).click();
-  await page.getByRole("button", { name: "Renommer la collection" }).click();
+  await page.getByRole("button", { name: "Modifier le nom et la catégorie" }).click();
 
-  const panneau = page.getByRole("dialog", { name: "Renommer la collection" });
+  const panneau = page.getByRole("dialog", { name: "Nom et catégorie" });
   const champ = panneau.getByLabel("Nom de la collection");
   await expect(champ).toHaveValue("Cartes");
 
