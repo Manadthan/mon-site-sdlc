@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useOptimistic, useRef, useState, useTransition } from "react";
+import { dupliquerCollection } from "@/app/actions/collections";
 import { deleteItem, moveItem, setOwned } from "@/app/actions/items";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -19,12 +21,16 @@ import { CLASSES_GRILLE, changerColonnes, COOKIE_GRILLE, type Colonnes } from "@
 import { filtrerItems, type Filtre } from "@/lib/items/filter";
 import { COOKIE_TRI_ITEMS, serialiserTriItems, trierItems, triSuivant, TRI_PAR_DEFAUT, type CleTri, type TriItems } from "@/lib/items/sort";
 import { moveInList, type Direction } from "@/lib/items/order";
+import { confirmationDuplication } from "@/lib/collections/messages";
 import { applyOwned, countOwned } from "@/lib/items/owned";
 import { computeProgress, formatProgress } from "@/lib/progress";
 
 type Props = {
   collectionId: string;
   name: string;
+  /** Catégorie de la collection et catégories déjà utilisées (US-19), pour le panneau « Nom et catégorie ». */
+  category?: string | null;
+  categories?: (string | null)[];
   items: Item[];
   imagesACopier?: string[];
   /** Items dont la vignette date d'avant le rognage des bords (issue #79). */
@@ -45,6 +51,8 @@ type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre
 export function CollectionBoard({
   collectionId,
   name,
+  category = null,
+  categories = [],
   items,
   imagesACopier = [],
   imagesARecadrer = [],
@@ -94,6 +102,19 @@ export function CollectionBoard({
   const supprimerRef = useRef<HTMLDialogElement>(null);
   const [suppressionEnCours, startSuppression] = useTransition();
   const [erreurSuppression, setErreurSuppression] = useState<string>();
+  // US-18 : dupliquer la collection, puis ouvrir la copie.
+  const router = useRouter();
+  const dupliquerRef = useRef<HTMLDialogElement>(null);
+  const [duplicationEnCours, startDuplication] = useTransition();
+  const [erreurDuplication, setErreurDuplication] = useState<string>();
+
+  function confirmerDuplication() {
+    startDuplication(async () => {
+      const resultat = await dupliquerCollection(collectionId);
+      if (resultat.id) router.push(`/collections/${resultat.id}`);
+      else setErreurDuplication(resultat.error);
+    });
+  }
 
   function deplacer(item: Item, direction: Direction) {
     setErreur(undefined);
@@ -184,10 +205,10 @@ export function CollectionBoard({
           <div className="flex items-start gap-1">
             <h1 className="min-w-0 flex-1 text-[22px] leading-tight font-bold tracking-tight break-words">{name}</h1>
             {edition && (
-              // US-12 : renommer la collection, seulement en mode édition.
+              // US-12, US-19 : nom et catégorie de la collection, seulement en mode édition.
               <button
                 type="button"
-                aria-label="Renommer la collection"
+                aria-label="Modifier le nom et la catégorie"
                 onClick={() => renommerCollectionRef.current?.showModal()}
                 className="-mt-2 -mr-2 flex size-11 shrink-0 items-center justify-center text-texte-doux"
               >
@@ -231,9 +252,23 @@ export function CollectionBoard({
 
       <main className="flex-1 px-4 pt-3 pb-8">
         {edition && (
-          <div className="mb-3 flex flex-col gap-2 empty:hidden">
+          <div className="mb-3 flex flex-col gap-2">
             <CopieImagesManquantes collectionId={collectionId} itemIds={imagesACopier} />
             <RecadrageImages collectionId={collectionId} itemIds={imagesARecadrer} />
+            <button
+              type="button"
+              onClick={() => {
+                setErreurDuplication(undefined);
+                dupliquerRef.current?.showModal();
+              }}
+              className="flex h-11 items-center justify-center gap-2 rounded-[10px] border border-champ bg-surface text-sm font-semibold text-texte"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+              </svg>
+              Dupliquer la collection
+            </button>
           </div>
         )}
         {!edition && affiches.length > 0 && (
@@ -310,7 +345,24 @@ export function CollectionBoard({
       </main>
 
       <RenameItemSheet dialogRef={renommerRef} item={cible} />
-      <RenameCollectionSheet dialogRef={renommerCollectionRef} collectionId={collectionId} name={name} />
+      <RenameCollectionSheet
+        dialogRef={renommerCollectionRef}
+        collectionId={collectionId}
+        name={name}
+        category={category}
+        categories={categories}
+      />
+      <ConfirmDialog
+        dialogRef={dupliquerRef}
+        title={confirmationDuplication(name, affiches.length)}
+        description="La copie reprend les items, leur ordre et leurs images, sans aucun item coché."
+        confirmLabel="Dupliquer"
+        onConfirm={confirmerDuplication}
+        pending={duplicationEnCours}
+        pendingLabel="Duplication…"
+        ton="action"
+        error={erreurDuplication}
+      />
       <ConfirmDialog
         dialogRef={supprimerRef}
         title={cible ? `Supprimer « ${cible.title} » ?` : ""}

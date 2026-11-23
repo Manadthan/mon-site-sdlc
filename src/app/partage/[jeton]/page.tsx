@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { cache } from "react";
-import { CollectionCard } from "@/components/CollectionCard";
 import { LienInvalide } from "@/components/LienInvalide";
+import { ListeCollections } from "@/components/ListeCollections";
 import { SortBar } from "@/components/SortBar";
 import { estJetonPartage, lireCollectionsPartagees } from "@/lib/collections/partage";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
@@ -46,11 +46,8 @@ export default async function PartagePage({ params }: Props) {
       ) : (
         <main className="pb-10">
           <SortBar sort={tri} />
-          <ul className="flex flex-col gap-2.5 px-4 pt-2" aria-label="Collections partagées">
-            {sortCards(cartes, tri).map((carte) => (
-              <CollectionCard key={carte.id} carte={carte} lien={`/partage/${jeton}/${carte.id}`} lectureSeule />
-            ))}
-          </ul>
+          {/* Regroupées par catégorie, comme l'accueil (US-19). */}
+          <ListeCollections cartes={sortCards(cartes, tri)} label="Collections partagées" lienPartage={`/partage/${jeton}`} />
         </main>
       )}
     </div>

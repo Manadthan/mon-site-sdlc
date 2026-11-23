@@ -1,21 +1,21 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
-import { CollectionCard } from "@/components/CollectionCard";
 import { ExportButton } from "@/components/ExportButton";
 import { ImportSauvegarde } from "@/components/ImportSauvegarde";
+import { ListeCollections } from "@/components/ListeCollections";
 import { PartageSheet } from "@/components/PartageSheet";
 import { SortBar } from "@/components/SortBar";
 import { toCollectionCards } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-// Accueil : liste des collections (US-02), suppression (US-04), tri mémorisé (US-05) — maquettes n° 1 et n° 6.
+// Accueil : liste des collections (US-02) par catégorie (US-19), suppression (US-04), tri mémorisé (US-05) — maquettes n° 1 et n° 6.
 export default async function Home() {
   const supabase = await createSupabaseServerClient();
   // La RLS ne renvoie que les collections de l'utilisateur connecté.
   const [collections, stats, partage] = await Promise.all([
-    supabase.from("collections").select("id, name, cover_path, created_at"),
+    supabase.from("collections").select("id, name, category, cover_path, created_at"),
     supabase.from("collection_stats").select("collection_id, owned, total, cover_path"),
     // Lien de partage en cours (US-17), s'il y en a un.
     supabase.from("partages").select("token").maybeSingle(),
@@ -83,11 +83,8 @@ export default async function Home() {
       ) : (
         <main className="pb-28">
           <SortBar sort={tri} />
-          <ul className="flex flex-col gap-2.5 px-4 pt-2" aria-label="Mes collections">
-            {cartes.map((carte) => (
-              <CollectionCard key={carte.id} carte={carte} />
-            ))}
-          </ul>
+          {/* Regroupées par catégorie (US-19), triées dans chaque section (US-05). */}
+          <ListeCollections cartes={cartes} label="Mes collections" />
           <ExportButton />
           <ImportSauvegarde />
           {/* Bouton flottant, à portée de pouce (maquette n° 1). */}

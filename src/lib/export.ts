@@ -1,7 +1,7 @@
 /** Version du format d'export : à augmenter si la structure de donnees.json change. */
 export const VERSION_EXPORT = 1;
 
-type CollectionLue = { id: string; name: string; source_url: string | null; created_at: string };
+type CollectionLue = { id: string; name: string; category?: string | null; source_url: string | null; created_at: string };
 type ItemLu = {
   id: string;
   collection_id: string;
@@ -22,6 +22,8 @@ export type Export = {
     exporte_le: string;
     collections: {
       nom: string;
+      /** Catégorie (US-19) ; absente des sauvegardes plus anciennes. */
+      categorie: string | null;
       page_source: string | null;
       creee_le: string;
       items: { intitule: string; possede: boolean; image: string | null; image_source: string | null; ajoute_le: string }[];
@@ -48,6 +50,7 @@ export function construireExport(collections: CollectionLue[], items: ItemLu[], 
       exporte_le: maintenant.toISOString(),
       collections: triees.map((collection) => ({
         nom: collection.name,
+        categorie: collection.category ?? null,
         page_source: collection.source_url,
         creee_le: collection.created_at,
         items: (parCollection.get(collection.id) ?? [])

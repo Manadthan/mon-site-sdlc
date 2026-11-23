@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { NewCollectionForm } from "@/components/NewCollectionForm";
+import { chargerCategories } from "@/lib/collections/categorieServeur";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Nouvelle collection · Suivi de collections" };
 
@@ -9,7 +11,9 @@ export const metadata: Metadata = { title: "Nouvelle collection · Suivi de coll
 export const maxDuration = 60;
 
 // Création d'une collection (US-03) : depuis l'adresse d'une page (aperçu puis import), ou vide.
-export default function NewCollectionPage() {
+export default async function NewCollectionPage() {
+  // Catégories déjà utilisées, proposées dans le champ (US-19).
+  const categories = await chargerCategories(await createSupabaseServerClient());
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
       <header className="flex items-center gap-1 border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),8px)] pr-2 pb-2.5 pl-2">
@@ -21,7 +25,7 @@ export default function NewCollectionPage() {
         <h1 className="text-lg font-bold">Nouvelle collection</h1>
       </header>
       <main className="px-4 pt-4 pb-6">
-        <NewCollectionForm />
+        <NewCollectionForm categories={categories} />
       </main>
     </div>
   );

@@ -21,8 +21,8 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-17 + critères d'acceptation | v1.8 validée |
-| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.13 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-19 + critères d'acceptation | v1.9 validée |
+| `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.14 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |
 
@@ -46,7 +46,7 @@ iPhone ──HTTPS──▶ Vercel / Next.js ──▶ Supabase (Auth, Postgres,
 ```
 
 Modèle de données :
-- `collections(id, user_id, name, source_url, cover_path, created_at)`
+- `collections(id, user_id, name, category, source_url, cover_path, created_at)` — `category` libre et facultative (US-19)
 - `partages(user_id, token, created_at)` : lien de partage (US-17), une ligne au plus par compte
 - `items(id, collection_id, title, image_path, source_image, position, owned, created_at)`
 - vue `collection_stats` : possédés / total / % et couverture (calculés, jamais stockés)
@@ -103,12 +103,14 @@ mon-site-sdlc/
 │   │   ├── 0004_move_item.sql         ✅   fonction move_item (ADR-04)
 │   │   ├── 0005_collection_cover.sql  ✅   couverture calculée dans collection_stats (#59)
 │   │   ├── 0006_partage.sql           ✅   partage par collection (#75), remplacé par 0007
-│   │   └── 0007_partage_global.sql    ✅   table partages + shared_collections / shared_collection (US-17, #77)
+│   │   ├── 0007_partage_global.sql    ✅   table partages + shared_collections / shared_collection (US-17, #77)
+│   │   └── 0008_categorie.sql         ✅   catégorie des collections, renvoyée par shared_collections (US-19)
 │   ├── tests/database/rls.test.sql    ✅   tests pgTAP (npm run db:test)
 │   ├── tests/database/storage.test.sql ✅  tests pgTAP du stockage des images
 │   ├── tests/database/move_item.test.sql ✅ tests pgTAP de move_item
 │   ├── tests/database/collection_cover.test.sql ✅ tests pgTAP de la couverture
 │   ├── tests/database/partage.test.sql ✅   tests pgTAP du partage (US-17)
+│   ├── tests/database/categorie.test.sql ✅ tests pgTAP de la catégorie (US-19)
 ├── src/
 │   ├── proxy.ts                       ✅   redirige vers /login si non connecté, sauf /partage (ex-« middleware » de Next.js)
 │   ├── app/
@@ -124,7 +126,7 @@ mon-site-sdlc/
 │   │   │   └── [id]/completer/page.tsx ✅  compléter depuis une URL (US-13)
 │   │   └── actions/
 │   │       ├── auth.ts                ✅   login, logout (US-01)
-│   │       ├── collections.ts         ✅   createCollection, renameCollection (US-12), deleteCollection, changeSort
+│   │       ├── collections.ts         ✅   createCollection, renameCollection (nom + catégorie, US-12, US-19), dupliquerCollection (US-18), deleteCollection, changeSort
 │   │       ├── items.ts               ✅   addItem, setOwned, renameItem, deleteItem, moveItem
 │   │       ├── partage.ts             ✅   partagerCollections, arreterPartage (US-17)
 │   │       ├── export.ts              ✅   preparerExport : données + adresses des images (#53)
@@ -136,19 +138,21 @@ mon-site-sdlc/
 │   │   ├── ExportButton.tsx           ✅   sauvegarde .zip (JSON + images) fabriquée dans le navigateur (#53)
 │   │   ├── ImportSauvegarde.tsx       ✅   import d'une sauvegarde, collections ajoutées (US-11)
 │   │   ├── CollectionCard.tsx         ✅   US-02
+│   │   ├── ListeCollections.tsx       ✅   cartes regroupées en sections par catégorie (US-19), accueil et partage
+│   │   ├── ChampCategorie.tsx         ✅   champ « Catégorie » avec suggestions (US-19)
 │   │   ├── NewCollectionForm.tsx      ✅   US-03 : adresse, nom pré-rempli, aperçu, import ou collection vide
 │   │   ├── SortBar.tsx                ✅   US-05
-│   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08
+│   │   ├── ConfirmDialog.tsx          ✅   US-04, réutilisé par US-08 et US-18 (duplication)
 │   │   ├── DeleteCollectionButton.tsx ✅   US-04
 │   │   ├── CollectionBoard.tsx        ✅   modes cocher / édition, compteur, coche immédiate, recherche et filtre (US-06 à 09)
-│   │   ├── ItemTile.tsx               ✅   carte : image, intitulé, état ; coche et bordure vertes si possédé (US-06, US-07)
+│   │   ├── ItemTile.tsx               ✅   carte : image, intitulé, état ; fanion et bordure verts si possédé, image grisée si manquant (US-06, US-07)
 │   │   ├── FilterTabs.tsx             ✅   Tous / Possédés / Manquants (US-09)
 │   │   ├── SearchField.tsx            ✅   recherche sur l'intitulé (US-09)
 │   │   ├── ZoomGrille.tsx             ✅   − / + : items par ligne, dans la barre du haut (US-14)
 │   │   ├── ItemSortBar.tsx            ✅   « Trier : Ordre · Nom » (US-15)
 │   │   ├── ItemEditTile.tsx           ✅   flèches haut/bas (US-10), renommer, supprimer (US-08)
 │   │   ├── RenameItemSheet.tsx        ✅   US-08
-│   │   ├── RenameCollectionSheet.tsx  ✅   US-12, en mode édition
+│   │   ├── RenameCollectionSheet.tsx  ✅   « Nom et catégorie » (US-12, US-19), en mode édition
 │   │   ├── AddItemForm.tsx            ✅   US-08, en mode édition, photo ou adresse d'image facultative
 │   │   ├── ItemImage.tsx              ✅   image d'un item (lazy) ou vignette neutre
 │   │   ├── ScrapePreview.tsx          ✅   grille de l'aperçu, décor décoché, « déjà dans la collection »
@@ -169,6 +173,8 @@ mon-site-sdlc/
 │   │   ├── items/sort.ts              ✅   tri à l'affichage, ordre naturel, cookie (+ sort.test.ts)
 │   │   ├── collections/cards.ts       ✅   collections + statistiques → cartes (+ cards.test.ts)
 │   │   ├── collections/name.ts        ✅   validation du nom (+ name.test.ts)
+│   │   ├── collections/categorie.ts   ✅   validation, orthographe commune, sections (+ categorie.test.ts) ; categorieServeur.ts : lecture en base
+│   │   ├── collections/duplication.ts ✅   nom « (copie) », chemin des vignettes copiées (+ duplication.test.ts)
 │   │   ├── collections/messages.ts    ✅   « N items », question de confirmation (+ messages.test.ts)
 │   │   ├── collections/sort.ts        ✅   tri, cookie, sens par défaut (+ sort.test.ts)
 │   │   ├── collections/import.ts      ✅   vérification des éléments importés (+ import.test.ts)
@@ -214,7 +220,9 @@ mon-site-sdlc/
         ├── search.spec.ts             ✅   US-09, US-14, US-15
         ├── export.spec.ts             ✅   sauvegarde (#53)
         ├── sauvegarde.spec.ts         ✅   import d'une sauvegarde (US-11)
-        └── partage.spec.ts            ✅   partage en lecture seule (US-17)
+        ├── partage.spec.ts            ✅   partage en lecture seule (US-17)
+        ├── categories.spec.ts         ✅   US-19
+        └── duplication.spec.ts        ✅   US-18
 ```
 
 ## Règles de travail (SDLC)
@@ -256,7 +264,7 @@ npm run db:types   # régénérer src/types/database.ts après une migration
   - [x] Étape 5 — Édition : US-08 2/2 (#33), US-10 (#34)
   - [x] Étape 6 — Import depuis une URL : US-03 2/2 (#35), image par URL d'US-08 (reprise de #33)
   - [x] Étape 7 — Recherche et filtres : US-09 (#36)
-  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77), vignettes rognées (#79), données JSON des sites en JavaScript (#82)
+  - [x] Hors plan : images HTTP de l'aperçu (#49), reprise d'import (#51), sauvegarde (#53), import d'une sauvegarde US-11 (#55), vignettes (#57), couvertures (#59), partage en lecture seule US-17 (#75, révisé #77), vignettes rognées (#79), données JSON des sites en JavaScript (#82), fanion « possédé » US-07, duplication US-18, catégories US-19
 - [x] Phase finale — Bilan : `docs/BILAN.md` v1.0
 
 Chaque étape a son **milestone GitHub** (onglet Issues → Milestones) : une issue = un milestone.

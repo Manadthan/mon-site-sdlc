@@ -13,6 +13,7 @@ describe("toCollectionCards", () => {
       {
         id: "a",
         name: "Cartes DBZ",
+        category: null,
         coverPath: null,
         createdAt: "2026-11-01T10:00:00Z",
         progress: { owned: 12, total: 48, percent: 25 },
@@ -45,5 +46,16 @@ describe("toCollectionCards — couverture (issue #59)", () => {
       ],
     );
     expect(cartes.map((c) => c.coverPath)).toEqual(["u/a/premier.webp", "u/b/choisie.webp", null]);
+  });
+});
+
+describe("toCollectionCards — catégorie (US-19)", () => {
+  it("reprend la catégorie, null si absente", () => {
+    const [avec, sans] = toCollectionCards(
+      [{ ...collection("a", "Cartes DBZ", "2026-11-01T10:00:00Z"), category: "Cartes" }, collection("b", "Divers", "2026-11-01T10:00:00Z")],
+      [],
+    );
+    expect(avec?.category).toBe("Cartes");
+    expect(sans?.category).toBeNull();
   });
 });

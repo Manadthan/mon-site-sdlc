@@ -9,14 +9,28 @@ type Props = {
   confirmLabel: string;
   onConfirm: () => void;
   pending?: boolean;
+  /** Texte du bouton pendant l'action (« Suppression… » par défaut). */
+  pendingLabel?: string;
+  /** Bouton rouge pour une suppression (défaut), bleu pour une action sans perte (duplication, US-18). */
+  ton?: "danger" | "action";
   error?: string;
 };
 
 /**
- * Boîte de confirmation (maquette n° 7), réutilisée pour supprimer une collection (US-04) puis un item (US-08).
+ * Boîte de confirmation (maquette n° 7), réutilisée pour supprimer une collection (US-04) puis un item (US-08), et pour dupliquer une collection (US-18).
  * Élément <dialog> natif : focus piégé, touche Échap et lecteur d'écran gérés par Safari.
  */
-export function ConfirmDialog({ dialogRef, title, description, confirmLabel, onConfirm, pending, error }: Props) {
+export function ConfirmDialog({
+  dialogRef,
+  title,
+  description,
+  confirmLabel,
+  onConfirm,
+  pending,
+  pendingLabel = "Suppression…",
+  ton = "danger",
+  error,
+}: Props) {
   // Identifiants uniques : plusieurs boîtes coexistent sur la page (une par carte).
   const id = useId();
   return (
@@ -51,9 +65,9 @@ export function ConfirmDialog({ dialogRef, title, description, confirmLabel, onC
           type="button"
           onClick={onConfirm}
           disabled={pending}
-          className="h-12 rounded-xl bg-danger text-[15px] font-semibold text-white disabled:opacity-60"
+          className={`h-12 rounded-xl text-[15px] font-semibold text-white disabled:opacity-60 ${ton === "danger" ? "bg-danger" : "bg-action"}`}
         >
-          {pending ? "Suppression…" : confirmLabel}
+          {pending ? pendingLabel : confirmLabel}
         </button>
       </div>
     </dialog>

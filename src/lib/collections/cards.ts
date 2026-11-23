@@ -1,12 +1,14 @@
 import { computeProgress, type Progress } from "@/lib/progress";
 
-export type CollectionRow = { id: string; name: string; cover_path: string | null; created_at: string };
+export type CollectionRow = { id: string; name: string; cover_path: string | null; created_at: string; category?: string | null };
 export type StatsRow = { collection_id: string; owned: number | null; total: number | null; cover_path?: string | null };
 
 /** Ce qu'affiche une carte de l'accueil (US-02). */
 export type CollectionCard = {
   id: string;
   name: string;
+  /** Catégorie (US-19), null = sans catégorie. */
+  category: string | null;
   coverPath: string | null;
   createdAt: string;
   progress: Progress;
@@ -25,6 +27,7 @@ export function toCollectionCards(collections: CollectionRow[], stats: StatsRow[
     return {
       id: c.id,
       name: c.name,
+      category: c.category ?? null,
       coverPath: s?.cover_path ?? c.cover_path,
       createdAt: c.created_at,
       progress: computeProgress(s?.owned ?? 0, s?.total ?? 0),

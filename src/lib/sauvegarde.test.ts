@@ -5,7 +5,7 @@ import { lireSauvegarde, nomSansDoublon } from "@/lib/sauvegarde";
 describe("lireSauvegarde", () => {
   it("relit ce que l'export produit", () => {
     const { donnees } = construireExport(
-      [{ id: "c1", name: "Mangas", source_url: "https://site.fr/liste", created_at: "2026-11-13T10:00:00Z" }],
+      [{ id: "c1", name: "Mangas", category: "Livres", source_url: "https://site.fr/liste", created_at: "2026-11-13T10:00:00Z" }],
       [
         { id: "i1", collection_id: "c1", title: "Tome 1", position: 1, owned: true, image_path: "u/c1/i1.webp", source_image: "https://site.fr/1.png", created_at: "x" },
         { id: "i2", collection_id: "c1", title: "Tome 2", position: 2, owned: false, image_path: null, source_image: null, created_at: "x" },
@@ -17,6 +17,7 @@ describe("lireSauvegarde", () => {
       collections: [
         {
           nom: "Mangas",
+          categorie: "Livres",
           page_source: "https://site.fr/liste",
           items: [
             { intitule: "Tome 1", possede: true, image: "images/c1/i1.webp", image_source: "https://site.fr/1.png" },
@@ -49,6 +50,7 @@ describe("lireSauvegarde", () => {
       collections: [
         {
           nom: "  ",
+          categorie: "   ",
           page_source: "javascript:alert(1)",
           items: [{ intitule: 42, possede: "oui", image: "../../etc/passwd", image_source: "file:///x" }],
         },
@@ -59,6 +61,7 @@ describe("lireSauvegarde", () => {
       collections: [
         {
           nom: "Collection importée",
+          categorie: null,
           page_source: null,
           items: [{ intitule: "Sans titre", possede: false, image: null, image_source: null }],
         },
@@ -72,5 +75,12 @@ describe("nomSansDoublon", () => {
     expect(nomSansDoublon("Cartes", ["Mangas"])).toBe("Cartes");
     expect(nomSansDoublon("Cartes", ["cartes"])).toBe("Cartes (importée)");
     expect(nomSansDoublon("Cartes", ["Cartes", "Cartes (importée)"])).toBe("Cartes (importée 2)");
+  });
+});
+
+describe("nomSansDoublon — autre mention (US-18)", () => {
+  it("ajoute toujours la mention quand c'est demandé", () => {
+    expect(nomSansDoublon("Cartes", [], "copie", true)).toBe("Cartes (copie)");
+    expect(nomSansDoublon("Cartes", ["Cartes", "Cartes (copie)"], "copie", true)).toBe("Cartes (copie 2)");
   });
 });

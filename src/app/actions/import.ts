@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { adresseWeb, validerElements } from "@/lib/collections/import";
 import { enParallele, TAILLE_LOT } from "@/lib/collections/lots";
+import { lireCategorie } from "@/lib/collections/categorieServeur";
 import { validateCollectionName } from "@/lib/collections/name";
 import { isUuid } from "@/lib/ids";
 import { telechargerImage } from "@/lib/images/download";
@@ -50,9 +51,11 @@ export async function importerCollection(_previous: ImportState, formData: FormD
   const sourceUrl = adresseWeb(formData.get("sourceUrl")) ?? null;
 
   const supabase = await createSupabaseServerClient();
+  const categorie = await lireCategorie(supabase, formData.get("category"));
+  if (!categorie.ok) return { error: categorie.error };
   const { data: collection, error } = await supabase
     .from("collections")
-    .insert({ name: nom.name, source_url: sourceUrl })
+    .insert({ name: nom.name, source_url: sourceUrl, category: categorie.category })
     .select("id")
     .single();
   if (error) return { error: "La collection n’a pas pu être créée. Réessayez dans un instant." };

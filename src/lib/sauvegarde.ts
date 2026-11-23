@@ -1,3 +1,4 @@
+import { CATEGORIE_MAX } from "@/lib/collections/categorie";
 import { NOM_MAX } from "@/lib/collections/name";
 import { VERSION_EXPORT } from "@/lib/export";
 import { INTITULE_MAX } from "@/lib/items/title";
@@ -9,7 +10,7 @@ export const ITEMS_PAR_COLLECTION_MAX = 5000;
 export const ITEMS_PAR_APPEL = 500;
 
 export type ItemSauvegarde = { intitule: string; possede: boolean; image: string | null; image_source: string | null };
-export type CollectionSauvegarde = { nom: string; page_source: string | null; items: ItemSauvegarde[] };
+export type CollectionSauvegarde = { nom: string; categorie: string | null; page_source: string | null; items: ItemSauvegarde[] };
 
 const ILLISIBLE = "Ce fichier n’est pas une sauvegarde de Suivi de collections.";
 
@@ -56,6 +57,7 @@ export function lireSauvegarde(
     }
     collections.push({
       nom: texte(c.nom, NOM_MAX) || "Collection importée",
+      categorie: texte(c.categorie, CATEGORIE_MAX) || null,
       page_source: adresse(c.page_source),
       items: (c.items as unknown[]).map(nettoyerItem),
     });
@@ -74,12 +76,15 @@ export function nettoyerItem(brut: unknown): ItemSauvegarde {
   };
 }
 
-/** Nom libre pour une collection importée (US-11) : « Cartes », sinon « Cartes (importée) », « Cartes (importée 2) »… */
-export function nomSansDoublon(nom: string, existants: Iterable<string>): string {
+/**
+ * Nom libre pour une collection importée (US-11) : « Cartes », sinon « Cartes (importée) », « Cartes (importée 2) »…
+ * Avec `toujours` (duplication, US-18) : la mention est ajoutée même si le nom est libre (« Cartes (copie) »).
+ */
+export function nomSansDoublon(nom: string, existants: Iterable<string>, mention = "importée", toujours = false): string {
   const pris = new Set([...existants].map((n) => n.toLowerCase()));
-  if (!pris.has(nom.toLowerCase())) return nom;
+  if (!toujours && !pris.has(nom.toLowerCase())) return nom;
   for (let n = 1; ; n++) {
-    const suffixe = n === 1 ? " (importée)" : ` (importée ${n})`;
+    const suffixe = n === 1 ? ` (${mention})` : ` (${mention} ${n})`;
     const candidat = nom.slice(0, NOM_MAX - suffixe.length) + suffixe;
     if (!pris.has(candidat.toLowerCase())) return candidat;
   }

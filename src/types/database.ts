@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       collections: {
         Row: {
+          category: string | null;
           cover_path: string | null;
           created_at: string;
           id: string;
@@ -20,6 +21,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          category?: string | null;
           cover_path?: string | null;
           created_at?: string;
           id?: string;
@@ -28,6 +30,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
+          category?: string | null;
           cover_path?: string | null;
           created_at?: string;
           id?: string;

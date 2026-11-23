@@ -2,12 +2,24 @@
 
 import { useActionState, useEffect, type RefObject } from "react";
 import { renameCollection, type RenameCollectionState } from "@/app/actions/collections";
+import { ChampCategorie } from "@/components/ChampCategorie";
 import { NOM_MAX } from "@/lib/collections/name";
 
-type Props = { dialogRef: RefObject<HTMLDialogElement | null>; collectionId: string; name: string };
+type Props = {
+  dialogRef: RefObject<HTMLDialogElement | null>;
+  collectionId: string;
+  name: string;
+  category: string | null;
+  /** Catégories déjà utilisées, proposées dans le champ (US-19). */
+  categories: (string | null)[];
+};
 
-// « Renommer la collection » (US-12) : panneau du bas, comme « Modifier l'item » (maquette n° 9).
-export function RenameCollectionSheet({ dialogRef, collectionId, name }: Props) {
+const CHAMP =
+  "h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger";
+
+// « Nom et catégorie » : renommer la collection (US-12) et changer sa catégorie (US-19).
+// Panneau du bas, comme « Modifier l'item » (maquette n° 9).
+export function RenameCollectionSheet({ dialogRef, collectionId, name, category, categories }: Props) {
   const [state, action, pending] = useActionState<RenameCollectionState, FormData>(renameCollection, {});
 
   useEffect(() => {
@@ -23,7 +35,7 @@ export function RenameCollectionSheet({ dialogRef, collectionId, name }: Props) 
       <div className="mx-auto h-[5px] w-10 rounded-full bg-champ" aria-hidden="true" />
       <div className="mt-2 flex items-center justify-between">
         <h2 id="renommer-collection-titre" className="text-lg font-bold">
-          Renommer la collection
+          Nom et catégorie
         </h2>
         <button
           type="button"
@@ -36,8 +48,8 @@ export function RenameCollectionSheet({ dialogRef, collectionId, name }: Props) 
           </svg>
         </button>
       </div>
-      {/* key : le champ reprend le nom actuel après chaque enregistrement. */}
-      <form key={name} action={action} className="mt-3 flex flex-col gap-3.5" noValidate>
+      {/* key : les champs reprennent les valeurs enregistrées après chaque enregistrement. */}
+      <form key={`${name}|${category}`} action={action} className="mt-3 flex flex-col gap-3.5" noValidate>
         <input type="hidden" name="collectionId" value={collectionId} />
         <label className="flex flex-col gap-1.5 text-[13px] font-semibold text-texte-doux">
           Nom de la collection
@@ -50,9 +62,10 @@ export function RenameCollectionSheet({ dialogRef, collectionId, name }: Props) 
             defaultValue={state.error ? state.name : name}
             aria-invalid={state.error ? true : undefined}
             aria-describedby={state.error ? "renommer-collection-erreur" : undefined}
-            className="h-12 rounded-[10px] border border-champ bg-surface px-3 text-base text-texte outline-none focus:border-action focus:ring-2 focus:ring-action/20 aria-invalid:border-danger"
+            className={CHAMP}
           />
         </label>
+        <ChampCategorie defaultValue={(state.error ? state.category : category) ?? ""} suggestions={categories} className={CHAMP} />
         {state.error && (
           <p id="renommer-collection-erreur" role="alert" className="text-sm text-alarme">
             {state.error}
