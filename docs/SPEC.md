@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.8 — 22/11/2026 — statut : **validé**
+> Version 1.9 — 23/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.9 | 23/11/2026 | US-07 : fanion vert dans l'angle et items manquants grisés ; ajout d'US-18 (dupliquer une collection) et d'US-19 (catégories) |
 > | 1.8 | 22/11/2026 | US-17 révisée : un seul lien pour **toutes** les collections, bouton « Partager » sur l'accueil ; plus de partage collection par collection |
 > | 1.7 | 22/11/2026 | Ajout d'US-17 : partager une collection en lecture seule ; §6 : seul le partage avec modification reste hors périmètre |
 > | 1.6 | 16/11/2026 | Ajout d'US-16 : thème sombre |
@@ -81,7 +82,8 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 
 ### US-07 — Marquer un item comme possédé (M)
 - [ ] Un tap sur la vignette bascule possédé / non possédé.
-- [ ] Un item possédé affiche une **coche verte dans l'angle haut droit** de la vignette.
+- [ ] Un item possédé affiche un **fanion vert** (triangle) dans l'angle haut droit de la vignette, avec une coche blanche, et une bordure verte.
+- [ ] Un item manquant a son image **grisée** (en noir et blanc, pâlie) : on voit d'un coup d'œil ce qui manque. L'intitulé reste lisible.
 - [ ] Le changement est enregistré immédiatement et persiste après rechargement.
 - [ ] Le compteur se met à jour instantanément.
 - [ ] Un tap accidentel est facile à annuler (un second tap suffit).
@@ -155,6 +157,22 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 - [ ] Une collection que je crée ensuite apparaît sans renvoyer de lien ; ce que je coche apparaît au prochain chargement de la page.
 - [ ] « Arrêter le partage » rend le lien invalide (message « Ce lien de partage n'est plus valide ») ; partager à nouveau crée un **nouveau** lien.
 - [ ] Les pages partagées ne sont pas indexées par les moteurs de recherche.
+
+### US-18 — Dupliquer une collection (S)
+*En tant que collectionneur, je pars d'une collection existante pour en suivre une autre (2e exemplaire, collection d'un proche).*
+- [ ] En mode édition d'une collection, un bouton « Dupliquer la collection » demande confirmation (« Dupliquer *Cartes DBZ* et ses 48 items ? »).
+- [ ] La copie reprend les items, leur ordre, leurs intitulés et leurs images ; **aucun item n'est coché**.
+- [ ] Elle s'appelle « *Nom* (copie) » (« (copie 2) »… si le nom est déjà pris) et garde la catégorie (US-19) ; je peux la renommer ensuite (US-12).
+- [ ] Les images de la copie sont indépendantes : supprimer l'original ne les efface pas.
+- [ ] À la fin, la copie s'ouvre ; en cas d'échec, un message clair s'affiche et rien n'est créé à moitié.
+
+### US-19 — Regrouper les collections par catégorie (S)
+*En tant que collectionneur, je range mes collections par type (cartes, mangas, DVD…) pour m'y retrouver sur l'accueil.*
+- [ ] À la création (US-03) et en mode édition (avec le nom, US-12), je peux saisir une **catégorie** facultative (40 caractères au plus).
+- [ ] Le champ propose les catégories déjà utilisées (pour éviter « Manga » et « Mangas ») ; la casse et les espaces en trop ne créent pas de nouvelle catégorie.
+- [ ] L'accueil regroupe les collections en **sections** titrées par catégorie, dans l'ordre alphabétique, « Sans catégorie » en dernier ; le tri choisi (US-05) s'applique dans chaque section.
+- [ ] Tant qu'aucune collection n'a de catégorie, l'accueil reste une simple liste, sans titre de section.
+- [ ] La liste partagée (US-17) est regroupée de la même façon ; la sauvegarde (§4) garde la catégorie et l'import (US-11) la reprend.
 
 ## 4. Exigences non fonctionnelles
 

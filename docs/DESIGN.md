@@ -2,11 +2,12 @@
 
 > Phase 2 du SDLC : **conception**. Ce document décrit *comment* on construit ce que décrit [SPEC.md](./SPEC.md).
 >
-> Version 1.13 — 22/11/2026 — statut : **validé**
+> Version 1.14 — 23/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.14 | 23/11/2026 | §3 : colonne `collections.category` (migration 0008, US-19) ; §5 : `dupliquerCollection` (US-18), copie des images dans le stockage ; §9 : durée d'une duplication |
 > | 1.13 | 22/11/2026 | §6 : éléments lus dans les données JSON de la page quand ses `<img>` ne donnent rien (sites construits en JavaScript, ex. Glénat, issue #82) ; images répétées décochées ; dossier principal sans les morceaux chiffrés |
 > | 1.12 | 22/11/2026 | ADR-02 : bords vides des images rognés, cases 3:4 ; ADR-05 : version dans le nom des vignettes, retraitement des anciennes (issue #79) |
 > | 1.11 | 22/11/2026 | ADR-06 révisé : un jeton par compte (table `partages`, migration 0007) au lieu d'un par collection ; routes `/partage/[jeton]` et `/partage/[jeton]/[id]` |
@@ -79,7 +80,8 @@ user_id      uuid  → auth.users     collection_id uuid  → collections (ON DE
 name         text  NOT NULL         title         text  NOT NULL
 source_url   text                   image_path    text        -- chemin dans Storage, NULL si pas d'image
 cover_path   text                   source_image  text        -- URL d'origine (info)
-created_at   timestamptz            position      integer NOT NULL
+category     text  (US-19)          position      integer NOT NULL
+created_at   timestamptz
                                     owned         boolean NOT NULL DEFAULT false
                                     created_at    timestamptz
 
@@ -98,6 +100,7 @@ created_at   timestamptz
   - `items` (pas de colonne `user_id`) : une ligne n'est visible et modifiable que si sa collection appartient à `auth.uid()` (`exists (select 1 from collections c where c.id = collection_id and c.user_id = auth.uid())`) ;
   - Storage : lecture publique (ADR-05) ; écriture et suppression réservées à l'utilisateur connecté, dans son dossier `{user_id}/`.
 - `partages` (migration 0007) : pas de ligne = rien n'est partagé (ADR-06). RLS : chacun ne voit et ne modifie que sa ligne. Seules `shared_collections` et `shared_collection` sont exécutables par le rôle anonyme.
+- `category` (migration 0008, US-19) : texte libre facultatif (NULL = sans catégorie), 1 à 40 caractères sans espace en trop (contrainte SQL). À l'enregistrement, une catégorie qui ne diffère d'une existante que par la casse prend l'orthographe existante. Pas de table `categories` : une catégorie n'existe que tant qu'une collection la porte, rien à créer ni à nettoyer. `shared_collections` renvoie aussi la catégorie (US-17).
 - Le tri préféré de l'accueil (US-05) est mémorisé dans un cookie : inutile de créer une table pour ça.
 
 ## 4. Écrans et routes
@@ -129,6 +132,8 @@ Maquettes validées (v1.0) : voir [MAQUETTES.md](./MAQUETTES.md), y compris les 
 | `preparerExport()` | Sauvegarde (SPEC §4) : renvoie `donnees.json` et l'adresse publique des images ; le **navigateur** télécharge les images et fabrique le .zip (`fflate`), car une réponse serveur Vercel est limitée en taille |
 | `creerCollectionImportee` / `ajouterItemsImportes` / `enregistrerImagesImportees` | Import d'une sauvegarde (US-11), piloté par le navigateur qui ouvre le .zip : collections **ajoutées** (nom suffixé « (importée) » si déjà pris), items par paquets de 500, images par lots de 10 ré-encodées par sharp |
 | `partagerCollections()` / `arreterPartage()` | Crée (ou remplace) le jeton de `partages` et le renvoie / supprime la ligne (US-17, ADR-06). Bouton « Partager » de l'accueil |
+| `changerCategorie` | Catégorie d'une collection (US-19), avec le nom dans le panneau « Nom et catégorie » du mode édition (US-12) |
+| `dupliquerCollection(id)` | US-18 : crée « *Nom* (copie) » (même catégorie et page source), **copie** chaque vignette dans le dossier de la nouvelle collection (`storage.copy`, côté Supabase, 10 en parallèle : rien ne transite par Vercel), puis insère les items (mêmes positions, intitulés et `source_image`, `owned = false`). Si l'insertion échoue, la collection et les fichiers copiés sont retirés. Une image dont la copie échoue est rattrapable par la reprise d'import (#51), grâce à `source_image` |
 | `renameItem` / `deleteItem` / `deleteCollection` | Évident ; la suppression efface aussi les fichiers du Storage |
 
 ## 6. Le scraper
@@ -181,6 +186,7 @@ supabase/        migrations SQL (le schéma est versionné dans Git)
 | Import de centaines d'images trop long | Délai dépassé | Lots de 10 pilotés par le navigateur (ADR-03) |
 | Quota gratuit Supabase (1 Go de stockage) | Plus de place | Vignettes WebP ~30 Ko → ~30 000 images possibles |
 | Lien de partage transféré à un inconnu | La collection est visible par lui (lecture seule) | « Arrêter le partage » invalide le lien ; rien d'autre n'est exposé (ADR-06) |
+| Duplication d'une très grande collection (milliers d'items) | Délai de la fonction dépassé | Copies faites par Supabase, 10 en parallèle (~3 s pour 300 images) ; `maxDuration` de 60 s |
 | Projet Supabase gratuit mis en pause après 7 jours sans activité | Site indisponible | Usage régulier, ou tâche planifiée de « ping » |
 
 ## 10. Plan de découpage (préparation de la phase 3)
