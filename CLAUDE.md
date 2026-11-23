@@ -21,7 +21,7 @@ sur son ordinateur.
 
 | Fichier | Contenu | Statut |
 |---|---|---|
-| `docs/SPEC.md` | Besoins : user stories US-01 à US-19 + critères d'acceptation | v1.9 validée |
+| `docs/SPEC.md` | Besoins : user stories US-01 à US-19 + critères d'acceptation | v1.10 validée |
 | `docs/DESIGN.md` | Conception : stack, ADR, modèle de données, scraper, tests, risques | v1.14 validée |
 | `docs/MAQUETTES.md` | Lien vers les maquettes : 4 écrans + 7 états complémentaires | v1.0 validée |
 | `docs/BILAN.md` | Rétrospective : chiffres, ce qui a marché, ce qui a coincé, leçons | v1.0 validée |

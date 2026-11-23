@@ -3,11 +3,12 @@
 > Phase 1 du SDLC : **besoins**. Ce document décrit *quoi* construire, pas *comment*.
 > Les choix techniques seront faits en phase 2 (conception).
 >
-> Version 1.9 — 23/11/2026 — statut : **validé**
+> Version 1.10 — 23/11/2026 — statut : **validé**
 >
 > | Version | Date | Changements |
 > |---|---|---|
 > | 0.1 | 13/11/2026 | Premier brouillon |
+> | 1.10 | 23/11/2026 | US-07 : items manquants moins grisés, couleurs atténuées et non plus noir et blanc |
 > | 1.9 | 23/11/2026 | US-07 : fanion vert dans l'angle et items manquants grisés ; ajout d'US-18 (dupliquer une collection) et d'US-19 (catégories) |
 > | 1.8 | 22/11/2026 | US-17 révisée : un seul lien pour **toutes** les collections, bouton « Partager » sur l'accueil ; plus de partage collection par collection |
 > | 1.7 | 22/11/2026 | Ajout d'US-17 : partager une collection en lecture seule ; §6 : seul le partage avec modification reste hors périmètre |
@@ -83,7 +84,7 @@ Priorités : **M** = indispensable (MVP), **S** = souhaitable, **C** = bonus.
 ### US-07 — Marquer un item comme possédé (M)
 - [ ] Un tap sur la vignette bascule possédé / non possédé.
 - [ ] Un item possédé affiche un **fanion vert** (triangle) dans l'angle haut droit de la vignette, avec une coche blanche, et une bordure verte.
-- [ ] Un item manquant a son image **grisée** (en noir et blanc, pâlie) : on voit d'un coup d'œil ce qui manque. L'intitulé reste lisible.
+- [ ] Un item manquant a son image **grisée** (couleurs atténuées et pâlie, mais l'objet reste reconnaissable) : on voit d'un coup d'œil ce qui manque. L'intitulé reste lisible.
 - [ ] Le changement est enregistré immédiatement et persiste après rechargement.
 - [ ] Le compteur se met à jour instantanément.
 - [ ] Un tap accidentel est facile à annuler (un second tap suffit).
