@@ -30,10 +30,11 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
           {/* Case en hauteur (3:4), comme la plupart des cartes, boîtes et mangas ; petite marge autour de l'image,
               dont les bords vides ont été rognés à la création de la vignette (issue #79). */}
           <span className={`absolute flex items-center justify-center ${densite === 2 ? "inset-1.5" : "inset-1"}`}>
-            {/* Item manquant : image grisée (noir et blanc, pâlie), pour voir d'un coup d'œil ce qui manque. */}
+            {/* Item manquant : image grisée (couleurs atténuées à 40 %, pâlie), pour voir d'un coup d'œil ce qui manque
+                sans empêcher de reconnaître l'objet (choix « B » du propriétaire). */}
             <span
               data-testid={item.owned ? undefined : "image-manquant"}
-              className={`relative flex size-full items-center justify-center transition-[filter,opacity] ${item.owned ? "" : "opacity-45 grayscale"}`}
+              className={`relative flex size-full items-center justify-center transition-[filter,opacity] ${item.owned ? "" : "opacity-70 grayscale-[40%]"}`}
             >
               <ItemImage chemin={item.image_path} taille={densite === 4 ? 18 : 24} />
             </span>
