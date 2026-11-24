@@ -78,6 +78,18 @@ test("la liste reste lisible à 375 px, même avec un nom très long", async ({ 
   await expect(page.getByRole("list", { name: "Mes collections" })).toBeVisible();
   const largeur = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(largeur).toBeLessThanOrEqual(375);
+
+  // Le nom s'affiche en entier, sur plusieurs lignes, sans points de suspension.
+  const titre = page.getByRole("heading", { level: 2 });
+  const mesure = await titre.evaluate((h) => ({
+    coupe: h.scrollWidth > h.clientWidth,
+    debordement: getComputedStyle(h).textOverflow,
+    hauteur: h.getBoundingClientRect().height,
+    ligne: parseFloat(getComputedStyle(h).lineHeight),
+  }));
+  expect(mesure.coupe).toBe(false);
+  expect(mesure.debordement).not.toBe("ellipsis");
+  expect(mesure.hauteur).toBeGreaterThan(mesure.ligne * 1.5);
 });
 
 // US-04 — Supprimer une collection
