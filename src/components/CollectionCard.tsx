@@ -17,7 +17,7 @@ export function CollectionCard({ carte, lien, lectureSeule = false }: { carte: C
           <ItemImage chemin={coverPath} taille={24} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h2 className="truncate text-base font-semibold">{name}</h2>
+          <h2 className="text-base leading-snug font-semibold break-words">{name}</h2>
           <p className="text-[13px] text-texte-doux">
             <span className="sr-only">Possédés : </span>
             {formatProgress(progress)}
