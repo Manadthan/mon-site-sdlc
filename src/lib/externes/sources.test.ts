@@ -106,6 +106,6 @@ describe("libelleSourceExterne et messageErreurExterne", () => {
     expect(libelleSourceExterne("dragonball-db")).toBe("Dragon Ball DB");
     expect(libelleSourceExterne(null)).toBe("Site externe");
     expect(messageErreurExterne("auth", "Nintendo DB").titre).toContain("Nintendo DB");
-    expect(messageErreurExterne("delai", "Nintendo DB").texte).toContain("4 secondes");
+    expect(messageErreurExterne("delai", "Nintendo DB").texte).toContain("8 secondes");
   });
 });

@@ -5,11 +5,14 @@ import { ExportButton } from "@/components/ExportButton";
 import { ImportSauvegarde } from "@/components/ImportSauvegarde";
 import { ListeCollections } from "@/components/ListeCollections";
 import { PartageSheet } from "@/components/PartageSheet";
+import { RafraichirAuRetour } from "@/components/RafraichirAuRetour";
 import { SortBar } from "@/components/SortBar";
 import { toCollectionCards, type CollectionRow, type StatsRow } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
 import { interrogerSourceExterne } from "@/lib/externes/sources";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 // Accueil : liste des collections (US-02) par catégorie (US-19), suppression (US-04), tri mémorisé (US-05) — maquettes n° 1 et n° 6.
 export default async function Home() {
@@ -62,9 +65,11 @@ export default async function Home() {
   const tri = parseSort((await cookies()).get(SORT_COOKIE)?.value);
   const cartes = erreur ? [] : sortCards(toCollectionCards(lignes, statsLignes), tri);
   const categories = lignes.map((c) => c.category ?? null);
+  const aCollectionsLiees = cartes.some((c) => !!c.externalUrl);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
+      {aCollectionsLiees && <RafraichirAuRetour />}
       <header className="flex items-center justify-between border-b border-bordure bg-surface pt-[max(env(safe-area-inset-top),12px)] pr-4 pb-3 pl-5">
         <div className="flex items-center gap-2.5">
           {/* Logo de l'application (même dessin que l'icône de l'écran d'accueil). */}
