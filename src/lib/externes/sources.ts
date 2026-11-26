@@ -27,7 +27,7 @@ export type ResultatExterne =
   | { ok: false; raison: RaisonErreurExterne; label?: string };
 
 const NINTENDO_DB_URL_DEFAUT = "https://nintendo-db.vercel.app";
-const DELAI_MS = 4000;
+const DELAI_MS = 8000;
 
 const LIBELLES: Record<SourceExterneId, string> = {
   "nintendo-db": "Nintendo DB",
@@ -218,7 +218,7 @@ export function messageErreurExterne(
     case "delai":
       return {
         titre: `${label} met trop de temps à répondre`,
-        texte: "Le site n’a pas répondu en 4 secondes. Réessayez dans un instant.",
+        texte: "Le site n’a pas répondu en 8 secondes. Réessayez dans un instant.",
       };
     case "reseau":
       return {
