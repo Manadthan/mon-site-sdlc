@@ -5,6 +5,12 @@ import { adresseWeb, validerElements } from "@/lib/collections/import";
 import { enParallele, TAILLE_LOT } from "@/lib/collections/lots";
 import { lireCategorie } from "@/lib/collections/categorieServeur";
 import { validateCollectionName } from "@/lib/collections/name";
+import {
+  interrogerSourceExterne,
+  messageErreurExterne,
+  reconnaitreSourceExterne,
+  type DonneesExterne,
+} from "@/lib/externes/sources";
 import { isUuid } from "@/lib/ids";
 import { telechargerImage } from "@/lib/images/download";
 import { enregistrerImage } from "@/lib/images/enregistrer";
@@ -13,10 +19,11 @@ import { messageEchecPage, type MessageEchec } from "@/lib/scraper/messages";
 import { ErreurRecuperation } from "@/lib/scraper/ssrf";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export type AnalyseState = { url?: string; apercu?: Apercu; echec?: MessageEchec };
+export type AnalyseState = { url?: string; apercu?: Apercu; externe?: DonneesExterne; echec?: MessageEchec };
 
 /**
  * Analyse une page (US-03, ADR-03 étape 1) : renvoie l'aperçu, n'écrit rien.
+ * Si l'adresse appartient à un site compagnon autorisé (ex. Nintendo DB), interroge son endpoint /api/suivi.
  * Réservé à l'utilisateur connecté : le serveur ne doit pas aller chercher des pages pour n'importe qui.
  */
 export async function analyserPage(_previous: AnalyseState, formData: FormData): Promise<AnalyseState> {
@@ -28,6 +35,12 @@ export async function analyserPage(_previous: AnalyseState, formData: FormData):
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { url, echec: { titre: "Session expirée", texte: "Reconnectez-vous, puis réessayez." } };
+
+  if (reconnaitreSourceExterne(url)) {
+    const resultat = await interrogerSourceExterne(url);
+    if (resultat.ok) return { url: resultat.donnees.url, externe: resultat.donnees };
+    return { url, echec: messageErreurExterne(resultat.raison, resultat.label) };
+  }
 
   try {
     return { url, apercu: await scrapePreview(url) };

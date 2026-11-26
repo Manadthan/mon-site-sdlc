@@ -59,3 +59,37 @@ describe("toCollectionCards — catégorie (US-19)", () => {
     expect(sans?.category).toBeNull();
   });
 });
+
+describe("toCollectionCards — collections liées", () => {
+  it("ajoute les champs externes uniquement quand external_url est renseignée", () => {
+    const [liee, locale] = toCollectionCards(
+      [
+        {
+          ...collection("a", "Wii U · Europe", "2026-11-26T10:00:00Z"),
+          external_url: "https://nintendo-db.vercel.app/?console=wii-u&marche=pal",
+          external_source: "nintendo-db",
+          external_cover_url: "https://exemple.supabase.co/jaquette-300.webp",
+        },
+        {
+          ...collection("b", "Locale", "2026-11-26T10:00:00Z"),
+          external_url: null,
+          external_source: null,
+          external_cover_url: null,
+        },
+      ],
+      [{ collection_id: "a", owned: 14, total: 42 }],
+    );
+    expect(liee).toEqual({
+      id: "a",
+      name: "Wii U · Europe",
+      category: null,
+      coverPath: null,
+      createdAt: "2026-11-26T10:00:00Z",
+      progress: { owned: 14, total: 42, percent: 33 },
+      externalUrl: "https://nintendo-db.vercel.app/?console=wii-u&marche=pal",
+      externalSource: "nintendo-db",
+      externalCoverUrl: "https://exemple.supabase.co/jaquette-300.webp",
+    });
+    expect(locale).not.toHaveProperty("externalUrl");
+  });
+});

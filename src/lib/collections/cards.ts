@@ -1,6 +1,15 @@
 import { computeProgress, type Progress } from "@/lib/progress";
 
-export type CollectionRow = { id: string; name: string; cover_path: string | null; created_at: string; category?: string | null };
+export type CollectionRow = {
+  id: string;
+  name: string;
+  cover_path: string | null;
+  created_at: string;
+  category?: string | null;
+  external_url?: string | null;
+  external_source?: string | null;
+  external_cover_url?: string | null;
+};
 export type StatsRow = { collection_id: string; owned: number | null; total: number | null; cover_path?: string | null };
 
 /** Ce qu'affiche une carte de l'accueil (US-02). */
@@ -12,6 +21,10 @@ export type CollectionCard = {
   coverPath: string | null;
   createdAt: string;
   progress: Progress;
+  /** Présents uniquement pour une collection liée à un site compagnon (/api/suivi). */
+  externalUrl?: string;
+  externalSource?: string | null;
+  externalCoverUrl?: string | null;
 };
 
 /**
@@ -24,7 +37,7 @@ export function toCollectionCards(collections: CollectionRow[], stats: StatsRow[
   const statsParId = new Map(stats.map((s) => [s.collection_id, s]));
   return collections.map((c) => {
     const s = statsParId.get(c.id);
-    return {
+    const carte: CollectionCard = {
       id: c.id,
       name: c.name,
       category: c.category ?? null,
@@ -32,5 +45,11 @@ export function toCollectionCards(collections: CollectionRow[], stats: StatsRow[
       createdAt: c.created_at,
       progress: computeProgress(s?.owned ?? 0, s?.total ?? 0),
     };
+    if (c.external_url) {
+      carte.externalUrl = c.external_url;
+      carte.externalSource = c.external_source ?? null;
+      carte.externalCoverUrl = c.external_cover_url ?? null;
+    }
+    return carte;
   });
 }

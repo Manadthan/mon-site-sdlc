@@ -7,10 +7,12 @@ import { lireCategorie } from "@/lib/collections/categorieServeur";
 import { cheminCopie, nomDeCopie } from "@/lib/collections/duplication";
 import { enParallele, TAILLE_LOT } from "@/lib/collections/lots";
 import { validateCollectionName } from "@/lib/collections/name";
+import { interrogerSourceExterne, messageErreurExterne } from "@/lib/externes/sources";
 import { isUuid } from "@/lib/ids";
 import { BUCKET_IMAGES, dossierCollection } from "@/lib/images/storage";
 import { nextSort, parseSort, serializeSort, SORT_COOKIE, SORT_KEYS, type SortKey } from "@/lib/collections/sort";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import type { TablesUpdate } from "@/types/database";
 
 export type CreateCollectionState = { error?: string; name?: string };
 
@@ -34,31 +36,105 @@ export async function createCollection(
   redirect("/");
 }
 
-export type RenameCollectionState = { error?: string; name?: string; category?: string; ok?: number };
+/**
+ * Crée une collection liée à un site compagnon (ex. Nintendo DB) : interroge /api/suivi côté serveur
+ * pour vérifier l'URL et enregistrer les compteurs initiaux en cache.
+ */
+export async function createExternalCollection(
+  _previous: CreateCollectionState,
+  formData: FormData,
+): Promise<CreateCollectionState> {
+  const saisie = formData.get("name");
+  const resultat = validateCollectionName(saisie);
+  if (!resultat.ok) return { error: resultat.error, name: typeof saisie === "string" ? saisie : "" };
+
+  const url = typeof formData.get("externalUrl") === "string" ? (formData.get("externalUrl") as string).trim() : "";
+  const externe = await interrogerSourceExterne(url);
+  if (!externe.ok) {
+    return { error: messageErreurExterne(externe.raison, externe.label).texte, name: resultat.name };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const categorie = await lireCategorie(supabase, formData.get("category"));
+  if (!categorie.ok) return { error: categorie.error, name: resultat.name };
+
+  const { error } = await supabase.from("collections").insert({
+    name: resultat.name,
+    category: categorie.category,
+    external_url: externe.donnees.url,
+    external_source: externe.donnees.source,
+    external_owned: externe.donnees.owned,
+    external_total: externe.donnees.total,
+    external_cover_url: externe.donnees.coverUrl,
+    external_synced_at: new Date().toISOString(),
+  });
+  if (error) {
+    return { error: "La collection n'a pas pu être liée. Réessayez dans un instant.", name: resultat.name };
+  }
+
+  revalidatePath("/");
+  redirect("/");
+}
+
+export type RenameCollectionState = { error?: string; name?: string; category?: string; externalUrl?: string; ok?: number };
 
 /**
- * Renomme une collection (US-12) et change sa catégorie (US-19).
+ * Renomme une collection (US-12), change sa catégorie (US-19) et, pour une collection liée, met à jour son URL de
+ * filtre en resynchronisant ses compteurs via /api/suivi.
  * L'identifiant arrive par un champ caché ; la RLS refuse la collection d'un autre.
  */
 export async function renameCollection(_previous: RenameCollectionState, formData: FormData): Promise<RenameCollectionState> {
   const id = formData.get("collectionId");
   const saisie = formData.get("name");
   const saisieCategorie = formData.get("category");
+  const saisieExterne = formData.get("externalUrl");
   const category = typeof saisieCategorie === "string" ? saisieCategorie : "";
+  const hasExternalUrl = typeof saisieExterne === "string";
+  const externalUrl = hasExternalUrl ? saisieExterne.trim() : undefined;
   if (!isUuid(id)) return { error: "Collection introuvable." };
   const resultat = validateCollectionName(saisie);
-  if (!resultat.ok) return { error: resultat.error, name: typeof saisie === "string" ? saisie : "", category };
+  if (!resultat.ok) {
+    return { error: resultat.error, name: typeof saisie === "string" ? saisie : "", category, externalUrl };
+  }
 
   const supabase = await createSupabaseServerClient();
   const categorie = await lireCategorie(supabase, saisieCategorie);
-  if (!categorie.ok) return { error: categorie.error, name: resultat.name, category };
+  if (!categorie.ok) return { error: categorie.error, name: resultat.name, category, externalUrl };
+
+  let miseAJour: TablesUpdate<"collections"> = { name: resultat.name, category: categorie.category };
+  if (hasExternalUrl) {
+    const externe = await interrogerSourceExterne(externalUrl ?? "");
+    if (!externe.ok) {
+      return {
+        error: messageErreurExterne(externe.raison, externe.label).texte,
+        name: resultat.name,
+        category,
+        externalUrl,
+      };
+    }
+    miseAJour = {
+      ...miseAJour,
+      external_url: externe.donnees.url,
+      external_source: externe.donnees.source,
+      external_owned: externe.donnees.owned,
+      external_total: externe.donnees.total,
+      external_cover_url: externe.donnees.coverUrl,
+      external_synced_at: new Date().toISOString(),
+    };
+  }
+
   const { data, error } = await supabase
     .from("collections")
-    .update({ name: resultat.name, category: categorie.category })
+    .update(miseAJour)
     .eq("id", id)
     .select("id");
   if (error || data.length === 0) {
-    return { error: "Les modifications n’ont pas pu être enregistrées. Réessayez dans un instant.", name: resultat.name, category };
+    return {
+      error: "Les modifications n’ont pas pu être enregistrées. Réessayez dans un instant.",
+      name: resultat.name,
+      category,
+      externalUrl,
+    };
   }
   revalidatePath(`/collections/${id}`);
   revalidatePath("/");

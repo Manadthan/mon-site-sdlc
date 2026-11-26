@@ -22,15 +22,22 @@ export function lienPartage(origine: string, jeton: string): string {
   return `${origine.replace(/\/+$/, "")}/partage/${jeton}`;
 }
 
+function estTexteOptionnel(v: unknown) {
+  return v === undefined || v === null || typeof v === "string";
+}
+
 function estCarte(v: Record<string, unknown>) {
   return (
     typeof v.id === "string" &&
     typeof v.name === "string" &&
-    (v.category === undefined || v.category === null || typeof v.category === "string") &&
+    estTexteOptionnel(v.category) &&
     typeof v.created_at === "string" &&
     (v.cover_path === null || typeof v.cover_path === "string") &&
     typeof v.owned === "number" &&
-    typeof v.total === "number"
+    typeof v.total === "number" &&
+    estTexteOptionnel(v.external_url) &&
+    estTexteOptionnel(v.external_source) &&
+    estTexteOptionnel(v.external_cover_url)
   );
 }
 
@@ -39,14 +46,22 @@ export function lireCollectionsPartagees(donnees: unknown): CollectionCard[] | n
   if (!Array.isArray(donnees)) return null;
   const lignes = donnees.filter((d): d is Record<string, unknown> => typeof d === "object" && d !== null);
   if (lignes.length !== donnees.length || !lignes.every(estCarte)) return null;
-  return lignes.map((c) => ({
-    id: c.id as string,
-    name: c.name as string,
-    category: (c.category as string | null | undefined) ?? null,
-    coverPath: c.cover_path as string | null,
-    createdAt: c.created_at as string,
-    progress: computeProgress(c.owned as number, c.total as number),
-  }));
+  return lignes.map((c) => {
+    const carte: CollectionCard = {
+      id: c.id as string,
+      name: c.name as string,
+      category: (c.category as string | null | undefined) ?? null,
+      coverPath: c.cover_path as string | null,
+      createdAt: c.created_at as string,
+      progress: computeProgress(c.owned as number, c.total as number),
+    };
+    if (typeof c.external_url === "string" && c.external_url) {
+      carte.externalUrl = c.external_url;
+      carte.externalSource = (c.external_source as string | null | undefined) ?? null;
+      carte.externalCoverUrl = (c.external_cover_url as string | null | undefined) ?? null;
+    }
+    return carte;
+  });
 }
 
 export type CollectionPartagee = { name: string; items: Item[] };

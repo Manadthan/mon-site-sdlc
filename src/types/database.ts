@@ -14,6 +14,12 @@ export type Database = {
           category: string | null;
           cover_path: string | null;
           created_at: string;
+          external_cover_url: string | null;
+          external_owned: number | null;
+          external_source: string | null;
+          external_synced_at: string | null;
+          external_total: number | null;
+          external_url: string | null;
           id: string;
           name: string;
           source_url: string | null;
@@ -24,6 +30,12 @@ export type Database = {
           category?: string | null;
           cover_path?: string | null;
           created_at?: string;
+          external_cover_url?: string | null;
+          external_owned?: number | null;
+          external_source?: string | null;
+          external_synced_at?: string | null;
+          external_total?: number | null;
+          external_url?: string | null;
           id?: string;
           name: string;
           source_url?: string | null;
@@ -33,6 +45,12 @@ export type Database = {
           category?: string | null;
           cover_path?: string | null;
           created_at?: string;
+          external_cover_url?: string | null;
+          external_owned?: number | null;
+          external_source?: string | null;
+          external_synced_at?: string | null;
+          external_total?: number | null;
+          external_url?: string | null;
           id?: string;
           name?: string;
           source_url?: string | null;

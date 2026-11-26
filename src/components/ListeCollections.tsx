@@ -8,11 +8,13 @@ type Props = {
   label: string;
   /** Liste partagée (US-17) : début des liens (/partage/{jeton}), sans corbeille. */
   lienPartage?: string;
+  /** Catégories existantes, proposées à l'édition d'une collection liée. */
+  categories?: (string | null)[];
 };
 
 // Liste des collections de l'accueil et de la liste partagée, regroupée par catégorie (US-19).
 // Sans aucune catégorie : une simple liste, sans titre de section (comme avant).
-export function ListeCollections({ cartes, label, lienPartage }: Props) {
+export function ListeCollections({ cartes, label, lienPartage, categories = [] }: Props) {
   const sections = grouperParCategorie(cartes);
   const liste = (contenu: Carte[], aria: string) => (
     <ul className="flex flex-col gap-2.5" aria-label={aria}>
@@ -20,7 +22,7 @@ export function ListeCollections({ cartes, label, lienPartage }: Props) {
         lienPartage ? (
           <CollectionCard key={carte.id} carte={carte} lien={`${lienPartage}/${carte.id}`} lectureSeule />
         ) : (
-          <CollectionCard key={carte.id} carte={carte} />
+          <CollectionCard key={carte.id} carte={carte} categories={categories} />
         ),
       )}
     </ul>
