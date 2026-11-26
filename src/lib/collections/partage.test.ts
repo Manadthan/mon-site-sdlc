@@ -86,3 +86,29 @@ describe("lireCollectionsPartagees — catégorie (US-19)", () => {
     expect(lireCollectionsPartagees([{ ...ligne, category: 3 }])).toBeNull();
   });
 });
+
+describe("lireCollectionsPartagees — collections liées", () => {
+  const ligne = { id: "c1", name: "Wii U", created_at: "2026-01-01T00:00:00Z", cover_path: null, owned: 14, total: 42 };
+
+  it("reprend les champs externes uniquement quand external_url est renseignée", () => {
+    const cartes = lireCollectionsPartagees([
+      {
+        ...ligne,
+        external_url: "https://nintendo-db.vercel.app/?console=wii-u",
+        external_source: "nintendo-db",
+        external_cover_url: "https://exemple.supabase.co/jaquette-300.webp",
+      },
+      { ...ligne, id: "c2", external_url: null, external_source: null, external_cover_url: null },
+    ]);
+    expect(cartes?.[0]).toMatchObject({
+      externalUrl: "https://nintendo-db.vercel.app/?console=wii-u",
+      externalSource: "nintendo-db",
+      externalCoverUrl: "https://exemple.supabase.co/jaquette-300.webp",
+    });
+    expect(cartes?.[1]).not.toHaveProperty("externalUrl");
+  });
+
+  it("refuse des champs externes mal formés", () => {
+    expect(lireCollectionsPartagees([{ ...ligne, external_url: 42 }])).toBeNull();
+  });
+});

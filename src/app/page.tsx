@@ -6,8 +6,9 @@ import { ImportSauvegarde } from "@/components/ImportSauvegarde";
 import { ListeCollections } from "@/components/ListeCollections";
 import { PartageSheet } from "@/components/PartageSheet";
 import { SortBar } from "@/components/SortBar";
-import { toCollectionCards } from "@/lib/collections/cards";
+import { toCollectionCards, type CollectionRow, type StatsRow } from "@/lib/collections/cards";
 import { parseSort, SORT_COOKIE, sortCards } from "@/lib/collections/sort";
+import { interrogerSourceExterne } from "@/lib/externes/sources";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Accueil : liste des collections (US-02) par catégorie (US-19), suppression (US-04), tri mémorisé (US-05) — maquettes n° 1 et n° 6.
@@ -15,14 +16,52 @@ export default async function Home() {
   const supabase = await createSupabaseServerClient();
   // La RLS ne renvoie que les collections de l'utilisateur connecté.
   const [collections, stats, partage] = await Promise.all([
-    supabase.from("collections").select("id, name, category, cover_path, created_at"),
+    supabase
+      .from("collections")
+      .select("id, name, category, cover_path, created_at, external_url, external_source, external_cover_url"),
     supabase.from("collection_stats").select("collection_id, owned, total, cover_path"),
     // Lien de partage en cours (US-17), s'il y en a un.
     supabase.from("partages").select("token").maybeSingle(),
   ]);
   const erreur = collections.error ?? stats.error;
+  const lignes: CollectionRow[] = (collections.data ?? []).map((c) => ({ ...c }));
+  const statsLignes: StatsRow[] = (stats.data ?? []).map((s) => ({ ...s }));
+
+  // Rafraîchit en parallèle les collections liées via /api/suivi ; en cas d'échec ou de délai, le cache en base reste affiché.
+  if (!erreur) {
+    const liees = lignes.filter((c): c is CollectionRow & { external_url: string } => !!c.external_url);
+    if (liees.length > 0) {
+      const statsParId = new Map(statsLignes.map((s) => [s.collection_id, s]));
+      await Promise.all(
+        liees.map(async (c) => {
+          const res = await interrogerSourceExterne(c.external_url);
+          if (!res.ok) return;
+          const { owned, total, coverUrl } = res.donnees;
+          c.external_cover_url = coverUrl;
+          const stat = statsParId.get(c.id);
+          if (stat) {
+            stat.owned = owned;
+            stat.total = total;
+          } else {
+            statsLignes.push({ collection_id: c.id, owned, total, cover_path: null });
+          }
+          await supabase
+            .from("collections")
+            .update({
+              external_owned: owned,
+              external_total: total,
+              external_cover_url: coverUrl,
+              external_synced_at: new Date().toISOString(),
+            })
+            .eq("id", c.id);
+        }),
+      );
+    }
+  }
+
   const tri = parseSort((await cookies()).get(SORT_COOKIE)?.value);
-  const cartes = erreur ? [] : sortCards(toCollectionCards(collections.data ?? [], stats.data ?? []), tri);
+  const cartes = erreur ? [] : sortCards(toCollectionCards(lignes, statsLignes), tri);
+  const categories = lignes.map((c) => c.category ?? null);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col">
@@ -84,7 +123,7 @@ export default async function Home() {
         <main className="pb-28">
           <SortBar sort={tri} />
           {/* Regroupées par catégorie (US-19), triées dans chaque section (US-05). */}
-          <ListeCollections cartes={cartes} label="Mes collections" />
+          <ListeCollections cartes={cartes} label="Mes collections" categories={categories} />
           <ExportButton />
           <ImportSauvegarde />
           {/* Bouton flottant, à portée de pouce (maquette n° 1). */}
