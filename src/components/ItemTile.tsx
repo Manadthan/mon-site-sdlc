@@ -1,7 +1,16 @@
 import { ItemImage } from "@/components/ItemImage";
 import type { Colonnes } from "@/lib/items/grille";
 
-export type Item = { id: string; title: string; image_path: string | null; owned: boolean };
+export type Item = {
+  id: string;
+  title: string;
+  image_path: string | null;
+  owned: boolean;
+  /** Vignette distante déjà optimisée (collection liée partagée). */
+  image_url?: string | null;
+  /** Lien vers la fiche sur le site compagnon (collection liée en lecture seule). */
+  external_url?: string | null;
+};
 
 type Props = { item: Item; onToggle?: () => void; densite?: Colonnes };
 
@@ -13,15 +22,20 @@ const FANION: Record<Colonnes, string> = { 2: "size-14", 3: "size-11", 4: "size-
 // Un item possédé a un fanion et une bordure verts ; un item manquant a son image grisée (US-07, v1.9).
 // Densité (US-14) : 2 ou 3 par ligne → image et intitulé ; 4 → image seule.
 // L'état (possédé / manquant) n'est pas écrit, mais reste lu par VoiceOver (#79).
-// Sans onToggle (collection partagée, US-17) : simple carte, rien à toucher.
+// Sans onToggle (collection partagée, US-17) : simple carte, ou lien vers la fiche du site compagnon.
 export function ItemTile({ item, onToggle, densite = 2 }: Props) {
   const etat = item.owned ? "Possédé" : "Manquant";
-  const Carte = onToggle ? "button" : "div";
+  const lienExterne = !onToggle && item.external_url ? item.external_url : null;
+  const Carte = onToggle ? "button" : lienExterne ? "a" : "div";
   return (
     // content-visibility : le navigateur ne dessine que les vignettes visibles (fluide avec 300+ items).
     <li className="[contain-intrinsic-size:auto_300px] [content-visibility:auto]">
       <Carte
-        {...(onToggle ? { type: "button" as const, onClick: onToggle, "aria-pressed": item.owned } : {})}
+        {...(onToggle
+          ? { type: "button" as const, onClick: onToggle, "aria-pressed": item.owned }
+          : lienExterne
+            ? { href: lienExterne, target: "_blank", rel: "noopener noreferrer" }
+            : {})}
         className={`flex h-full w-full flex-col overflow-hidden border bg-surface text-left text-texte transition-colors ${
           densite === 4 ? "rounded-md" : "rounded-[10px]"
         } ${item.owned ? "border-possede ring-1 ring-possede" : "border-bordure"}`}
@@ -36,7 +50,18 @@ export function ItemTile({ item, onToggle, densite = 2 }: Props) {
               data-testid={item.owned ? undefined : "image-manquant"}
               className={`relative flex size-full items-center justify-center transition-[filter,opacity] ${item.owned ? "" : "opacity-70 grayscale-[40%]"}`}
             >
-              <ItemImage chemin={item.image_path} taille={densite === 4 ? 18 : 24} />
+              {item.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.image_url}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="absolute inset-0 size-full rounded-[inherit] object-contain"
+                />
+              ) : (
+                <ItemImage chemin={item.image_path} taille={densite === 4 ? 18 : 24} />
+              )}
             </span>
           </span>
           {item.owned && (

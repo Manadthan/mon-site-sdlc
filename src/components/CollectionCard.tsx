@@ -68,7 +68,7 @@ export function CollectionCard({
 
   return (
     <li className="flex items-center gap-3 rounded-[14px] border border-bordure bg-surface py-2.5 pr-1.5 pl-2.5">
-      {externalUrl ? (
+      {externalUrl && !lectureSeule ? (
         <a href={externalUrl} className="flex min-w-0 flex-1 items-center gap-3 text-texte">
           {contenu}
         </a>

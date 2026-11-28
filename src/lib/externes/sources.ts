@@ -10,6 +10,14 @@ export type SourceExterneConfig = {
   token: string | null;
 };
 
+export type ItemExterne = {
+  id: string;
+  title: string;
+  imageUrl: string | null;
+  owned: boolean;
+  url: string | null;
+};
+
 export type DonneesExterne = {
   source: SourceExterneId;
   label: string;
@@ -18,6 +26,7 @@ export type DonneesExterne = {
   coverUrl: string | null;
   suggestedTitle: string;
   url: string;
+  items?: ItemExterne[];
 };
 
 export type RaisonErreurExterne = "inconnue" | "non_configuree" | "auth" | "delai" | "reseau" | "http" | "format";
@@ -106,20 +115,48 @@ function estUrlHttp(v: unknown): v is string {
   }
 }
 
+function lireItemsExternes(brut: unknown, origine: string): ItemExterne[] | undefined {
+  if (!Array.isArray(brut)) return undefined;
+  const resultat: ItemExterne[] = [];
+  for (const entree of brut) {
+    if (typeof entree !== "object" || entree === null) return undefined;
+    const v = entree as Record<string, unknown>;
+    if (
+      typeof v.id !== "string" ||
+      !v.id ||
+      typeof v.title !== "string" ||
+      (v.imageUrl !== null && !estUrlHttp(v.imageUrl)) ||
+      typeof v.owned !== "boolean"
+    ) {
+      return undefined;
+    }
+    const urlValide = estUrlHttp(v.url) && new URL(v.url).origin === origine ? v.url : null;
+    resultat.push({
+      id: v.id,
+      title: v.title,
+      imageUrl: v.imageUrl,
+      owned: v.owned,
+      url: urlValide,
+    });
+  }
+  return resultat;
+}
+
 function nettoyerUrlCanonique(origin: string, search: string): string {
   const params = new URLSearchParams(search);
   params.delete("collection");
+  params.delete("items");
   const query = params.toString();
   return query ? `${origin}/?${query}` : `${origin}/`;
 }
 
 /**
- * Interroge l'endpoint `GET /api/suivi` d'un site compagnon autorisé (timeout 4 s, jeton Bearer, validation JSON).
+ * Interroge l'endpoint `GET /api/suivi` d'un site compagnon autorisé (timeout 8 s, jeton Bearer, validation JSON).
  * Ne suit jamais les redirections (`redirect: "error"`) pour préserver la liste blanche d'origines.
  */
 export async function interrogerSourceExterne(
   url: string,
-  options?: { env?: EnvSources; fetchFn?: typeof fetch },
+  options?: { env?: EnvSources; fetchFn?: typeof fetch; inclureItems?: boolean },
 ): Promise<ResultatExterne> {
   const reconnue = reconnaitreSourceExterne(url, options?.env);
   if (!reconnue) return { ok: false, raison: "inconnue" };
@@ -127,6 +164,8 @@ export async function interrogerSourceExterne(
 
   const params = new URLSearchParams(reconnue.url.search);
   params.delete("collection");
+  if (options?.inclureItems) params.set("items", "1");
+  else params.delete("items");
   const query = params.toString();
   const endpoint = `${reconnue.origin}/api/suivi${query ? `?${query}` : ""}`;
   const fetchImpl = options?.fetchFn ?? fetch;
@@ -185,18 +224,21 @@ export async function interrogerSourceExterne(
       ? data.url
       : nettoyerUrlCanonique(reconnue.origin, reconnue.url.search);
 
-  return {
-    ok: true,
-    donnees: {
-      source: reconnue.source,
-      label: reconnue.label,
-      owned: data.owned,
-      total: data.total,
-      coverUrl: data.coverUrl,
-      suggestedTitle: data.suggestedTitle.trim(),
-      url: urlFinale,
-    },
+  const donnees: DonneesExterne = {
+    source: reconnue.source,
+    label: reconnue.label,
+    owned: data.owned,
+    total: data.total,
+    coverUrl: data.coverUrl,
+    suggestedTitle: data.suggestedTitle.trim(),
+    url: urlFinale,
   };
+  if (options?.inclureItems) {
+    const items = lireItemsExternes(data.items, reconnue.origin);
+    if (items) donnees.items = items;
+  }
+
+  return { ok: true, donnees };
 }
 
 /** Message d'erreur lisible en français pour un échec d'interrogation d'une source externe. */

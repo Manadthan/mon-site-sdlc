@@ -98,6 +98,77 @@ describe("interrogerSourceExterne", () => {
     });
     expect(invalide).toEqual({ ok: false, raison: "format", label: "Nintendo DB" });
   });
+
+  it("demande ?items=1 avec inclureItems et filtre les URL d'items hors origine", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          source: "nintendo-db",
+          owned: 1,
+          total: 2,
+          coverUrl: "https://exemple.supabase.co/jaquette-300.webp",
+          suggestedTitle: "Wii U · Europe",
+          url: "https://nintendo-db.vercel.app/?console=wii-u&marche=pal",
+          items: [
+            {
+              id: "jeu:1:PAL",
+              title: "Splatoon",
+              imageUrl: "https://exemple.supabase.co/jaquette-300.webp",
+              owned: true,
+              url: "https://nintendo-db.vercel.app/jeux/wii-u/splatoon",
+            },
+            {
+              id: "jeu:2:PAL",
+              title: "Mario Kart 8",
+              imageUrl: null,
+              owned: false,
+              url: "https://evil.example/phishing",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    );
+
+    const res = await interrogerSourceExterne("https://nintendo-db.vercel.app/?console=wii-u&marche=pal", {
+      env: { NINTENDO_DB_TOKEN: "jeton-test" },
+      fetchFn: fetchMock,
+      inclureItems: true,
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://nintendo-db.vercel.app/api/suivi?console=wii-u&marche=pal&items=1",
+      expect.any(Object),
+    );
+    expect(res).toEqual({
+      ok: true,
+      donnees: {
+        source: "nintendo-db",
+        label: "Nintendo DB",
+        owned: 1,
+        total: 2,
+        coverUrl: "https://exemple.supabase.co/jaquette-300.webp",
+        suggestedTitle: "Wii U · Europe",
+        url: "https://nintendo-db.vercel.app/?console=wii-u&marche=pal",
+        items: [
+          {
+            id: "jeu:1:PAL",
+            title: "Splatoon",
+            imageUrl: "https://exemple.supabase.co/jaquette-300.webp",
+            owned: true,
+            url: "https://nintendo-db.vercel.app/jeux/wii-u/splatoon",
+          },
+          {
+            id: "jeu:2:PAL",
+            title: "Mario Kart 8",
+            imageUrl: null,
+            owned: false,
+            url: null,
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe("libelleSourceExterne et messageErreurExterne", () => {
