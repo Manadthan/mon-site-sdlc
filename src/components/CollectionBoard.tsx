@@ -41,6 +41,8 @@ type Props = {
   lectureSeule?: boolean;
   /** Page du bouton retour : l'accueil, ou la liste partagée (US-17). */
   retour?: string;
+  /** Lien vers le catalogue filtré du site compagnon (collection liée en lecture seule). */
+  lienExterne?: { url: string; label: string };
 };
 type Changement = { type: "coche"; id: string; owned: boolean } | { type: "ordre"; id: string; direction: Direction };
 
@@ -60,6 +62,7 @@ export function CollectionBoard({
   tri: triInitial = TRI_PAR_DEFAUT,
   lectureSeule = false,
   retour = "/",
+  lienExterne,
 }: Props) {
   // Affichage « optimiste » : la coche, le compteur et l'ordre changent tout de suite, sans attendre le serveur.
   // Si l'enregistrement échoue, l'affichage revient tout seul à l'état réel.
@@ -202,8 +205,31 @@ export function CollectionBoard({
           )}
         </div>
         <div className="flex flex-col gap-2 px-3">
-          <div className="flex items-start gap-1">
+          <div className="flex items-start gap-2">
             <h1 className="min-w-0 flex-1 text-[22px] leading-tight font-bold tracking-tight break-words">{name}</h1>
+            {lectureSeule && lienExterne && (
+              <a
+                href={lienExterne.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-champ bg-fond px-2.5 py-1 text-xs font-semibold text-lien"
+              >
+                {lienExterne.label}
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M7 17L17 7M7 7h10v10" />
+                </svg>
+              </a>
+            )}
             {edition && (
               // US-12, US-19 : nom et catégorie de la collection, seulement en mode édition.
               <button
